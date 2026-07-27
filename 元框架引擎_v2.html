@@ -1261,7 +1261,9 @@ var MOCK = {
         { num:'05', name:'核心难题', desc:'黎曼猜想：素数分布的零点规律（千禧年难题）；P vs NP：计算复杂性的核心问题（千禧年难题）；Navier-Stokes 方程：流体光滑性是否成立（千禧年难题）；BSD 猜想：椭圆曲线与 L 函数的深刻联系（千禧年难题）；ABC 猜想：数论中整数加法与乘法的关系；连续统假设：集合论基数的独立性。' },
         { num:'06', name:'关键概念索引', desc:'群/环/域（代数）、流形/拓扑空间（几何）、收敛/连续/微分（分析）、概率/随机过程（统计）。' },
         { num:'07', name:'领域交叉', desc:'数学物理（弦论↔拓扑）、数论密码（RSA↔素数）、金融数学（随机分析↔期权定价）、生物数学。' },
-        { num:'08', name:'实用价值映射', desc:'工程结构计算、金融风险建模、AI 优化算法——数学是现代文明的隐性基础设施。' }
+        { num:'08', name:'实用价值映射', desc:'工程结构计算、金融风险建模、AI 优化算法——数学是现代文明的隐性基础设施。' },
+        { num:'09', name:'常见误区', desc:'误区1：数学=算术和计算。正解：数学本质是逻辑推理和抽象结构研究，计算只是工具；误区2：学数学靠天赋。正解：数学思维可以通过刻意练习培养，多数数学家靠持续积累而非天才直觉；误区3：纯数学没有实用价值。正解：数论曾经被认为无用，如今支撑RSA加密和区块链安全；误区4：数学结论是绝对的。正解：哥德尔不完备定理证明任何足够复杂的数学体系都存在无法证明的命题。' },
+        { num:'10', name:'工具箱', desc:'入门书：G·波利亚《怎样解题》适合培养数学思维方法论；经典著作：克莱因《古今数学思想》适合理解数学发展脉络；在线课程：MIT OCW 18.01/18.02（微积分）、18.06（线性代数）免费系统性课程；工具：Geogebra（可视化探索）、Wolfram Alpha（符号计算辅助）；社群：Math StackExchange（精确问答）、AoPS（竞赛训练社区）适合深度参与；实践项目：Project Euler（编程+数学相结合的习题库）。' }
       ],
       path: [
         { stage:'入门', time:'1-2 年', content:'微积分、线性代数、概率论。建立连续与离散的基本直觉，能读懂标准工程应用。' },
@@ -1279,7 +1281,9 @@ var MOCK = {
         { num:'05', name:'核心难题', desc:'量子引力：如何将广义相对论与量子力学统一（弦论/圈量子引力）；测量问题：波函数坍缩的本质是什么（多世界/退相干/隐变量）；量子-经典边界：宏观物体为何不呈现叠加态；暗物质与暗能量：量子场论能否解释宇宙学常数；高温超导机制：BCS 理论之外的配对机制；量子复杂性：量子系统模拟的指数墙。' },
         { num:'06', name:'关键概念索引', desc:'波函数/态矢量、哈密顿量、算符/可观测量、纠缠/贝尔不等式、自旋、费米子/玻色子。' },
         { num:'07', name:'领域交叉', desc:'量子化学（分子模拟）、量子信息（计算机科学）、宇宙学（早期宇宙量子涨落）、哲学（决定论 vs 概率论）。' },
-        { num:'08', name:'实用价值映射', desc:'半导体物理（晶体管原理）、激光技术、MRI 医学成像、量子加密通信——现代电子设备的底层支撑。' }
+        { num:'08', name:'实用价值映射', desc:'半导体物理（晶体管原理）、激光技术、MRI 医学成像、量子加密通信——现代电子设备的底层支撑。' },
+        { num:'09', name:'常见误区', desc:'误区1：量子纠缠可以实现超光速通信。正解：纠缠无法传递信息，贝尔定理禁止超光速信号；误区2：薛定谔的猫既死又活。正解：这是讽刺量子叠加的荒谬思想实验，宏观物体不会处于叠加态；误区3：观测需要意识参与。正解：现代退相干理论中观测只需与环境的物理相互作用；误区4：量子计算机在所有任务上都比经典计算机快。正解：仅在特定问题（分解质因数、量子模拟等）上有指数加速。' },
+        { num:'10', name:'工具箱', desc:'入门书：格里菲斯《量子力学导论》最适合自学的标准教材、费曼《QED》适合建立概念直觉；经典著作：费曼《费曼物理学讲义》第三卷适合深入物理图像；在线课程：MIT OCW 8.04/8.05（量子力学）免费完整课程、Stanford QMSE-1适合研究生入门；工具：QuTiP（Python量子模拟库）、IBM Quantum Experience（在线量子计算实验平台）适合动手验证；社群：Physics StackExchange（专业问答）、B站"二次元的中科院物理所"适合中文科普；实践项目：在IBM Quantum上用Qiskit编写第一个量子电路，运行Grover搜索算法。' }
       ],
       path: [
         { stage:'入门', time:'3-6 月', content:'线性代数复习 + 薛定谔方程基础。理解一维势阱、氢原子模型，建立量子化直觉。' },
@@ -1297,7 +1301,9 @@ var MOCK = {
         { num:'05', name:'核心难题', desc:'多重均衡选择：当存在多个纳什均衡时如何选择；有限理性建模：人类非完全理性的数学刻画；信息不完全推断：贝叶斯博弈中的信念更新；大规模博弈计算：纳什均衡的 PPAD 完全性；机制设计逆向工程：从目标到规则的自动构造；动态博弈承诺：时间不一致性与可信承诺。' },
         { num:'06', name:'关键概念索引', desc:'纳什均衡、帕累托最优、囚徒困境、零和博弈、贝叶斯博弈、子博弈完美、沙普利值。' },
         { num:'07', name:'领域交叉', desc:'经济学（拍卖/寡头竞争）、生物学（进化稳定策略）、计算机科学（机制设计/AI）、政治学（投票理论）。' },
-        { num:'08', name:'实用价值映射', desc:'频谱拍卖（FCC）、定价策略、供应链谈判、AI 训练（GAN 的对抗均衡）——博弈论已渗透到商业决策各环节。' }
+        { num:'08', name:'实用价值映射', desc:'频谱拍卖（FCC）、定价策略、供应链谈判、AI 训练（GAN 的对抗均衡）——博弈论已渗透到商业决策各环节。' },
+        { num:'09', name:'常见误区', desc:'误区1：博弈论只适用于零和对抗。正解：博弈论涵盖合作博弈、正和博弈，广泛应用于商业合作和机制设计；误区2：纳什均衡=最优策略。正解：纳什均衡只是稳定状态，帕累托最优才代表最优，二者常常不一致（囚徒困境）；误区3：理性人假设意味着人都是自利的。正解：理性仅指偏好一致和效用最大化，利他偏好也可以纳入理性效用函数。' },
+        { num:'10', name:'工具箱', desc:'入门书：《策略思维》适合零基础理解博弈思维、罗森《博弈论》适合建立系统框架；经典著作：冯·诺依曼《博弈论与经济行为》奠基之作、迈尔森《博弈论：矛盾冲突分析》适合深入理论；在线课程：Coursera《Game Theory》（Stanford）免费系统性课程、Yale Open Course ECON 159适合本科生入门；工具：Gambit（开源博弈求解器）、PyGameTheory（Python博弈论库）适合动手验证；社群：Economics StackExchange（博弈论问答）、r/GAMETHEORY（Reddit博弈论社区）；实践项目：设计一个拍卖机制并用Gambit求解均衡，分析真实商业案例（如网约车定价博弈）。' }
       ],
       path: [
         { stage:'入门', time:'1-2 月', content:'博弈的基本概念、纳什均衡、囚徒困境与经典模型。读《策略思维》或《博弈论基础》。' },
@@ -2209,6 +2215,66 @@ function generateModuleSVG(m, conceptName) {
       svg += '</svg>';
       break;
 
+    case 9: // 常见误区 → Warning icons with corrections
+      var miscs = parseItems(m.desc, '；');
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><radialGradient id="warn-grad"><stop offset="0%" stop-color="var(--accent2)" stop-opacity="0.1"/><stop offset="100%" stop-color="var(--accent2)" stop-opacity="0"/></radialGradient></defs>' +
+        '<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="8" fill="url(#warn-grad)"/>';
+      var pos9 = [{x:10,y:10},{x:180,y:75},{x:10,y:140},{x:180,y:195}];
+      for (var mi = 0; mi < Math.min(miscs.length, pos9.length); mi++) {
+        var parts = miscs[mi].split('。')[0];
+        var title = parts.split('：')[0];
+        var detail = parts.split('：')[1] || '';
+        var p9 = pos9[mi];
+        svg += '<rect x="' + p9.x + '" y="' + p9.y + '" width="160" height="50" rx="6" fill="var(--red-soft)" stroke="#ef4444" stroke-width="1"/>';
+        svg += '<text x="' + (p9.x+14) + '" y="' + (p9.y+24) + '" font-size="14">⚠️</text>';
+        svg += '<text x="' + (p9.x+34) + '" y="' + (p9.y+18) + '" fill="var(--ink)" font-size="9" font-weight="700">' + esc(G.trunc(title, 12)) + '</text>';
+        svg += '<text x="' + (p9.x+34) + '" y="' + (p9.y+34) + '" fill="var(--muted)" font-size="7">' + esc(G.trunc(detail, 20)) + '</text>';
+      }
+      svg += '<text x="' + G.cx + '" y="' + (H-8) + '" text-anchor="middle" font-size="7" fill="var(--muted)">不要重复别人的认知陷阱——起步前先看路标</text>';
+      svg += '</svg>';
+      break;
+
+    case 10: // 工具箱 → Resource grid
+      var rawResources = m.desc.split('；');
+      var resources = [];
+      rawResources.forEach(function(r) {
+        var parts = r.trim().split('：');
+        if (parts.length >= 2) {
+          resources.push({cat: parts[0].replace(/^入门书|^经典著作|^在线课程|^工具|^社群|^实践项目|^.+?(?=：)/g,function(m){return m;}), name: parts[1].replace(/适合.*/,'').replace(/。/g,'').trim(), note: r});
+        }
+      });
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+      var t10pos = [
+        {x:10,y:10,c:'入门'},{x:175,y:10,c:'经典'},
+        {x:340,y:10,c:'课程'},{x:10,y:80,c:'工具'},
+        {x:175,y:80,c:'社群'},{x:340,y:80,c:'实践'}
+      ];
+      for (var ri = 0; ri < t10pos.length; ri++) {
+        var tp = t10pos[ri];
+        svg += '<rect x="' + tp.x + '" y="' + tp.y + '" width="160" height="28" rx="5" fill="' + G.accent(ri) + '" stroke="' + G.border(ri) + '" stroke-width="1"/>';
+        svg += '<text x="' + (tp.x + 80) + '" y="' + (tp.y + 18) + '" text-anchor="middle" font-size="8" font-weight="600" fill="var(--ink)">' + G.trunc(tp.c, 10) + '</text>';
+      }
+      // Show some resource names
+      var shownRes = [];
+      rawResources.forEach(function(r) {
+        var parts = r.trim().split('：');
+        if (parts.length >= 2) {
+          var name = parts[1].split('适合')[0].split('。')[0].trim().substring(0, 12);
+          shownRes.push(name);
+        }
+      });
+      var rp = [
+        {x:10,y:42},{x:175,y:42},{x:340,y:42},
+        {x:10,y:112},{x:175,y:112},{x:340,y:112}
+      ];
+      for (var si = 0; si < Math.min(shownRes.length, rp.length); si++) {
+        svg += '<text x="' + (rp[si].x + 80) + '" y="' + (rp[si].y + 8) + '" text-anchor="middle" font-size="7" fill="var(--muted)">' + esc(shownRes[si]) + '</text>';
+      }
+      svg += '<text x="' + G.cx + '" y="' + (H-6) + '" text-anchor="middle" font-size="7" fill="var(--muted)">选对工具，看对书，走对路</text>';
+      svg += '</svg>';
+      break;
+
     default:
       svg = '';
       break;
@@ -2348,7 +2414,7 @@ function showObsidianComplete() {
       '<div class="obs-section-content"><strong>' + d.concept.name + '</strong><br>' + d.concept.definition.substring(0, 100) + '...</div>' +
     '</div>' +
     '<div class="obs-section">' +
-      '<div class="obs-section-title">第二层 · 框架体系（8 模块）</div>' +
+      '<div class="obs-section-title">第二层 · 框架体系（10 模块）</div>' +
       '<div class="obs-section-content">' + sysSummary + '<br>• ...</div>' +
     '</div>' +
     '<div class="obs-section">' +

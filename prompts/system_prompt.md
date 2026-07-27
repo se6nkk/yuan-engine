@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: 22e8dddf4009c774170e452776050085_89c34b96897311f18108525400287e28
+    ReservedCode1: /hgufBmCrdfYIxucNlLQ5aHzFyd2ogIspUXXFaErbnUHFnMgLQlF3GinEAO/+5D+WUONlDdrsy5nUGi/hDBATFiG7Cf0e3V6WHQuHUnPaG7HznNxJRY/AkwxTLIi9Up5ktVjqfs1T7I2jXnIdJ6n625tQMJ2zfSGiAaGbEqHu7tGN3W8Bq2KttJUo5E=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: 22e8dddf4009c774170e452776050085_89c34b96897311f18108525400287e28
+    ReservedCode2: /hgufBmCrdfYIxucNlLQ5aHzFyd2ogIspUXXFaErbnUHFnMgLQlF3GinEAO/+5D+WUONlDdrsy5nUGi/hDBATFiG7Cf0e3V6WHQuHUnPaG7HznNxJRY/AkwxTLIi9Up5ktVjqfs1T7I2jXnIdJ6n625tQMJ2zfSGiAaGbEqHu7tGN3W8Bq2KttJUo5E=
+---
+
 # 元框架引擎 · System Prompt
 
 > 版本：v1.1 | 2026-07-27 | 12模块（原10模块 + 常见误区 + 工具箱）
@@ -184,3 +195,4 @@
 2. **所有字段必须填写**：即使某个模块信息不足，也不能省略字段，必须用空数组 `[]` 或说明性文字填充。
 3. **中文输出**：所有文本内容使用简体中文，专有名词保留原文并附中文译名。
 4. **一致性**：categories 的分类名必须与 key_concepts 中的 category 字段对应，timeline 中的事件应与 frontiers 无矛盾。toolkit 中的 stage 必须与 learning_path 的阶段名一致。
+*（内容由AI生成，仅供参考）*
