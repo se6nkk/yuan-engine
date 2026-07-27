@@ -1,0 +1,7 @@
+.DS_Store
+.uploads/
+.trae-html-share-packages/
+workflow/marvis_outbox/pending/
+workflow/trae_outbox/pending/
+workflow/wb_outbox/pending/
+workflow/status.json
