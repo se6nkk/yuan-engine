@@ -1,0 +1,36 @@
+<svg viewBox="0 0 680 400" width="100%" role="img" xmlns="http://www.w3.org/2000/svg">
+<rect width="680" height="400" fill="#FBFAF7"/>
+
+<line x1="190" y1="40" x2="190" y2="378" stroke="#B4B2A9" stroke-width="1.2" stroke-linecap="round"/>
+
+<circle cx="190" cy="45" r="4" fill="#5F5E5A"/>
+<circle cx="190" cy="109" r="4" fill="#5F5E5A"/>
+<circle cx="190" cy="173" r="4" fill="#5F5E5A"/>
+<circle cx="190" cy="237" r="4" fill="#5F5E5A"/>
+<circle cx="190" cy="301" r="4" fill="#5F5E5A"/>
+<circle cx="190" cy="365" r="4" fill="#5F5E5A"/>
+
+<text x="175" y="50" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">1763年</text>
+<text x="205" y="50" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">托马斯·贝叶斯逝世后，论文《论机遇理论中一个问题的解决》</text>
+<text x="205" y="74" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">发表，提出基本思想</text>
+
+<text x="175" y="114" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">18-19世纪</text>
+<text x="205" y="114" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">拉普拉斯等人发展了贝叶斯思想，</text>
+<text x="205" y="138" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">应用于天文学和人口统计</text>
+
+<text x="175" y="178" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">20世纪初</text>
+<text x="205" y="178" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">频率学派兴起，贝叶斯方法受到争议</text>
+
+<text x="175" y="242" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">20世纪50-60年代</text>
+<text x="205" y="242" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">统计决策理论的发展</text>
+<text x="205" y="266" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">重新点燃了对贝叶斯方法的研究</text>
+
+<text x="175" y="306" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">20世纪80-90年代</text>
+<text x="205" y="306" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">计算机计算能力提升，马尔可夫链蒙特卡洛(MCMC)方法</text>
+<text x="205" y="330" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">使复杂贝叶斯计算成为可能</text>
+
+<text x="175" y="370" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="500" fill="#444441" text-anchor="end">21世纪</text>
+<text x="205" y="370" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">贝叶斯方法在机器学习、人工智能领域广泛应用，</text>
+<text x="205" y="394" font-family="-apple-system,system-ui,sans-serif" font-size="15" font-weight="400" fill="#444441">成为现代AI的核心技术之一</text>
+
+</svg>

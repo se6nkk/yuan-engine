@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元框架引擎 · Demo</title>
+<style>
+/* ===== Theme Variables ===== */
+:root {
+  --bg: #fafaf9;
+  --bg2: #f4f3f1;
+  --ink: #1a1a2e;
+  --muted: #6b6b80;
+  --rule: #e5e3df;
+  --accent: #6366f1;
+  --accent2: #ec4899;
+  --accent-soft: rgba(99,102,241,0.08);
+  --accent2-soft: rgba(236,72,153,0.08);
+  --surface: #ffffff;
+  --shadow: rgba(0,0,0,0.06);
+  --shadow-lg: rgba(0,0,0,0.12);
+  --green: #10b981;
+  --green-soft: rgba(16,185,129,0.1);
+  --orange: #f59e0b;
+  --orange-soft: rgba(245,158,11,0.1);
+  --red-soft: rgba(239,68,68,0.1);
+}
+[data-theme="dark"] {
+  --bg: #0f0f1a;
+  --bg2: #1a1a2e;
+  --ink: #e4e4ef;
+  --muted: #8888a8;
+  --rule: #2a2a42;
+  --accent: #818cf8;
+  --accent2: #f472b6;
+  --accent-soft: rgba(129,140,248,0.12);
+  --accent2-soft: rgba(244,114,182,0.12);
+  --surface: #1a1a2e;
+  --shadow: rgba(0,0,0,0.3);
+  --shadow-lg: rgba(0,0,0,0.4);
+  --green: #34d399;
+  --green-soft: rgba(52,211,153,0.12);
+  --orange: #fbbf24;
+  --orange-soft: rgba(251,191,36,0.12);
+  --red-soft: rgba(248,113,113,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ===== Glassmorphism Base ===== */
+body {
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.7;
+  font-size: 16px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99,102,241,0.10), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(236,72,153,0.07), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(99,102,241,0.05), transparent 50%);
+  pointer-events: none; z-index: 0;
+  transition: opacity 0.3s;
+}
+[data-theme="dark"] body::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(129,140,248,0.14), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(244,114,182,0.10), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(129,140,248,0.08), transparent 50%);
+}
+
+
+/* ===== Theme Toggle ===== */
+.theme-toggle {
+  position: fixed; top: 1.2rem; right: 1.2rem; z-index: 999;
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--rule); background: var(--surface);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; transition: all 0.25s; box-shadow: 0 2px 8px var(--shadow);
+}
+.theme-toggle:hover { border-color: var(--accent); transform: scale(1.05); }
+.theme-toggle .moon { display: block; }
+.theme-toggle .sun { display: none; }
+[data-theme="dark"] .theme-toggle .moon { display: none; }
+[data-theme="dark"] .theme-toggle .sun { display: block; }
+
+/* ===== App Container ===== */
+#app {
+  max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
+  position: relative; z-index: 1; min-height: 100vh;
+}
+
+/* ===== Top Bar ===== */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--rule);
+}
+.topbar .back-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 0.85rem; font-family: inherit; padding: 0.3rem 0.6rem;
+  border-radius: 6px; transition: all 0.15s;
+}
+.topbar .back-btn:hover { color: var(--accent); background: var(--accent-soft); }
+.topbar .brand {
+  font-weight: 700; font-size: 1rem; letter-spacing: 0.02em;
+}
+.topbar .brand .dot { color: var(--accent); }
+
+/* ===== Pages ===== */
+.page { display: none; animation: fadeIn 0.35s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardFadeIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ===== Home / Search Page (minimal) ===== */
+.home-search {
+  text-align: center;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  transition: all 0.3s;
+}
+.home-search .big-logo {
+  width: 96px; height: 96px; border-radius: 24px;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; font-weight: 700; color: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.home-search[data-mode="fw"] .big-logo {
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  box-shadow: 0 16px 36px rgba(99,102,241,0.28);
+}
+.home-search[data-mode="dc"] .big-logo {
+  background: linear-gradient(135deg, var(--accent2), #f472b6);
+  box-shadow: 0 16px 36px rgba(236,72,153,0.28);
+}
+.home-search .brand-name {
+  font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+}
+.home-search[data-mode="fw"] .brand-name { color: var(--accent); }
+.home-search[data-mode="dc"] .brand-name { color: var(--accent2); }
+
+.home-search .search-wrap {
+  width: 100%; max-width: 520px;
+  position: relative;
+}
+.home-search .search-input {
+  width: 100%; padding: 1rem 1.2rem;
+  border: 2px solid var(--rule); border-radius: 14px;
+  font-family: inherit; font-size: 1rem; background: var(--surface); color: var(--ink);
+  transition: all 0.25s;
+}
+.home-search .search-input:focus {
+  outline: none;
+}
+.home-search[data-mode="fw"] .search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.home-search[data-mode="dc"] .search-input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 4px var(--accent2-soft);
+}
+.home-search .search-input.error {
+  border-color: var(--accent2);
+  animation: shake 0.4s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.home-search .search-btn {
+  margin-top: 1rem;
+  padding: 0.9rem 2.5rem;
+  border: none; border-radius: 12px;
+  font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  color: white; cursor: pointer;
+  transition: all 0.25s;
+}
+.home-search[data-mode="fw"] .search-btn {
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+}
+.home-search[data-mode="fw"] .search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+}
+.home-search[data-mode="dc"] .search-btn {
+  background: linear-gradient(135deg, var(--accent2), #f472b6);
+  box-shadow: 0 4px 16px rgba(236,72,153,0.25);
+}
+.home-search[data-mode="dc"] .search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(236,72,153,0.3);
+}
+
+/* Mode toggle pill */
+.mode-pill {
+  margin-top: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 4px;
+  background: var(--bg2);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+}
+.mode-pill button {
+  padding: 0.35rem 0.9rem;
+  border: none; background: transparent;
+  border-radius: 999px;
+  font-family: inherit; font-size: 0.78rem; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.25s;
+}
+.mode-pill button.active.fw {
+  background: var(--surface); color: var(--accent);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.mode-pill button.active.dc {
+  background: var(--surface); color: var(--accent2);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.mode-pill .divider {
+  width: 1px; height: 14px; background: var(--rule);
+}
+
+.home-search .hint-row {
+  margin-top: 1rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+.home-search .hint-row .obs {
+  color: var(--accent);
+  display: none;
+}
+.home-search[data-mode="fw"] .hint-row .obs { display: inline; }
+
+.home-search .quick-examples {
+  margin-top: 1.5rem;
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+  justify-content: center;
+  max-width: 520px;
+}
+.home-search .quick-ex {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  background: var(--bg2); color: var(--muted);
+  cursor: pointer;
+  border: 1px solid var(--rule);
+  transition: all 0.15s;
+}
+.home-search .quick-ex:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+.home-search[data-mode="dc"] .quick-ex:hover {
+  border-color: var(--accent2); color: var(--accent2);
+}
+
+/* ===== Loading Page ===== */
+.loading-page { text-align: center; padding: 3rem 0; }
+.gen-spinner {
+  width: 48px; height: 48px;
+  border: 3px solid var(--rule);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.5rem;
+  position: relative;
+}
+.gen-spinner::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px solid transparent;
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite reverse;
+  opacity: 0.5;
+}
+@keyframes spin { to { transform: rotate(360deg); } } }
+.gen-text { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.gen-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
+.gen-steps { max-width: 360px; margin: 0 auto; text-align: left; }
+.gen-step {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0; font-size: 0.84rem; color: var(--muted);
+  border-bottom: 1px solid var(--rule); transition: all 0.3s;
+}
+.gen-step:last-child { border-bottom: none; }
+.gen-step.done { color: var(--ink); }
+.gen-step.done .step-icon { color: var(--green); }
+.gen-step.active { color: var(--accent); font-weight: 600; }
+.gen-step.active .step-icon { color: var(--accent); }
+.step-icon { width: 20px; text-align: center; font-size: 0.9rem; }
+
+/* ===== Progressive View ===== */
+.prog-view { padding: 0.5rem 0; }
+.prog-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+}
+.prog-breadcrumb { display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; flex-wrap: wrap; }
+.crumb {
+  color: var(--muted); cursor: pointer; padding: 0.2rem 0.5rem;
+  border-radius: 5px; transition: all 0.15s;
+}
+.crumb:hover { background: var(--accent-soft); color: var(--accent); }
+.crumb.active { color: var(--accent); font-weight: 700; background: var(--accent-soft); }
+.crumb-sep { color: var(--rule); }
+.export-trigger {
+  background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 0.35rem 0.8rem; font-size: 0.78rem; cursor: pointer; color: var(--muted);
+  font-family: inherit; transition: all 0.15s;
+}
+.export-trigger:hover { border-color: var(--accent); color: var(--accent); }
+
+.layer-stack { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; }
+.layer-bar { flex: 1; height: 5px; border-radius: 3px; background: var(--rule); transition: background 0.3s; }
+.layer-bar.done { background: var(--accent); }
+.layer-bar.current { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+[data-path="dc"] .layer-bar.done { background: var(--accent2); }
+[data-path="dc"] .layer-bar.current { background: linear-gradient(90deg, var(--accent2), #f472b6); }
+
+.layer-content { display: none; animation: cardFadeIn 0.3s ease; }
+.layer-content.active { display: block; }
+
+/* Layer 1: Concept */
+.layer-concept { text-align: center; padding: 1rem 0 1.5rem; }
+.layer-concept .c-tag {
+  font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 0.6rem; letter-spacing: 0.05em;
+}
+.layer-concept .c-name { font-size: 2rem; font-weight: 700; margin-bottom: 0.8rem; }
+.layer-concept .c-def { font-size: 1rem; color: var(--ink); line-height: 1.7; margin-bottom: 0.8rem; max-width: 560px; margin-left: auto; margin-right: auto; }
+.layer-concept .c-essence {
+  font-size: 0.86rem; color: var(--muted); font-style: italic;
+  padding: 0.6rem 1rem; background: var(--bg2); border-radius: 8px;
+  display: inline-block; max-width: 500px;
+}
+
+/* Layer 1: Decision Conclusion */
+.layer-conclusion { text-align: center; padding: 1rem 0 1.5rem; }
+.layer-conclusion .q-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--muted); }
+.verdict-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1.2rem; border-radius: 10px; font-size: 1rem; font-weight: 700;
+  margin-bottom: 1rem;
+}
+.verdict-badge.yes { background: var(--green-soft); color: var(--green); }
+.verdict-badge.no { background: var(--red-soft); color: #ef4444; }
+.verdict-badge.cond { background: var(--orange-soft); color: var(--orange); }
+.conclusion-text { font-size: 0.95rem; color: var(--ink); line-height: 1.7; max-width: 540px; margin: 0 auto 0.8rem; }
+.tradeoff-text { font-size: 0.84rem; color: var(--muted); max-width: 480px; margin: 0 auto; }
+
+/* Layer 2: System / Dimensions - pagination */
+.sub-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+.module-counter { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--muted); font-weight: 700; }
+.module-counter .cur { color: var(--accent); }
+[data-path="dc"] .module-counter .cur { color: var(--accent2); }
+.module-dots { display: flex; gap: 0.3rem; }
+.mod-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--rule);
+  transition: all 0.2s; cursor: pointer;
+}
+.mod-dot.active { background: var(--accent); width: 22px; border-radius: 4px; }
+.mod-dot.done { background: rgba(99,102,241,0.3); }
+[data-path="dc"] .mod-dot.active { background: var(--accent2); }
+[data-path="dc"] .mod-dot.done { background: rgba(236,72,153,0.3); }
+
+.sys-card {
+  border: 1px solid var(--rule); border-radius: 12px; padding: 1.4rem;
+  background: var(--surface); transition: all 0.2s; animation: cardFadeIn 0.3s ease;
+}
+.sys-card .s-num { font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 700; margin-bottom: 0.3rem; }
+[data-path="dc"] .sys-card .s-num { color: var(--accent2); }
+.sys-card .s-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
+.sys-card .s-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+.sys-card .s-type {
+  display: inline-block; font-size: 0.72rem; padding: 0.15rem 0.5rem;
+  border-radius: 5px; margin-bottom: 0.5rem; font-weight: 600;
+}
+.s-type.pro { background: var(--green-soft); color: var(--green); }
+.s-type.con { background: var(--red-soft); color: #ef4444; }
+.s-type.risk { background: var(--orange-soft); color: var(--orange); }
+.s-type.cond { background: var(--accent-soft); color: var(--accent); }
+
+/* SVG visual in sys-card */
+.s-visual {
+  margin-top: 0.8rem;
+  padding: 0.8rem 0.4rem 0.4rem;
+  border-top: 1px solid var(--rule);
+  display: flex; justify-content: center;
+  overflow-x: auto;
+}
+.s-visual svg { max-width: 100%; height: auto; }
+.s-visual svg text { font-family: -apple-system, 'PingFang SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif; }
+.s-visual svg .node-rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; rx: 6; }
+.s-visual svg .node-text { fill: var(--accent); font-size: 11px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+.s-visual svg .conn-line { stroke: var(--rule); stroke-width: 1.5; fill: none; }
+.s-visual svg .conn-arrow { fill: var(--accent); }
+.s-visual svg .pill { fill: var(--bg2); stroke: var(--rule); stroke-width: 1; rx: 6; }
+.s-visual svg .pill-text { fill: var(--ink); font-size: 10px; text-anchor: middle; dominant-baseline: middle; }
+.s-visual svg .venn-a { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; opacity: 0.7; }
+.s-visual svg .venn-b { fill: var(--accent2-soft); stroke: var(--accent2); stroke-width: 1.5; opacity: 0.7; }
+.s-visual svg .venn-text { fill: var(--ink); font-size: 9px; text-anchor: middle; }
+.s-visual svg .tag-rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; rx: 4; }
+.s-visual svg .tag-text { fill: var(--accent); font-size: 9px; text-anchor: middle; dominant-baseline: middle; }
+.s-visual svg .challenge-badge { fill: var(--accent2); }
+.s-visual svg .challenge-text { fill: var(--ink); font-size: 10px; }
+.s-visual svg .timeline-dot { fill: var(--accent); }
+.s-visual svg .timeline-line { stroke: var(--rule); stroke-width: 2; }
+.s-visual svg .timeline-text { fill: var(--ink); font-size: 9px; text-anchor: middle; }
+.s-visual svg .frontier-node { fill: white; stroke: var(--accent); stroke-width: 1.5; rx: 6; }
+[data-theme="dark"] .s-visual svg .frontier-node { fill: var(--surface); }
+.s-visual svg .frontier-text { fill: var(--ink); font-size: 9px; text-anchor: middle; dominant-baseline: middle; }
+.s-visual svg .mapping-arrow { stroke: var(--accent); stroke-width: 1.5; fill: none; }
+.s-visual svg .mapping-from { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; rx: 4; }
+.s-visual svg .mapping-to { fill: var(--green-soft); stroke: var(--green); stroke-width: 1; rx: 4; }
+.s-visual svg .mapping-text { fill: var(--ink); font-size: 9px; text-anchor: middle; dominant-baseline: middle; }
+
+.sub-nav-btns { display: flex; gap: 0.6rem; margin-top: 1rem; }
+.prev-btn, .next-btn {
+  flex: 1; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 0.7rem 1rem; font-size: 0.84rem;
+  cursor: pointer; font-family: inherit; color: var(--ink); transition: all 0.15s;
+  text-align: center; display: block; min-height: 44px;
+}
+.prev-btn:hover:not(:disabled), .next-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+[data-path="dc"] .prev-btn:hover:not(:disabled), [data-path="dc"] .next-btn:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
+.prev-btn:disabled, .next-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.enter-btn {
+  display: block; width: 100%; margin-top: 0.8rem;
+  padding: 0.8rem; border: none; border-radius: 10px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  background: var(--accent); color: white; transition: all 0.2s;
+}
+.enter-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--accent-soft); }
+[data-path="dc"] .enter-btn { background: var(--accent2); }
+[data-path="dc"] .enter-btn:hover { box-shadow: 0 4px 14px var(--accent2-soft); }
+
+/* Layer 3: Learning Path */
+.layer-path { padding: 0.5rem 0; }
+.path-track { display: flex; flex-direction: column; gap: 0.8rem; }
+.path-node {
+  border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem;
+  background: var(--surface); position: relative; padding-left: 3rem;
+}
+.path-node::before {
+  content: ''; position: absolute; left: 1.2rem; top: 1.2rem;
+  width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+}
+.path-node:not(:last-child)::after {
+  content: ''; position: absolute; left: 1.65rem; top: 2rem;
+  width: 2px; height: calc(100% - 1.5rem); background: var(--rule);
+}
+.path-node .p-stage { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+.path-node .p-time { font-size: 0.76rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-left: 0.4rem; }
+.path-node .p-content { font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
+
+/* Layer 3: Action Suggestions */
+.layer-action { padding: 0.5rem 0; }
+.action-section { margin-bottom: 1.2rem; }
+.action-section h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--accent2); }
+.action-list { list-style: none; }
+.action-item {
+  display: flex; gap: 0.6rem; padding: 0.6rem 0;
+  font-size: 0.86rem; border-bottom: 1px solid var(--rule);
+}
+.action-item:last-child { border-bottom: none; }
+.action-item .a-num {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent2-soft);
+  color: var(--accent2); font-size: 0.72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.alt-card {
+  border: 1px dashed var(--rule); border-radius: 10px; padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem; font-size: 0.84rem; color: var(--muted);
+}
+.alt-card .alt-title { font-weight: 600; color: var(--ink); margin-bottom: 0.2rem; }
+
+/* ===== Export Page ===== */
+.export-page { text-align: center; padding: 2rem 0; }
+.export-page h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; }
+.export-page .hint { font-size: 0.84rem; color: var(--muted); margin-bottom: 1.5rem; }
+.export-scope {
+  display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem;
+}
+.scope-btn {
+  padding: 0.4rem 1rem; border: 1px solid var(--rule); border-radius: 8px;
+  background: var(--surface); color: var(--muted); cursor: pointer;
+  font-family: inherit; font-size: 0.82rem; transition: all 0.15s;
+}
+.scope-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.export-options { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+.export-option {
+  width: 160px; border: 2px solid var(--rule); border-radius: 12px; padding: 1.2rem;
+  cursor: pointer; background: var(--surface); transition: all 0.2s; text-align: center;
+}
+.export-option:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 16px var(--shadow); }
+.export-option .ico {
+  width: 44px; height: 44px; border-radius: 10px; margin: 0 auto 0.6rem;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.82rem; color: white;
+}
+.export-option .ico.md { background: var(--accent); }
+.export-option .ico.json { background: var(--accent2); }
+.export-option .name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+.export-option .fmt { font-size: 0.74rem; color: var(--muted); }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--ink); color: var(--bg); padding: 0.7rem 1.4rem;
+  border-radius: 10px; font-size: 0.84rem; z-index: 9999;
+  box-shadow: 0 8px 24px var(--shadow-lg); transition: transform 0.3s;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast .obsidian-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+/* ===== Obsidian Panel ===== */
+.obs-panel {
+  position: fixed; bottom: 1rem; right: 1rem; width: 280px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: 0 8px 24px var(--shadow-lg); z-index: 998;
+  overflow: hidden; transition: all 0.3s; max-height: 400px;
+}
+.obs-panel.collapsed { max-height: 44px; }
+.obs-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 1rem; cursor: pointer; background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+}
+.obs-panel.collapsed .obs-panel-header { border-bottom: none; }
+.obs-panel-header .obs-title { font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+.obs-panel-header .obs-status { font-size: 0.7rem; color: var(--green); }
+.obs-panel-header .toggle { font-size: 0.8rem; color: var(--muted); }
+.obs-panel-body { padding: 0.8rem 1rem; max-height: 320px; overflow-y: auto; font-size: 0.78rem; }
+.obs-panel-body .obs-note-title { font-weight: 700; margin-bottom: 0.4rem; }
+.obs-panel-body .obs-section { margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--rule); }
+.obs-panel-body .obs-section:last-child { border-bottom: none; }
+.obs-panel-body .obs-section-title { font-size: 0.72rem; color: var(--accent); font-weight: 600; margin-bottom: 0.2rem; }
+.obs-panel-body .obs-section-content { color: var(--muted); line-height: 1.5; }
+.obs-panel-body .obs-pending { color: var(--muted); font-style: italic; font-size: 0.74rem; }
+
+
+/* ===== Glass Cards ===== */
+.layer-concept, .layer-conclusion, .sys-card, .path-node,
+.action-section, .alt-card, .export-option, .history-item,
+.modal-content, .obs-section {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.04),
+    0 1px 2px rgba(0,0,0,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  border-radius: 16px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.4s ease,
+              border-color 0.3s ease;
+}
+[data-theme="dark"] .layer-concept,
+[data-theme="dark"] .layer-conclusion,
+[data-theme="dark"] .sys-card,
+[data-theme="dark"] .path-node,
+[data-theme="dark"] .action-section,
+[data-theme="dark"] .alt-card,
+[data-theme="dark"] .export-option,
+[data-theme="dark"] .history-item,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .obs-section {
+  background: rgba(26,26,46,0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.layer-concept:hover, .layer-conclusion:hover, .sys-card:hover,
+.path-node:hover, .action-section:hover, .alt-card:hover,
+.export-option:hover, .history-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 12px 40px rgba(99,102,241,0.10),
+    0 4px 12px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  border-color: rgba(99,102,241,0.2);
+}
+
+/* ===== Spring Physics Transitions ===== */
+.layer-content { animation: springFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes springFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.enter-btn, .search-btn, .export-trigger, .scope-btn, .prev-btn, .next-btn {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.enter-btn:active, .search-btn:active, .export-trigger:active {
+  transform: scale(0.96);
+}
+
+.mode-pill button {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===== Search Input Glass ===== */
+.search-input {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+[data-theme="dark"] .search-input {
+  background: rgba(26,26,46,0.6);
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.search-input:focus {
+  background: rgba(255,255,255,0.85);
+}
+[data-theme="dark"] .search-input:focus {
+  background: rgba(26,26,46,0.75);
+}
+
+/* ===== Topbar Glass ===== */
+.topbar {
+  background: rgba(250,250,249,0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0.8rem 0;
+  margin: -2rem -1.5rem 2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+[data-theme="dark"] .topbar {
+  background: rgba(15,15,26,0.7);
+  border-bottom-color: rgba(255,255,255,0.05);
+}
+
+/* ===== Obsidian Panel Glass ===== */
+.obs-panel {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .obs-panel {
+  background: rgba(26,26,46,0.6);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* ===== Toast Glass ===== */
+.toast {
+  background: rgba(26,26,46,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ===== Theme Toggle Glass ===== */
+.theme-toggle {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+[data-theme="dark"] .theme-toggle {
+  background: rgba(26,26,46,0.5);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* ===== Big Logo Glass ===== */
+.home-search .big-logo {
+  background: linear-gradient(135deg, rgba(99,102,241,0.85), rgba(129,140,248,0.9));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.home-search[data-mode="dc"] .big-logo {
+  background: linear-gradient(135deg, rgba(236,72,153,0.85), rgba(244,114,182,0.9));
+}
+
+/* ===== Glass Cards ===== */
+.layer-concept, .layer-conclusion, .sys-card, .path-node,
+.action-section, .alt-card, .export-option, .history-item,
+.modal-content, .obs-section {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.04),
+    0 1px 2px rgba(0,0,0,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  border-radius: 16px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.4s ease,
+              border-color 0.3s ease;
+}
+[data-theme="dark"] .layer-concept,
+[data-theme="dark"] .layer-conclusion,
+[data-theme="dark"] .sys-card,
+[data-theme="dark"] .path-node,
+[data-theme="dark"] .action-section,
+[data-theme="dark"] .alt-card,
+[data-theme="dark"] .export-option,
+[data-theme="dark"] .history-item,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .obs-section {
+  background: rgba(26,26,46,0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.layer-concept:hover, .layer-conclusion:hover, .sys-card:hover,
+.path-node:hover, .action-section:hover, .alt-card:hover,
+.export-option:hover, .history-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 12px 40px rgba(99,102,241,0.10),
+    0 4px 12px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  border-color: rgba(99,102,241,0.2);
+}
+
+/* ===== Spring Physics Transitions ===== */
+.layer-content { animation: springFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes springFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.enter-btn, .search-btn, .export-trigger, .scope-btn, .prev-btn, .next-btn {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.enter-btn:active, .search-btn:active, .export-trigger:active {
+  transform: scale(0.96);
+}
+
+.mode-pill button {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===== Search Input Glass ===== */
+.search-input {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+[data-theme="dark"] .search-input {
+  background: rgba(26,26,46,0.6);
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.search-input:focus {
+  background: rgba(255,255,255,0.85);
+}
+[data-theme="dark"] .search-input:focus {
+  background: rgba(26,26,46,0.75);
+}
+
+/* ===== Topbar Glass ===== */
+.topbar {
+  background: rgba(250,250,249,0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0.8rem 0;
+  margin: -2rem -1.5rem 2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+[data-theme="dark"] .topbar {
+  background: rgba(15,15,26,0.7);
+  border-bottom-color: rgba(255,255,255,0.05);
+}
+
+/* ===== Obsidian Panel Glass ===== */
+.obs-panel {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .obs-panel {
+  background: rgba(26,26,46,0.6);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* ===== Toast Glass ===== */
+.toast {
+  background: rgba(26,26,46,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ===== Theme Toggle Glass ===== */
+.theme-toggle {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+[data-theme="dark"] .theme-toggle {
+  background: rgba(26,26,46,0.5);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* ===== Big Logo Glass ===== */
+.home-search .big-logo {
+  background: linear-gradient(135deg, rgba(99,102,241,0.85), rgba(129,140,248,0.9));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.home-search[data-mode="dc"] .big-logo {
+  background: linear-gradient(135deg, rgba(236,72,153,0.85), rgba(244,114,182,0.9));
+}
+
+/* ===== Card Expansion ===== */
+.sys-card {
+  cursor: pointer;
+  overflow: hidden;
+}
+.sys-card .card-detail {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.35s ease 0.1s,
+              margin 0.3s ease;
+  margin-top: 0;
+}
+.sys-card.expanded .card-detail {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+.sys-card .expand-hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.6rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.sys-card:hover .expand-hint {
+  opacity: 1;
+}
+.sys-card.expanded .expand-hint {
+  display: none;
+}
+
+/* ===== Custom Cursor ===== */
+.custom-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  mix-blend-mode: difference;
+}
+.cursor-main {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(99,102,241,0.6);
+  background: rgba(99,102,241,0.1);
+  transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+}
+.cursor-main.hovering {
+  width: 40px; height: 40px;
+  border-color: rgba(236,72,153,0.5);
+  background: rgba(236,72,153,0.08);
+}
+.cursor-trail {
+  width: 8px; height: 8px;
+  background: rgba(99,102,241,0.3);
+  transition: transform 0.08s ease-out;
+}
+.cursor-trail:nth-child(3) { width: 6px; height: 6px; background: rgba(99,102,241,0.2); }
+.cursor-trail:nth-child(4) { width: 4px; height: 4px; background: rgba(99,102,241,0.12); }
+.cursor-trail:nth-child(5) { width: 3px; height: 3px; background: rgba(99,102,241,0.08); }
+
+/* Hide default cursor on desktop */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  a, button, input, .sys-card, .history-item, .export-option, .quick-ex, .mod-dot, .crumb {
+    cursor: none;
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  #app { padding: 1rem 1rem 3rem; }
+  .home-search .big-logo { width: 72px; height: 72px; font-size: 2rem; }
+  .home-search .brand-name { font-size: 1.1rem; }
+  .home-search .search-btn { padding: 0.75rem 1.5rem; font-size: 0.9rem; }
+  .mode-pill button { padding: 0.3rem 0.6rem; font-size: 0.72rem; }
+  .topbar { flex-wrap: wrap; gap: 0.5rem; }
+  .topbar .brand { font-size: 0.9rem; }
+  .prog-header { flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+  .layer-content { padding: 0.8rem; }
+  .sys-card { padding: 1rem; }
+  .s-visual svg { max-width: 100%; height: auto; }
+  .export-page { padding: 0 0.5rem; }
+  .path-node { padding: 0.8rem 1rem; }
+  .obs-panel { left: 0.5rem; right: 0.5rem; max-width: none; }
+  .history-section { padding: 0 0.5rem; }
+}
+@media (max-width: 480px) {
+  .home-search .big-logo { width: 60px; height: 60px; font-size: 1.6rem; }
+  .search-input { padding: 0.8rem 1rem; font-size: 0.95rem; }
+  .sub-nav-btns { flex-direction: column; gap: 0.5rem; }
+  .sub-nav-btns button { width: 100%; }
+  .action-section { padding: 1rem; }
+}
+
+/* ===== Quick Examples ===== */
+.quick-examples {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-width: 480px;
+}
+.quick-ex {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-ex:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+[data-theme="dark"] .quick-ex {
+  background: var(--bg2);
+}
+
+/* ===== History Section ===== */
+.history-section {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 520px;
+}
+.history-title {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.history-title .clear-btn {
+  font-size: 0.7rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.history-title .clear-btn:hover { opacity: 1; }
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  animation: cardFadeIn 0.3s ease;
+}
+.history-item:hover {
+  border-color: var(--accent);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.history-item .h-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.history-item .h-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.history-item .h-mode {
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+.history-item .h-mode.fw { background: var(--accent-soft); color: var(--accent); }
+.history-item .h-mode.dc { background: var(--accent2-soft); color: var(--accent2); }
+.history-empty {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* ===== Enhanced Loading ===== */
+.gen-progress-bar {
+  width: 200px;
+  height: 3px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin: 1rem auto 0;
+  overflow: hidden;
+}
+.gen-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+/* ===== SVG Interaction ===== */
+.s-visual svg { max-width: 100%; }
+.s-visual .pill, .s-visual .node-rect, .s-visual .frontier-node, .s-visual .mapping-to, .s-visual .mapping-from, .s-visual .tag-rect {
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.s-visual .pill:hover, .s-visual .node-rect:hover, .s-visual .frontier-node:hover, .s-visual .mapping-to:hover, .s-visual .mapping-from:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+  transform-origin: center;
+}
+.s-visual .conn-line, .s-visual .timeline-line, .s-visual .mapping-arrow {
+  transition: stroke 0.2s;
+}
+.s-visual text { pointer-events: none; }
+
+/* ===== Tooltip ===== */
+.svg-tooltip {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.78rem;
+  color: var(--ink);
+  box-shadow: 0 4px 16px var(--shadow-lg);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s;
+  z-index: 100;
+  max-width: 240px;
+}
+.svg-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== Keyboard hint ===== */
+.kb-hint {
+  position: fixed;
+  bottom: 0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.8rem;
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 50;
+  pointer-events: none;
+}
+.kb-hint.show { opacity: 0.7; }
+
+/* ===== Smooth scroll & selection ===== */
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+[data-theme="dark"] ::selection {
+  background: rgba(129,140,248,0.25);
+}
+
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式">
+  <span class="moon">🌙</span>
+  <span class="sun">☀️</span>
+</button>
+
+<!-- Obsidian Sync Panel -->
+<div class="obs-panel collapsed" id="obsPanel" style="display:none">
+  <div class="obs-panel-header" onclick="toggleObsPanel()">
+    <span class="obs-title">📓 Obsidian 同步</span>
+    <span class="obs-status" id="obsStatus">已连接</span>
+    <span class="toggle" id="obsToggle">▲</span>
+  </div>
+  <div class="obs-panel-body" id="obsBody"></div>
+</div>
+
+<div id="app">
+
+  <!-- ===== HOME / SEARCH PAGE ===== -->
+  <div class="page active" id="page-home">
+    <div class="home-search" data-mode="fw" id="homeSearch">
+      <div class="big-logo" id="bigLogo">框</div>
+      <div class="brand-name" id="brandName">元框架引擎</div>
+      <div class="search-wrap">
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="输入一个概念，如数学、量子力学..."
+               onkeydown="if(event.key==='Enter')handleSearch()">
+      </div>
+      <button class="search-btn" id="searchBtn" onclick="handleSearch()">生成框架</button>
+      <div class="mode-pill">
+        <button class="active fw" id="modeFw" onclick="switchMode('fw')">认知框架</button>
+        <span class="divider"></span>
+        <button class="dc" id="modeDc" onclick="switchMode('dc')">决策建议</button>
+      </div>
+      <div class="hint-row">
+        <span class="obs">📓 生成即同步到 Obsidian</span>
+        <span id="hintText">支持任意学科、技术、产业、方法论名词</span>
+      </div>
+      <div class="quick-examples" id="quickExamples"></div>
+      <div class="history-section" id="historySection" style="display:none">
+        <div class="history-title">
+          <span>最近生成</span>
+          <button class="clear-btn" onclick="clearHistory()">清空</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INPUT PAGE (removed - merged into home) ===== -->
+
+  <!-- ===== LOADING PAGE ===== -->
+  <div class="page" id="page-loading">
+    <div class="topbar">
+      <button class="back-btn" onclick="cancelLoading()">← 取消</button>
+      <span class="brand">元框架<span class="dot">·</span>引擎</span>
+    </div>
+    <div class="loading-page">
+      <div class="gen-spinner"></div>
+      <div class="gen-text" id="loadText">正在构建认知框架</div>
+      <div class="gen-sub" id="loadSub">LLM 正在生成三层渐进结构</div>
+      <div class="gen-progress-bar"><div class="gen-progress-fill" id="progressFill"></div></div>
+      <div class="gen-steps" id="loadSteps"></div>
+    </div>
+  </div>
+
+  <!-- ===== PROGRESSIVE VIEW PAGE ===== -->
+  <div class="page" id="page-prog">
+    <div class="topbar">
+      <button class="back-btn" onclick="showPage('home')">← 返回首页</button>
+      <span class="brand">元框架<span class="dot">·</span>引擎</span>
+    </div>
+    <div class="prog-view" id="progView" data-path="fw"></div>
+  </div>
+
+  <!-- ===== EXPORT PAGE ===== -->
+  <div class="page" id="page-export">
+    <div class="topbar">
+      <button class="back-btn" onclick="showPage('prog')">← 返回</button>
+      <span class="brand">元框架<span class="dot">·</span>引擎</span>
+    </div>
+    <div class="export-page">
+      <h2>导出分享</h2>
+      <p class="hint" id="exportHint">选择导出格式与范围</p>
+      <div class="export-scope">
+        <button class="scope-btn active" data-scope="all" onclick="setScope('all')">全部层</button>
+        <button class="scope-btn" data-scope="current" onclick="setScope('current')">仅当前层</button>
+      </div>
+      <div class="export-options">
+        <div class="export-option" onclick="doExport('md')">
+          <div class="ico md">MD</div>
+          <div class="name">Markdown</div>
+          <div class="fmt">.md · 适合笔记与博客</div>
+        </div>
+        <div class="export-option" onclick="doExport('json')">
+          <div class="ico json">JSON</div>
+          <div class="name">JSON 数据</div>
+          <div class="fmt">.json · 适合二次开发</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"><span class="obsidian-dot"></span><span id="toastText"></span></div>
+
+<script>
+// ===== Mock Data =====
+var MOCK = {
+  framework: {
+    '数学': {
+      concept: { name: '数学', definition: '数学是研究数量、结构、变化、空间以及信息等概念的学科，是人类思维最抽象的产物之一。', essence: '从计数到抽象推理，数学用严格的逻辑构建了理解世界的语言体系。' },
+      system: [
+        { num:'01', name:'领域分类', desc:'纯粹数学（代数/几何/分析/数论/拓扑）与应用数学（概率统计/计算数学/运筹学）两大分支，外加新兴交叉方向。' },
+        { num:'02', name:'发展脉络', desc:'古代实用算术与希腊公理化几何 → 微积分与分析 → 抽象代数与现代公理化 → 计算数学与离散数学。' },
+        { num:'03', name:'底层原理', desc:'公理化方法：从少数不证自明的公理出发，通过逻辑推理构建整个理论体系。这是数学区别于其他学科的根本特征。' },
+        { num:'04', name:'最新前沿', desc:'朗兰兹纲领：统一数论与表示论的"大统一理论"；拓扑数据分析（TDA）：将拓扑学引入机器学习与数据科学；同伦类型论：重塑数学基础的全新语言；AI 辅助证明：Lean/Coq 形式化验证改变数学证明方式；自动定理发现：机器学习搜索新数学定理；高维几何可视化：利用 VR/AR 探索高维空间结构。' },
+        { num:'05', name:'核心难题', desc:'黎曼猜想：素数分布的零点规律（千禧年难题）；P vs NP：计算复杂性的核心问题（千禧年难题）；Navier-Stokes 方程：流体光滑性是否成立（千禧年难题）；BSD 猜想：椭圆曲线与 L 函数的深刻联系（千禧年难题）；ABC 猜想：数论中整数加法与乘法的关系；连续统假设：集合论基数的独立性。' },
+        { num:'06', name:'关键概念索引', desc:'群/环/域（代数）、流形/拓扑空间（几何）、收敛/连续/微分（分析）、概率/随机过程（统计）。' },
+        { num:'07', name:'领域交叉', desc:'数学物理（弦论↔拓扑）、数论密码（RSA↔素数）、金融数学（随机分析↔期权定价）、生物数学。' },
+        { num:'08', name:'实用价值映射', desc:'工程结构计算、金融风险建模、AI 优化算法——数学是现代文明的隐性基础设施。' },
+        { num:'09', name:'常见误区', desc:'误区1：数学=算术和计算。正解：数学本质是逻辑推理和抽象结构研究，计算只是工具；误区2：学数学靠天赋。正解：数学思维可以通过刻意练习培养，多数数学家靠持续积累而非天才直觉；误区3：纯数学没有实用价值。正解：数论曾经被认为无用，如今支撑RSA加密和区块链安全；误区4：数学结论是绝对的。正解：哥德尔不完备定理证明任何足够复杂的数学体系都存在无法证明的命题。' },
+        { num:'10', name:'工具箱', desc:'入门书：G·波利亚《怎样解题》适合培养数学思维方法论；经典著作：克莱因《古今数学思想》适合理解数学发展脉络；在线课程：MIT OCW 18.01/18.02（微积分）、18.06（线性代数）免费系统性课程；工具：Geogebra（可视化探索）、Wolfram Alpha（符号计算辅助）；社群：Math StackExchange（精确问答）、AoPS（竞赛训练社区）适合深度参与；实践项目：Project Euler（编程+数学相结合的习题库）。' }
+      ],
+      path: [
+        { stage:'入门', time:'1-2 年', content:'微积分、线性代数、概率论。建立连续与离散的基本直觉，能读懂标准工程应用。' },
+        { stage:'进阶', time:'2-3 年', content:'实分析、抽象代数、拓扑学。从计算转向证明，理解数学的结构性而非技巧性。' },
+        { stage:'前沿', time:'持续', content:'选定细分方向深入，阅读前沿论文，参与学术讨论。数学学习无终点，只有方向。' }
+      ]
+    },
+    '量子力学': {
+      concept: { name:'量子力学', definition:'量子力学是描述微观粒子（原子、电子、光子）运动规律的物理学理论，与相对论并称现代物理学两大支柱。', essence:'世界在最小尺度上不是确定的，而是概率的——叠加态、纠缠和测量坍缩颠覆了经典直觉。' },
+      system: [
+        { num:'01', name:'领域分类', desc:'非相对论量子力学（薛定谔方程）与相对论量子力学（狄拉克方程）→ 量子场论（QED/QCD）→ 量子信息与量子计算。' },
+        { num:'02', name:'发展脉络', desc:'普朗克黑体辐射 → 玻尔模型 → 海森堡矩阵力学 & 薛定谔波动力学 → 狄拉克相对论方程 → 费曼路径积分 → 量子信息论。' },
+        { num:'03', name:'底层原理', desc:'态叠加（粒子可同时处于多态）、不确定性原理（位置与动量不可同时精确）、测量坍缩（观测改变系统）。' },
+        { num:'04', name:'最新前沿', desc:'超导量子计算：IBM/Google 千量子比特芯片突破；离子阱量子计算：高保真度量子门与长程连接；拓扑量子比特：马约拉纳费米子的实验追寻；量子纠错码：表面码与 LDPC 码逼近容错阈值；量子通信网络：星地量子密钥分发与量子中继；量子机器学习：量子加速的优化与采样算法；量子引力实验： tabletop 实验探寻引力量子效应。' },
+        { num:'05', name:'核心难题', desc:'量子引力：如何将广义相对论与量子力学统一（弦论/圈量子引力）；测量问题：波函数坍缩的本质是什么（多世界/退相干/隐变量）；量子-经典边界：宏观物体为何不呈现叠加态；暗物质与暗能量：量子场论能否解释宇宙学常数；高温超导机制：BCS 理论之外的配对机制；量子复杂性：量子系统模拟的指数墙。' },
+        { num:'06', name:'关键概念索引', desc:'波函数/态矢量、哈密顿量、算符/可观测量、纠缠/贝尔不等式、自旋、费米子/玻色子。' },
+        { num:'07', name:'领域交叉', desc:'量子化学（分子模拟）、量子信息（计算机科学）、宇宙学（早期宇宙量子涨落）、哲学（决定论 vs 概率论）。' },
+        { num:'08', name:'实用价值映射', desc:'半导体物理（晶体管原理）、激光技术、MRI 医学成像、量子加密通信——现代电子设备的底层支撑。' },
+        { num:'09', name:'常见误区', desc:'误区1：量子纠缠可以实现超光速通信。正解：纠缠无法传递信息，贝尔定理禁止超光速信号；误区2：薛定谔的猫既死又活。正解：这是讽刺量子叠加的荒谬思想实验，宏观物体不会处于叠加态；误区3：观测需要意识参与。正解：现代退相干理论中观测只需与环境的物理相互作用；误区4：量子计算机在所有任务上都比经典计算机快。正解：仅在特定问题（分解质因数、量子模拟等）上有指数加速。' },
+        { num:'10', name:'工具箱', desc:'入门书：格里菲斯《量子力学导论》最适合自学的标准教材、费曼《QED》适合建立概念直觉；经典著作：费曼《费曼物理学讲义》第三卷适合深入物理图像；在线课程：MIT OCW 8.04/8.05（量子力学）免费完整课程、Stanford QMSE-1适合研究生入门；工具：QuTiP（Python量子模拟库）、IBM Quantum Experience（在线量子计算实验平台）适合动手验证；社群：Physics StackExchange（专业问答）、B站"二次元的中科院物理所"适合中文科普；实践项目：在IBM Quantum上用Qiskit编写第一个量子电路，运行Grover搜索算法。' }
+      ],
+      path: [
+        { stage:'入门', time:'3-6 月', content:'线性代数复习 + 薛定谔方程基础。理解一维势阱、氢原子模型，建立量子化直觉。' },
+        { stage:'进阶', time:'6-12 月', content:'角动量与自旋、微扰理论、量子统计。能计算实际物理问题的近似解。' },
+        { stage:'前沿', time:'持续', content:'量子场论、量子信息或量子引力方向深入。需要较强数学物理基础。' }
+      ]
+    },
+    '博弈论': {
+      concept: { name:'博弈论', definition:'博弈论是研究理性决策者之间策略互动的数学理论，分析各方在利益相互影响下如何做出最优选择。', essence:'你的最优策略取决于对手的策略——交互决策中的数学推理。' },
+      system: [
+        { num:'01', name:'领域分类', desc:'合作博弈（联盟/分配）与非合作博弈（纳什均衡）、静态与动态博弈、完全信息与不完全信息博弈。' },
+        { num:'02', name:'发展脉络', desc:'冯·诺依曼最小最大定理 → 纳什均衡 → 泽尔腾子博弈完美 → 迈尔森机制设计 → 演化博弈论。' },
+        { num:'03', name:'底层原理', desc:'纳什均衡——每个参与者的策略在其他人的策略给定时是最优的，无人有单方面偏离的动机。' },
+        { num:'04', name:'最新前沿', desc:'算法博弈论：拍卖设计与匹配市场的高效计算；演化博弈与生物行为：合作演化的数学模型；AI 多智能体博弈：AlphaGo/星际争霸中的自对弈学习；区块链机制设计：去中心化系统的激励相容；公平分配理论：不可分资源的公平分割算法；网络博弈：社交网络上的信息级联与策略传播；量子博弈论：量子策略与经典策略的本质差异。' },
+        { num:'05', name:'核心难题', desc:'多重均衡选择：当存在多个纳什均衡时如何选择；有限理性建模：人类非完全理性的数学刻画；信息不完全推断：贝叶斯博弈中的信念更新；大规模博弈计算：纳什均衡的 PPAD 完全性；机制设计逆向工程：从目标到规则的自动构造；动态博弈承诺：时间不一致性与可信承诺。' },
+        { num:'06', name:'关键概念索引', desc:'纳什均衡、帕累托最优、囚徒困境、零和博弈、贝叶斯博弈、子博弈完美、沙普利值。' },
+        { num:'07', name:'领域交叉', desc:'经济学（拍卖/寡头竞争）、生物学（进化稳定策略）、计算机科学（机制设计/AI）、政治学（投票理论）。' },
+        { num:'08', name:'实用价值映射', desc:'频谱拍卖（FCC）、定价策略、供应链谈判、AI 训练（GAN 的对抗均衡）——博弈论已渗透到商业决策各环节。' },
+        { num:'09', name:'常见误区', desc:'误区1：博弈论只适用于零和对抗。正解：博弈论涵盖合作博弈、正和博弈，广泛应用于商业合作和机制设计；误区2：纳什均衡=最优策略。正解：纳什均衡只是稳定状态，帕累托最优才代表最优，二者常常不一致（囚徒困境）；误区3：理性人假设意味着人都是自利的。正解：理性仅指偏好一致和效用最大化，利他偏好也可以纳入理性效用函数。' },
+        { num:'10', name:'工具箱', desc:'入门书：《策略思维》适合零基础理解博弈思维、罗森《博弈论》适合建立系统框架；经典著作：冯·诺依曼《博弈论与经济行为》奠基之作、迈尔森《博弈论：矛盾冲突分析》适合深入理论；在线课程：Coursera《Game Theory》（Stanford）免费系统性课程、Yale Open Course ECON 159适合本科生入门；工具：Gambit（开源博弈求解器）、PyGameTheory（Python博弈论库）适合动手验证；社群：Economics StackExchange（博弈论问答）、r/GAMETHEORY（Reddit博弈论社区）；实践项目：设计一个拍卖机制并用Gambit求解均衡，分析真实商业案例（如网约车定价博弈）。' }
+      ],
+      path: [
+        { stage:'入门', time:'1-2 月', content:'博弈的基本概念、纳什均衡、囚徒困境与经典模型。读《策略思维》或《博弈论基础》。' },
+        { stage:'进阶', time:'3-6 月', content:'扩展式博弈、贝叶斯博弈、机制设计。需要一定概率论与优化基础。' },
+        { stage:'前沿', time:'持续', content:'算法博弈论、演化博弈、多智能体强化学习。与 AI 和经济学深度交叉。' }
+      ]
+    }
+  },
+  decision: {
+    '现在该不该入光模块': {
+      conclusion: { question:'现在该不该入光模块', verdict:'cond', verdictText:'有条件进入', tradeoff:'AI 算力需求是确定性趋势，但短期估值已偏高，需关注技术迭代风险与市场周期。' },
+      dimensions: [
+        { type:'pro', typeName:'利', title:'AI 算力需求拉动', detail:'800G/1.6T 光模块需求随 AI 训练/推理集群扩张爆发式增长，2025-2027 年确定性高景气。' },
+        { type:'pro', typeName:'利', title:'国产替代加速', detail:'国内光模块厂商（中际旭创/新易盛）在全球市场份额已超 50%，技术差距缩小。' },
+        { type:'con', typeName:'弊', title:'估值偏高', detail:'头部光模块公司 PE 已处于历史高位，市场预期充分，短期回调风险大。' },
+        { type:'risk', typeName:'风险', title:'技术路线变化', detail:'硅光技术/CPO 共封装可能颠覆现有可插拔光模块方案，技术路线切换期存在淘汰风险。' },
+        { type:'risk', typeName:'风险', title:'产能过剩', detail:'2026 年后大量新增产能释放，若 AI 需求增速放缓，可能出现量价齐跌。' },
+        { type:'cond', typeName:'前提', title:'判断成立的前提', detail:'AI 资本开支持续增长 > 20% YoY；北美云厂商 800G 招标按预期推进；硅光替代节奏慢于预期。' }
+      ],
+      actions: [
+        '分批建仓：将计划仓位分 3-4 批，在回调 10-15% 时逐步买入，降低追高风险',
+        '聚焦龙头：优先配置中际旭创/新易盛等头部厂商，回避二三线产能不确定性',
+        '设置止损：以入场价 -15% 为止损线，若 AI 算力需求增速不及预期及时退出',
+        '跟踪指标：每月关注北美云厂商 Capex 指引、800G 出货量、硅光技术进展'
+      ],
+      alternatives: [
+        { title:'替代方案 A：光芯片/光器件', desc:'投资光模块产业链上游（如源杰科技），受益于模块放量但估值更低。' },
+        { title:'替代方案 B：AI 算力 ETF', desc:'不押注单一环节，买 AI 算力全产业链 ETF（含光模块/服务器/芯片），分散风险。' }
+      ]
+    },
+    '该不该转行做 AI': {
+      conclusion: { question:'该不该转行做 AI', verdict:'yes', verdictText:'建议进入', tradeoff:'AI 人才需求远大于供给，但窗口期有限，越早转型红利越大。关键是选对切入点而非盲目 all-in。' },
+      dimensions: [
+        { type:'pro', typeName:'利', title:'市场需求旺盛', detail:'AI 岗位需求增速 > 40% YoY，薪资溢价显著，初级岗位也供不应求。' },
+        { type:'pro', typeName:'利', title:'技能可迁移', detail:'你已有的编程/数据分析/领域知识是 AI 落地的核心优势，不是从零开始。' },
+        { type:'con', typeName:'弊', title:'学习曲线陡峭', detail:'数学基础（线性代数/概率/优化）+ 框架（PyTorch）+ 工程化，至少需 6-12 个月密集投入。' },
+        { type:'risk', typeName:'风险', title:'同质化竞争', detail:'大量人员涌入基础 AI 岗位，2-3 年后初级岗位可能内卷，需建立差异化壁垒。' },
+        { type:'risk', typeName:'风险', title:'技术快速迭代', detail:'今天学的技术 1 年后可能过时，需持续学习能力，否则很快被淘汰。' },
+        { type:'cond', typeName:'前提', title:'成功转型的前提', detail:'能投入每天 3+ 小时学习；有明确的细分方向（应用/研究/产品）；保持原有领域知识作为护城河。' }
+      ],
+      actions: [
+        '选对切入点：非算法岗（AI 应用开发/Prompt 工程/AI 产品经理）门槛低、见效快，适合快速转型',
+        '3 个月速成：完成 2-3 个完整 AI 项目（RAG 系统/Agent/微调），放到 GitHub 作为作品集',
+        '利用领域优势：将 AI 与你原有行业经验结合（如金融+AI/医疗+AI），做"AI+领域"复合人才',
+        '6 个月内跳槽：通过内推/开源贡献获得面试机会，目标 AI 初创或大厂 AI 新业务线'
+      ],
+      alternatives: [
+        { title:'替代方案 A：AI side project', desc:'不转行，用业余时间做 AI 副业（独立开发者/内容创作），验证后再决定是否 all-in。' },
+        { title:'替代方案 B：内部转岗', desc:'在现有公司寻找 AI 相关项目机会，低风险过渡，积累经验后再跳槽。' }
+      ]
+    },
+    '要不要读 MBA': {
+      conclusion: { question:'要不要读 MBA', verdict:'cond', verdictText:'有条件进入', tradeoff:'MBA 价值在人脉与视野而非知识本身，投入产出比高度依赖你当前职业阶段与目标。' },
+      dimensions: [
+        { type:'pro', typeName:'利', title:'人脉网络价值', detail:'顶级 MBA 的人脉网络是终身资产，同学会成为未来商业伙伴/客户/投资人。' },
+        { type:'pro', typeName:'利', title:'职业转换跳板', detail:'MBA 是跨行业转型的有效路径，尤其金融/咨询/科技方向。' },
+        { type:'con', typeName:'弊', title:'机会成本高', detail:'2 年时间 + 50-100 万学费，直接成本加上放弃的收入，总成本可能超 200 万。' },
+        { type:'risk', typeName:'风险', title:'学历通胀', detail:'MBA 供给增加，顶级项目之外的学校 ROI 持续下降，非名校 MBA 性价比存疑。' },
+        { type:'risk', typeName:'风险', title:'目标不明确', detail:'如果仅为"镀金"而非有清晰职业目标，读完后可能仍迷茫，浪费时间和金钱。' },
+        { type:'cond', typeName:'前提', title:'值得读的前提', detail:'工作 5-8 年遇到职业瓶颈；目标是转型/创业/进入投资圈；能考入 Top 20 项目。' }
+      ],
+      actions: [
+        '明确目标：先想清楚"读完 MBA 要做什么"，再决定是否读，而非反过来',
+        '只考顶级：非 Top 20 的 MBA 性价比低，不如用同样时间深耕现有职业',
+        '在职 vs 全职：若当前收入高且不急转型，EMBA/在职 MBA 风险更低',
+        '提前 1 年准备：GMAT + 申请文书 + 推荐信，顶级 MBA 录取竞争激烈'
+      ],
+      alternatives: [
+        { title:'替代方案 A：高管教育项目', desc:'短期高管课程（如哈佛/斯坦福 Summer Program）成本更低，也能获得人脉与视野。' },
+        { title:'替代方案 B：行业社群', desc:'加入高质量行业社群/创业营，用 1/10 的成本获得类似的人脉网络价值。' }
+      ]
+    }
+  }
+};
+
+var FRAMEWORK_EXAMPLES = ['数学', '量子力学', '博弈论'];
+var DECISION_EXAMPLES = ['现在该不该入光模块', '该不该转行做 AI', '要不要读 MBA'];
+
+// ===== State =====
+var currentPath = 'fw'; // 'fw' or 'dc'
+var currentData = null;
+var currentLayer = 0;
+var currentModule = 0;
+var exportScope = 'all';
+var loadingTimer = null;
+
+// ===== Theme Toggle =====
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+// Restore theme on load
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+// ===== Page Navigation =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ===== Entry Mode Switch (home page) =====
+function switchMode(mode) {
+  currentPath = mode;
+  const hs = document.getElementById('homeSearch');
+  hs.setAttribute('data-mode', mode);
+
+  const logo = document.getElementById('bigLogo');
+  const btn = document.getElementById('searchBtn');
+  const input = document.getElementById('searchInput');
+  const hint = document.getElementById('hintText');
+  const ex = document.getElementById('quickExamples');
+  const btnFw = document.getElementById('modeFw');
+  const btnDc = document.getElementById('modeDc');
+
+  btnFw.classList.toggle('active', mode === 'fw');
+  btnDc.classList.toggle('active', mode === 'dc');
+
+  if (mode === 'fw') {
+    logo.textContent = '框';
+    btn.textContent = '生成框架';
+    input.placeholder = '输入一个概念，如数学、量子力学...';
+    hint.textContent = '支持任意学科、技术、产业、方法论名词';
+    ex.innerHTML = '';
+    FRAMEWORK_EXAMPLES.forEach(function(e) {
+      const s = document.createElement('span');
+      s.className = 'quick-ex';
+      s.textContent = e;
+      s.onclick = function() { input.value = e; input.focus(); };
+      ex.appendChild(s);
+    });
+  } else {
+    logo.textContent = '决';
+    btn.textContent = '生成建议';
+    input.placeholder = '输入一个待决策问题，如现在该不该入光模块...';
+    hint.textContent = '支持投资、职业、方案取舍等各类决策问题';
+    ex.innerHTML = '';
+    DECISION_EXAMPLES.forEach(function(e) {
+      const s = document.createElement('span');
+      s.className = 'quick-ex';
+      s.textContent = e;
+      s.onclick = function() { input.value = e; input.focus(); };
+      ex.appendChild(s);
+    });
+  }
+  input.value = '';
+  input.focus();
+}
+
+// ===== Custom Cursor =====
+function initCursor() {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const cursorMain = document.createElement('div');
+  cursorMain.className = 'custom-cursor cursor-main';
+  document.body.appendChild(cursorMain);
+
+  const trails = [];
+  for (let i = 0; i < 4; i++) {
+    const t = document.createElement('div');
+    t.className = 'custom-cursor cursor-trail';
+    document.body.appendChild(t);
+    trails.push({ el: t, x: 0, y: 0 });
+  }
+
+  let mx = 0, my = 0;
+  let cx = 0, cy = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+  });
+
+  // Hover detection on interactive elements
+  const hoverSelector = 'a, button, input, .sys-card, .history-item, .export-option, .quick-ex, .mod-dot, .crumb, .path-node, .layer-concept, .layer-conclusion, .alt-card, .action-section';
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(hoverSelector)) cursorMain.classList.add('hovering');
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(hoverSelector)) cursorMain.classList.remove('hovering');
+  });
+
+  function animate() {
+    // Main cursor follows with slight lag for smooth feel
+    cx += (mx - cx) * 0.35;
+    cy += (my - cy) * 0.35;
+    const isHovering = cursorMain.classList.contains('hovering');
+    const half = isHovering ? 20 : 10;
+    cursorMain.style.transform = 'translate(' + (cx - half) + 'px, ' + (cy - half) + 'px)';
+
+    // Trails follow with increasing delay
+    trails.forEach((trail, i) => {
+      trail.x += (mx - trail.x) * (0.3 - i * 0.06);
+      trail.y += (my - trail.y) * (0.3 - i * 0.06);
+      const size = 8 - i * 1.5;
+      trail.el.style.transform = 'translate(' + (trail.x - size/2) + 'px, ' + (trail.y - size/2) + 'px)';
+    });
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// Initialize examples on load
+window.addEventListener('DOMContentLoaded', function() {
+  switchMode('fw');
+  renderHistory();
+  setupKeyboard();
+  initCursor();
+});
+
+// ===== Keyboard Shortcuts =====
+function setupKeyboard() {
+  const hintEl = document.getElementById('kbHint');
+  let hintTimer = null;
+  function showHint(text) {
+    hintEl.textContent = text;
+    hintEl.classList.add('show');
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hintEl.classList.remove('show'), 2000);
+  }
+  document.addEventListener('keydown', function(e) {
+    // Only when not typing in input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 't' || e.key === 'T') { toggleTheme(); showHint('T = 切换主题'); }
+    if (e.key === 'Escape') {
+      const activePage = document.querySelector('.page.active');
+      if (activePage.id === 'page-loading') cancelLoading();
+      else if (activePage.id === 'page-prog') showPage('home');
+      else if (activePage.id === 'page-export') showPage('prog');
+    }
+    if (e.key === 'ArrowLeft') {
+      const activePage = document.querySelector('.page.active');
+      if (activePage.id === 'page-prog' && currentLayer === 1) goToPrevModule();
+    }
+    if (e.key === 'ArrowRight') {
+      const activePage = document.querySelector('.page.active');
+      if (activePage.id === 'page-prog' && currentLayer === 1) goToNextModule();
+    }
+  });
+}
+
+// ===== Search / Generate =====
+function handleSearch() {
+  const input = document.getElementById('searchInput');
+  let val = input.value.trim();
+  if (!val) {
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 400);
+    return;
+  }
+
+  // Check if we have mock data
+  const db = currentPath === 'fw' ? MOCK.framework : MOCK.decision;
+  if (!db[val]) {
+    const keys = Object.keys(db);
+    if (keys.length > 0) val = keys[0];
+  }
+
+  currentData = db[val];
+  if (!currentData) {
+    showToast('暂无该' + (currentPath === 'fw' ? '概念' : '问题') + '的模拟数据，请使用示例词条');
+    return;
+  }
+
+  // Save to history
+  saveHistory(val, currentPath);
+  startLoading(val);
+}
+
+function startLoading(query) {
+  showPage('loading');
+  const loadText = document.getElementById('loadText');
+  const loadSub = document.getElementById('loadSub');
+  const steps = document.getElementById('loadSteps');
+
+  if (currentPath === 'fw') {
+    loadText.textContent = '正在为「' + query + '」构建认知框架';
+    loadSub.textContent = 'LLM 正在生成三层渐进结构';
+    const fwSteps = [
+      '解析概念', '生成第一层：概念核心定义',
+      '生成第二层：框架体系', '生成第三层：学习路径'
+    ];
+    steps.innerHTML = '';
+    fwSteps.forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'gen-step' + (i === 0 ? ' done' : '');
+      d.innerHTML = '<span class="step-icon">' + (i === 0 ? '✓' : '○') + '</span>' + s;
+      steps.appendChild(d);
+    });
+
+    let stepIdx = 0;
+    const progressFill = document.getElementById('progressFill');
+    loadingTimer = setInterval(() => {
+      stepIdx++;
+      if (progressFill) progressFill.style.width = (stepIdx / 4 * 100) + '%';
+      const allSteps = steps.querySelectorAll('.gen-step');
+      if (stepIdx < allSteps.length) {
+        allSteps[stepIdx - 1].className = 'gen-step done';
+        allSteps[stepIdx - 1].querySelector('.step-icon').textContent = '✓';
+        allSteps[stepIdx].className = 'gen-step active';
+        allSteps[stepIdx].querySelector('.step-icon').textContent = '▸';
+      } else {
+        allSteps[allSteps.length - 1].className = 'gen-step done';
+        allSteps[allSteps.length - 1].querySelector('.step-icon').textContent = '✓';
+        clearInterval(loadingTimer);
+        setTimeout(() => renderProgressiveView(), 600);
+      }
+    }, 800);
+  } else {
+    loadText.textContent = '正在为「' + query + '」生成决策建议';
+    loadSub.textContent = 'LLM 正在生成三层渐进结构';
+    const dcSteps = [
+      '解析问题', '生成第一层：结论与权衡',
+      '生成第二层：支撑维度', '生成第三层：行动建议'
+    ];
+    steps.innerHTML = '';
+    dcSteps.forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'gen-step' + (i === 0 ? ' done' : '');
+      d.innerHTML = '<span class="step-icon">' + (i === 0 ? '✓' : '○') + '</span>' + s;
+      steps.appendChild(d);
+    });
+
+    let dcIdx = 0;
+    const progressFill2 = document.getElementById('progressFill');
+    loadingTimer = setInterval(() => {
+      dcIdx++;
+      if (progressFill2) progressFill2.style.width = (dcIdx / 4 * 100) + '%';
+      const allSteps = steps.querySelectorAll('.gen-step');
+      if (dcIdx < allSteps.length) {
+        allSteps[dcIdx - 1].className = 'gen-step done';
+        allSteps[dcIdx - 1].querySelector('.step-icon').textContent = '✓';
+        allSteps[dcIdx].className = 'gen-step active';
+        allSteps[dcIdx].querySelector('.step-icon').textContent = '▸';
+      } else {
+        allSteps[allSteps.length - 1].className = 'gen-step done';
+        allSteps[allSteps.length - 1].querySelector('.step-icon').textContent = '✓';
+        clearInterval(loadingTimer);
+        setTimeout(() => renderProgressiveView(), 600);
+      }
+    }, 800);
+  }
+}
+
+function cancelLoading() {
+  if (loadingTimer) { clearInterval(loadingTimer); loadingTimer = null; }
+  const progressFill = document.getElementById('progressFill');
+  if (progressFill) progressFill.style.width = '0%';
+  showPage('home');
+}
+
+// ===== Progressive View =====
+function renderProgressiveView() {
+  currentLayer = 0;
+  currentModule = 0;
+  const view = document.getElementById('progView');
+  view.setAttribute('data-path', currentPath);
+  view.innerHTML = '';
+
+  // Header: breadcrumb + export
+  const header = document.createElement('div');
+  header.className = 'prog-header';
+  const crumbs = currentPath === 'fw'
+    ? ['概念', '框架体系', '学习路径']
+    : ['结论', '支撑维度', '行动建议'];
+  let bcHtml = '<div class="prog-breadcrumb">';
+  crumbs.forEach(function(c, i) {
+    if (i > 0) bcHtml += '<span class="crumb-sep">/</span>';
+    bcHtml += '<span class="crumb' + (i === 0 ? ' active' : '') + '" onclick="goToLayer(' + i + ')">' + c + '</span>';
+  });
+  bcHtml += '</div>';
+  bcHtml += '<button class="export-trigger" onclick="goToExport()">📤 导出</button>';
+  header.innerHTML = bcHtml;
+  view.appendChild(header);
+
+  // Layer bars
+  const bars = document.createElement('div');
+  bars.className = 'layer-stack';
+  bars.id = 'layerBars';
+  for (let i = 0; i < 3; i++) {
+    const b = document.createElement('div');
+    b.className = 'layer-bar' + (i === 0 ? ' current' : '');
+    bars.appendChild(b);
+  }
+  view.appendChild(bars);
+
+  // Layer contents
+  if (currentPath === 'fw') {
+    renderFrameworkLayers(view);
+  } else {
+    renderDecisionLayers(view);
+  }
+
+  showPage('prog');
+  updateModuleView();
+}
+
+function renderFrameworkLayers(view) {
+  var d = currentData;
+
+  // Layer 0: Concept
+  var l0 = document.createElement('div');
+  l0.className = 'layer-content active';
+  l0.id = 'layer0';
+  l0.innerHTML =
+    '<div class="layer-concept">' +
+      '<div class="c-tag">第一层 · 概念核心定义</div>' +
+      '<div class="c-name">' + d.concept.name + '</div>' +
+      '<div class="c-def">' + d.concept.definition + '</div>' +
+      '<div class="c-essence">本质：' + d.concept.essence + '</div>' +
+    '</div>' +
+    '<button class="enter-btn" onclick="goToLayer(1)">进入框架体系 →</button>';
+  view.appendChild(l0);
+
+  // Layer 1: System (8 modules, paginated, with SVG visuals)
+  const l1 = document.createElement('div');
+  l1.className = 'layer-content';
+  l1.id = 'layer1';
+  let dotsHtml = '';
+  for (let i = 0; i < d.system.length; i++) {
+    dotsHtml += '<span class="mod-dot' + (i === 0 ? ' active' : '') + '" onclick="goToModule(' + i + ')"></span>';
+  }
+  let cardsHtml = '';
+  d.system.forEach((m, i) => {
+    const svg = generateModuleSVG(m, d.concept.name);
+    const items = m.desc.replace(/。$/, '').split('；').filter(s => s.trim());
+    const detailHtml = items.length > 1 ? '<div class="card-detail"><div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem">详细内容</div>' + items.map(it => '<div style="padding:0.3rem 0;font-size:0.82rem;border-bottom:1px solid var(--rule)">' + esc(it.trim()) + '</div>').join('') + '</div>' : '';
+    cardsHtml += '<div class="sys-card" style="display:' + (i === 0 ? 'block' : 'none') + '" data-idx="' + i + '" onclick="toggleCardExpand(this)">' +
+      '<div class="s-num">' + m.num + '</div>' +
+      '<div class="s-name">' + m.name + '</div>' +
+      '<div class="s-desc">' + m.desc + '</div>' +
+      (svg ? '<div class="s-visual">' + svg + '</div>' : '') +
+      detailHtml +
+      '<div class="expand-hint">点击展开详情 ↓</div>' +
+    '</div>';
+  });
+  l1.innerHTML =
+    '<div class="c-tag" style="font-size:0.72rem;color:var(--muted);font-family:monospace;margin-bottom:0.8rem">第二层 · 框架体系</div>' +
+    '<div class="sub-nav">' +
+      '<div class="module-counter"><span class="cur" id="modCur">01</span> / ' + String(d.system.length).padStart(2,'0') + '</div>' +
+      '<div class="module-dots" id="modDots">' + dotsHtml + '</div>' +
+    '</div>' +
+    '<div id="sysStack">' + cardsHtml + '</div>' +
+    '<div class="sub-nav-btns">' +
+      '<button class="prev-btn" id="prevMod" onclick="goToPrevModule()" disabled>← 上一个模块</button>' +
+      '<button class="next-btn" id="nextMod" onclick="goToNextModule()">下一个模块 →</button>' +
+    '</div>' +
+    '<button class="enter-btn" id="enterPath" onclick="goToLayer(2)" style="display:none">进入学习路径 →</button>';
+  view.appendChild(l1);
+
+  // Layer 2: Learning Path
+  var l2 = document.createElement('div');
+  l2.className = 'layer-content';
+  l2.id = 'layer2';
+  var pathHtml = '';
+  d.path.forEach(function(p) {
+    pathHtml += '<div class="path-node">' +
+      '<div class="p-stage">' + p.stage + '<span class="p-time">' + p.time + '</span></div>' +
+      '<div class="p-content">' + p.content + '</div>' +
+    '</div>';
+  });
+  l2.innerHTML =
+    '<div class="c-tag" style="font-size:0.72rem;color:var(--accent);font-family:monospace;margin-bottom:0.8rem">第三层 · 学习路径</div>' +
+    '<div class="path-track">' + pathHtml + '</div>' +
+    '<button class="enter-btn" onclick="goToExport()">导出完整框架 →</button>';
+  view.appendChild(l2);
+}
+
+function renderDecisionLayers(view) {
+  var d = currentData;
+  var verdictMap = { yes:'建议进入', no:'不建议', cond:'有条件进入' };
+  var c = d.conclusion;
+
+  // Layer 0: Conclusion
+  var l0 = document.createElement('div');
+  l0.className = 'layer-content active';
+  l0.id = 'layer0';
+  l0.innerHTML =
+    '<div class="layer-conclusion">' +
+      '<div class="c-tag" style="font-size:0.72rem;color:var(--muted);font-family:monospace;margin-bottom:0.6rem">第一层 · 结论与权衡</div>' +
+      '<div class="q-text">' + c.question + '</div>' +
+      '<div class="verdict-badge ' + c.verdict + '">' + c.verdictText + '</div>' +
+      '<div class="conclusion-text">' + c.tradeoff + '</div>' +
+    '</div>' +
+    '<button class="enter-btn" onclick="goToLayer(1)">进入支撑维度 →</button>';
+  view.appendChild(l0);
+
+  // Layer 1: Dimensions (paginated)
+  const l1 = document.createElement('div');
+  l1.className = 'layer-content';
+  l1.id = 'layer1';
+  let dotsHtml = '';
+  for (let i = 0; i < d.dimensions.length; i++) {
+    dotsHtml += '<span class="mod-dot' + (i === 0 ? ' active' : '') + '" onclick="goToModule(' + i + ')"></span>';
+  }
+  let cardsHtml = '';
+  d.dimensions.forEach((m, i) => {
+    cardsHtml += '<div class="sys-card" style="display:' + (i === 0 ? 'block' : 'none') + '" data-idx="' + i + '" onclick="toggleCardExpand(this)">' +
+      '<span class="s-type ' + m.type + '">' + m.typeName + '</span>' +
+      '<div class="s-name">' + m.title + '</div>' +
+      '<div class="s-desc">' + m.detail + '</div>' +
+      '<div class="expand-hint">点击展开详情 ↓</div>' +
+    '</div>';
+  });
+  l1.innerHTML =
+    '<div class="c-tag" style="font-size:0.72rem;color:var(--muted);font-family:monospace;margin-bottom:0.8rem">第二层 · 支撑维度</div>' +
+    '<div class="sub-nav">' +
+      '<div class="module-counter"><span class="cur" id="modCur">01</span> / ' + String(d.dimensions.length).padStart(2,'0') + '</div>' +
+      '<div class="module-dots" id="modDots">' + dotsHtml + '</div>' +
+    '</div>' +
+    '<div id="sysStack">' + cardsHtml + '</div>' +
+    '<div class="sub-nav-btns">' +
+      '<button class="prev-btn" id="prevMod" onclick="goToPrevModule()" disabled>← 上一个维度</button>' +
+      '<button class="next-btn" id="nextMod" onclick="goToNextModule()">下一个维度 →</button>' +
+    '</div>' +
+    '<button class="enter-btn" id="enterPath" onclick="goToLayer(2)" style="display:none">进入行动建议 →</button>';
+  view.appendChild(l1);
+
+  // Layer 2: Actions
+  var l2 = document.createElement('div');
+  l2.className = 'layer-content';
+  l2.id = 'layer2';
+  var actionsHtml = '';
+  d.actions.forEach(function(a, i) {
+    actionsHtml += '<div class="action-item"><span class="a-num">' + (i+1) + '</span><span>' + a + '</span></div>';
+  });
+  var altsHtml = '';
+  d.alternatives.forEach(function(a) {
+    altsHtml += '<div class="alt-card"><div class="alt-title">' + a.title + '</div>' + a.desc + '</div>';
+  });
+  l2.innerHTML =
+    '<div class="c-tag" style="font-size:0.72rem;color:var(--accent2);font-family:monospace;margin-bottom:0.8rem">第三层 · 行动建议</div>' +
+    '<div class="action-section"><h4>建议行动</h4><div class="action-list">' + actionsHtml + '</div></div>' +
+    '<div class="action-section"><h4>备选方案</h4>' + altsHtml + '</div>' +
+    '<button class="enter-btn" onclick="goToExport()">导出完整建议 →</button>';
+  view.appendChild(l2);
+}
+
+// ===== Layer Navigation =====
+function goToLayer(idx) {
+  currentLayer = idx;
+  document.querySelectorAll('.layer-content').forEach((l, i) => {
+    l.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.crumb').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
+  });
+  const bars = document.querySelectorAll('.layer-bar');
+  bars.forEach(function(b, i) {
+    b.className = 'layer-bar' + (i < idx ? ' done' : (i === idx ? ' current' : ''));
+  });
+  // Reset module when entering layer 1
+  if (idx === 1) {
+    currentModule = 0;
+    setTimeout(function() { updateModuleView(); }, 0);
+  }
+  // Show Obsidian sync status when reaching the last layer (framework path only)
+  if (idx === 2 && currentPath === 'fw') {
+    showObsidianComplete();
+  } else {
+    hideObsidianPanel();
+  }
+  window.scrollTo(0, 0);
+}
+
+// ===== Module Navigation =====
+function goToModule(idx) {
+  currentModule = idx;
+  updateModuleView();
+}
+function goToPrevModule() {
+  if (currentModule > 0) {
+    currentModule--;
+    updateModuleView();
+  }
+}
+function goToNextModule() {
+  var total = getTotalModules();
+  if (currentModule < total - 1) {
+    currentModule++;
+    updateModuleView();
+  }
+}
+function getTotalModules() {
+  const stack = document.getElementById('sysStack');
+  if (!stack) return 0;
+  return stack.querySelectorAll('.sys-card').length;
+}
+function updateModuleView() {
+  const stack = document.getElementById('sysStack');
+  if (!stack) { return; }
+  const cards = stack.querySelectorAll('.sys-card');
+  const total = cards.length;
+  if (total === 0) { return; }
+  if (currentModule < 0) currentModule = 0;
+  if (currentModule > total - 1) currentModule = total - 1;
+
+  for (let i = 0; i < cards.length; i++) {
+    cards[i].style.display = (i === currentModule) ? 'block' : 'none';
+  }
+
+  const dots = document.querySelectorAll('#modDots .mod-dot');
+  for (let j = 0; j < dots.length; j++) {
+    dots[j].className = 'mod-dot' + (j === currentModule ? ' active' : (j < currentModule ? ' done' : ''));
+  }
+
+  const modCurEl = document.getElementById('modCur');
+  if (modCurEl) modCurEl.textContent = String(currentModule + 1).padStart(2, '0');
+
+  const prevBtn = document.getElementById('prevMod');
+  if (prevBtn) prevBtn.disabled = (currentModule === 0);
+
+  const nextBtn = document.getElementById('nextMod');
+  if (nextBtn) {
+    if (currentModule === total - 1) {
+      nextBtn.style.display = 'none';
+    } else {
+      nextBtn.style.display = '';
+      nextBtn.disabled = false;
+    }
+  }
+
+  const enterBtn = document.getElementById('enterPath');
+  if (enterBtn) enterBtn.style.display = (currentModule === total - 1) ? '' : 'none';
+}
+
+// ===== SVG Module Visual Generator =====
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function parseItems(desc, sep) { return desc.replace(/。$/,'').split(sep || '；').map(function(s){return s.trim();}).filter(function(s){return s;}); }
+
+// ===== Unified Layout Grid Model =====
+var G = {
+  W: 520, H: 220,
+  MARGIN: 10, GAP: 8,
+  col: function(i) { return 10 + i * 128; },
+  row: function(j) { return 8 + j * 36; },
+  cx: 260, cy: 110,
+  CARD_W: 118, CARD_H: 34,
+  PILL_W: 118, PILL_H: 28,
+  SM_W: 80, SM_H: 26,
+  COL: ['var(--accent-soft)','var(--accent2-soft)','var(--green-soft)','var(--orange-soft)','var(--red-soft)'],
+  BDR: ['var(--accent)','var(--accent2)','var(--green)','var(--orange)','var(--accent2)'],
+  accent: function(i) { return this.COL[i % this.COL.length]; },
+  border: function(i) { return this.BDR[i % this.BDR.length]; },
+  pill: function(x, y, w, h, text, fontSize, fill, extra) {
+    var r = '<rect class="pill" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6"' + (extra||'') + '/>';
+    r += '<text class="pill-text" x="' + (x + w/2) + '" y="' + (y + h/2 + 1) + '" font-size="' + (fontSize||9) + '"' + (fill ? ' fill="' + fill + '"' : '') + '>' + text + '</text>';
+    return r;
+  },
+  node: function(x, y, w, h, text, fill, extra) {
+    var r = '<rect class="node-rect" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6"' + (extra||'') + '/>';
+    r += '<text class="node-text" x="' + (x + w/2) + '" y="' + (y + h/2 + 1) + '">' + text + '</text>';
+    return r;
+  },
+  line: function(x1, y1, x2, y2, cls, extra) {
+    return '<line class="' + (cls||'conn-line') + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"' + (extra||'') + '/>';
+  },
+  trunc: function(s, n) { return String(s).substring(0, n); }
+};
+
+function generateModuleSVG(m, conceptName) {
+  var num = parseInt(m.num);
+  var svg = '', W = G.W, H = G.H;
+
+  switch (num) {
+    case 1: // 领域分类 → Horizontal Tree (grid-aligned)
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        G.node(G.MARGIN, G.row(2)-4, 70, 34, G.trunc(conceptName, 4)) +
+        G.line(80, G.row(2)+13, G.col(1)-8, G.row(0)+13) +
+        G.line(80, G.row(2)+13, G.col(1)-8, G.row(2)+13) +
+        G.line(80, G.row(2)+13, G.col(1)-8, G.row(4)+13) +
+        G.pill(G.col(1)-8, G.row(0)+3, 80, 26, '纯粹数学', 10) +
+        G.pill(G.col(1)-8, G.row(2)+3, 80, 26, '应用数学', 10) +
+        G.pill(G.col(1)-8, G.row(4)+3, 80, 26, '交叉学科', 10) +
+        G.line(G.col(1)+72, G.row(0)+16, G.col(2)-8, G.row(0)+3) +
+        G.line(G.col(1)+72, G.row(0)+16, G.col(2)-8, G.row(1)+3) +
+        G.line(G.col(1)+72, G.row(0)+16, G.col(2)-8, G.row(1)+21) +
+        G.line(G.col(1)+72, G.row(2)+16, G.col(2)-8, G.row(2)+3) +
+        G.line(G.col(1)+72, G.row(2)+16, G.col(2)-8, G.row(2)+21) +
+        G.line(G.col(1)+72, G.row(4)+16, G.col(2)-8, G.row(3)+21) +
+        G.line(G.col(1)+72, G.row(4)+16, G.col(2)-8, G.row(4)+21) +
+        G.pill(G.col(2)-8, G.row(0), 68, 20, '代数', 8) +
+        G.pill(G.col(2)-8, G.row(1), 68, 20, '几何', 8) +
+        G.pill(G.col(2)-8, G.row(1)+18, 68, 20, '分析', 8) +
+        G.pill(G.col(2)-8, G.row(2), 68, 20, '概率统计', 8) +
+        G.pill(G.col(2)-8, G.row(2)+18, 68, 20, '计算数学', 8) +
+        G.pill(G.col(2)-8, G.row(3)+18, 68, 20, '数理金融', 8) +
+        G.pill(G.col(2)-8, G.row(4)+18, 68, 20, '生物数学', 8) +
+        G.line(G.col(2)+60, G.row(0)+10, G.col(3)-8, G.row(0)+10) +
+        G.line(G.col(2)+60, G.row(1)+10, G.col(3)-8, G.row(1)+10) +
+        G.line(G.col(2)+60, G.row(1)+28, G.col(3)-8, G.row(1)+28) +
+        G.line(G.col(2)+60, G.row(2)+10, G.col(3)-8, G.row(2)+10) +
+        G.line(G.col(2)+60, G.row(2)+28, G.col(3)-8, G.row(2)+28) +
+        G.line(G.col(2)+60, G.row(3)+28, G.col(3)-8, G.row(3)+28) +
+        G.line(G.col(2)+60, G.row(4)+28, G.col(3)-8, G.row(4)+28) +
+        G.pill(G.col(3), G.row(0)-2, 110, 20, '群·环·域', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(1)-2, 110, 20, '流形·拓扑', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(1)+16, 110, 20, '微分方程', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(2)-2, 110, 20, '随机过程', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(2)+16, 110, 20, '数值分析', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(3)+16, 110, 20, '期权定价', 8, 'var(--muted)') +
+        G.pill(G.col(3), G.row(4)+16, 110, 20, '种群动力学', 8, 'var(--muted)') +
+      '</svg>';
+      break;
+
+    case 2: // 发展脉络 → Vertical Timeline
+      var TL = {
+        eras: [
+          {y:16, cy:30, side:'left',  x:15,  w:155, tx:92,  title:'古代',    desc:'算术·几何 | 毕达哥拉斯'},
+          {y:52, cy:66, side:'right', x:345, w:160, tx:425, title:'17-18C',  desc:'微积分 | 牛顿·莱布尼茨'},
+          {y:88, cy:102, side:'left', x:15,  w:155, tx:92,  title:'19C',     desc:'公理化 | 康托尔·希尔伯特'},
+          {y:124, cy:138, side:'right', x:345, w:160, tx:425, title:'20C',  desc:'抽象代数 | 诺特·伽罗瓦'},
+          {y:160, cy:174, side:'left', x:15,  w:155, tx:92,  title:'21C',     desc:'计算·AI | 形式化验证'}
+        ],
+        band: [
+          {x:20, w:86, label:'经验数学', c:'accent'},
+          {x:116, w:86, label:'分析时代', c:'accent'},
+          {x:212, w:86, label:'公理重构', c:'accent'},
+          {x:308, w:86, label:'结构数学', c:'accent'},
+          {x:404, w:86, label:'计算时代', c:'accent2'}
+        ]
+      };
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><marker id="tl-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/></marker></defs>' +
+        '<line class="timeline-line" x1="' + G.cx + '" y1="16" x2="' + G.cx + '" y2="186" marker-end="url(#tl-arrow)"/>';
+      TL.eras.forEach(function(e) {
+        var connX = e.side === 'left' ? 175 : 345;
+        svg += '<circle class="timeline-dot" cx="' + G.cx + '" cy="' + e.cy + '" r="8"/>';
+        svg += G.line(G.cx, e.cy, connX, e.cy);
+        svg += '<rect class="pill" x="' + e.x + '" y="' + e.y + '" width="' + e.w + '" height="28" rx="6"/>';
+        svg += '<text class="pill-text" x="' + e.tx + '" y="' + (e.y + 11) + '" font-size="9" font-weight="700">' + e.title + '</text>';
+        svg += '<text x="' + e.tx + '" y="' + (e.y + 23) + '" text-anchor="middle" font-size="7" fill="var(--muted)">' + e.desc + '</text>';
+      });
+      TL.band.forEach(function(b, i) {
+        var fill = b.c === 'accent2' ? 'var(--accent2-soft)' : 'var(--accent-soft)';
+        var stroke = b.c === 'accent2' ? 'var(--accent2)' : 'var(--accent)';
+        svg += '<rect x="' + b.x + '" y="198" width="' + b.w + '" height="18" rx="3" fill="' + fill + '" stroke="' + stroke + '" stroke-width="0.5"/>';
+        svg += '<text x="' + (b.x + b.w/2) + '" y="209" text-anchor="middle" font-size="7" fill="' + stroke + '">' + b.label + '</text>';
+        if (i < TL.band.length - 1) {
+          svg += '<text x="' + (b.x + b.w + 8) + '" y="209" text-anchor="middle" font-size="10" fill="var(--rule)">→</text>';
+        }
+      });
+      svg += '</svg>';
+      break;
+
+    case 3: // 底层原理 → Flow diagram
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><marker id="fl-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/></marker></defs>' +
+        G.node(20, 60, 100, 34, '公理体系') +
+        G.line(120, 77, 165, 77, null, ' marker-end="url(#fl-arrow)"') +
+        G.node(170, 60, 100, 34, '逻辑推理') +
+        G.line(270, 77, 315, 77, null, ' marker-end="url(#fl-arrow)"') +
+        G.node(320, 60, 100, 34, '定理') +
+        G.line(420, 77, 465, 77, null, ' marker-end="url(#fl-arrow)"') +
+        G.node(430, 60, 80, 34, '体系') +
+        G.line(70, 94, 70, 120) +
+        G.pill(14, 120, 112, 28, '不证自明', 9) +
+        G.line(220, 94, 220, 120) +
+        G.pill(164, 120, 112, 28, '严格演绎', 9) +
+        G.line(370, 94, 370, 120) +
+        G.pill(314, 120, 112, 28, '可验证', 9) +
+        G.line(470, 94, 470, 120) +
+        G.pill(414, 120, 96, 28, '自洽完备', 9) +
+        '<path class="conn-line" d="M470 94 Q470 170 260 170 Q70 170 70 94" stroke-dasharray="3,3" marker-end="url(#fl-arrow)"/>' +
+        '<text x="260" y="186" text-anchor="middle" font-size="8" fill="var(--muted)">反馈验证：定理反哺公理体系</text>' +
+        '<rect x="170" y="10" width="260" height="28" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="0.5"/>' +
+        '<text x="300" y="24" text-anchor="middle" font-size="9" fill="var(--green)" font-weight="600">核心特征：从少数公理出发 → 严格演绎 → 完整体系</text>' +
+      '</svg>';
+      break;
+
+    case 4: // 最新前沿 → Mind map / radial
+      var fronts = parseItems(m.desc, '；');
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><radialGradient id="centerGlow"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></radialGradient></defs>' +
+        '<circle cx="' + G.cx + '" cy="' + G.cy + '" r="80" fill="url(#centerGlow)"/>' +
+        '<circle cx="' + G.cx + '" cy="' + G.cy + '" r="28" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>' +
+        '<text x="' + G.cx + '" y="107" text-anchor="middle" dominant-baseline="middle" fill="var(--accent)" font-size="9" font-weight="700">' + G.trunc(conceptName, 4) + '</text>' +
+        '<text x="' + G.cx + '" y="119" text-anchor="middle" dominant-baseline="middle" fill="var(--accent)" font-size="7">前沿</text>';
+      var pos4 = [
+        {x:30,y:14,w:120,h:32,cx:90,cy:30}, {x:370,y:14,w:130,h:32,cx:435,cy:30},
+        {x:10,y:60,w:110,h:32,cx:65,cy:76}, {x:400,y:60,w:110,h:32,cx:455,cy:76},
+        {x:10,y:130,w:110,h:32,cx:65,cy:146}, {x:400,y:130,w:110,h:32,cx:455,cy:146},
+        {x:30,y:178,w:120,h:32,cx:90,cy:194}, {x:370,y:178,w:130,h:32,cx:435,cy:194}
+      ];
+      for (var fi = 0; fi < Math.min(fronts.length, pos4.length); fi++) {
+        var fp = pos4[fi];
+        var label = fronts[fi].split('：')[0];
+        var detail = fronts[fi].indexOf('：') >= 0 ? fronts[fi].split('：')[1] : '';
+        svg += G.line(G.cx, G.cy, fp.cx, fp.cy);
+        svg += '<rect class="frontier-node" x="' + fp.x + '" y="' + fp.y + '" width="' + fp.w + '" height="' + fp.h + '" rx="6"/>';
+        svg += '<text class="frontier-text" x="' + fp.cx + '" y="' + (fp.cy - 4) + '">' + esc(G.trunc(label, 10)) + '</text>';
+        if (detail) svg += '<text x="' + fp.cx + '" y="' + (fp.cy + 8) + '" text-anchor="middle" font-size="7" fill="var(--muted)">' + esc(G.trunc(detail, 12)) + '</text>';
+      }
+      svg += '</svg>';
+      break;
+
+    case 5: // 核心难题 → Challenge grid
+      var challenges = parseItems(m.desc, '；');
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+      var grid5 = [
+        {x:10,y:8, col:0}, {x:270,y:8, col:1},
+        {x:10,y:80, col:2}, {x:270,y:80, col:3},
+        {x:10,y:152, col:0}, {x:270,y:152, col:1}
+      ];
+      for (var ci = 0; ci < Math.min(challenges.length, grid5.length); ci++) {
+        var gp = grid5[ci];
+        var parts = challenges[ci].split('：');
+        var title = parts[0];
+        var detail = parts[1] || '';
+        var isMillennium = challenges[ci].indexOf('千禧年') >= 0;
+        var fillCol = G.accent(ci), bdrCol = G.border(ci);
+        svg += '<rect x="' + gp.x + '" y="' + gp.y + '" width="240" height="62" rx="8" fill="' + fillCol + '" stroke="' + bdrCol + '" stroke-width="1"/>';
+        svg += '<circle cx="' + (gp.x + 20) + '" cy="' + (gp.y + 20) + '" r="12" fill="' + bdrCol + '"/>';
+        svg += '<text x="' + (gp.x + 20) + '" y="' + (gp.y + 23) + '" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="11" font-weight="700">' + (ci+1) + '</text>';
+        svg += '<text x="' + (gp.x + 40) + '" y="' + (gp.y + 18) + '" fill="var(--ink)" font-size="10" font-weight="700">' + esc(G.trunc(title, 12)) + '</text>';
+        if (isMillennium) {
+          svg += '<rect x="' + (gp.x + 175) + '" y="' + (gp.y + 10) + '" width="55" height="16" rx="3" fill="var(--accent2)"/>';
+          svg += '<text x="' + (gp.x + 202) + '" y="' + (gp.y + 21) + '" text-anchor="middle" font-size="7" fill="white" font-weight="600">$1M</text>';
+        }
+        svg += '<text x="' + (gp.x + 40) + '" y="' + (gp.y + 38) + '" fill="var(--muted)" font-size="8">' + esc(G.trunc(detail, 22)) + '</text>';
+        svg += '<text x="' + (gp.x + 40) + '" y="' + (gp.y + 52) + '" fill="var(--muted)" font-size="7">' + (isMillennium ? '★ 千禧年大奖难题' : '○ 开放问题') + '</text>';
+      }
+      svg += '</svg>';
+      break;
+
+    case 6: // 关键概念索引 → Tag cloud (grid-aligned)
+      var rawTags = m.desc.replace(/。$/,'').split(/[、，,]/);
+      var tags6 = [];
+      rawTags.forEach(function(t) {
+        var clean = t.replace(/[（(][^）)]*[）)]/g,'').trim();
+        if (!clean) return;
+        var parts = clean.split(/[/／]/);
+        parts.forEach(function(p) {
+          p = p.trim();
+          if (p && p.length <= 10 && tags6.indexOf(p) < 0) tags6.push(p);
+        });
+      });
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+      for (var ti6 = 0; ti6 < Math.min(tags6.length, 20); ti6++) {
+        var col = ti6 % 4, row = Math.floor(ti6 / 4);
+        var tx = G.col(col) + 2, ty = G.row(row) + 2;
+        var tag = G.trunc(tags6[ti6], 8);
+        var tw = 120, th = 32;
+        var fs = tag.length > 5 ? 8 : 9;
+        var opacity = 0.65 + (ti6 % 3) * 0.1;
+        svg += '<rect class="tag-rect" x="' + tx + '" y="' + ty + '" width="' + tw + '" height="' + th + '" rx="4" opacity="' + opacity + '"/>';
+        svg += '<text class="tag-text" x="' + (tx + tw/2) + '" y="' + (ty + th/2 + 1) + '" font-size="' + fs + '">' + esc(tag) + '</text>';
+      }
+      svg += '</svg>';
+      break;
+
+    case 7: // 领域交叉 → Venn diagram (3 circles)
+      var crossItems = m.desc.replace(/。$/,'').split(/[、，,]/);
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<circle class="venn-a" cx="170" cy="95" r="75"/>' +
+        '<circle class="venn-b" cx="350" cy="95" r="75"/>' +
+        '<circle cx="' + G.cx + '" cy="160" r="55" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5" opacity="0.7"/>' +
+        '<text class="venn-text" x="115" y="55" font-weight="700" font-size="10">' + G.trunc(conceptName, 4) + '</text>' +
+        '<text class="venn-text" x="380" y="55" font-weight="700" font-size="10">其他学科</text>' +
+        '<text x="' + G.cx + '" y="178" text-anchor="middle" font-size="9" fill="var(--green)" font-weight="700">应用领域</text>' +
+        '<text class="venn-text" x="' + G.cx + '" y="82" font-size="8" fill="var(--accent2)" font-weight="600">交叉领域</text>';
+      for (var vi = 0; vi < Math.min(crossItems.length, 3); vi++) {
+        var vItem = crossItems[vi].trim().replace(/[（(][^）)]*[）)]/g,'');
+        var vy = 96 + vi * 13;
+        svg += '<text class="venn-text" x="' + G.cx + '" y="' + vy + '" font-size="7" fill="var(--muted)">' + esc(G.trunc(vItem, 8)) + '</text>';
+      }
+      svg += '<text class="venn-text" x="105" y="95" font-size="7" fill="var(--accent)">理论核心</text>' +
+        '<text class="venn-text" x="105" y="108" font-size="7" fill="var(--accent)">公理方法</text>' +
+        '<text class="venn-text" x="105" y="121" font-size="7" fill="var(--accent)">严格证明</text>' +
+        '<text class="venn-text" x="385" y="95" font-size="7" fill="var(--accent2)">实验方法</text>' +
+        '<text class="venn-text" x="385" y="108" font-size="7" fill="var(--accent2)">数据驱动</text>' +
+        '<text class="venn-text" x="385" y="121" font-size="7" fill="var(--accent2)">经验验证</text>';
+      svg += '</svg>';
+      break;
+
+    case 8: // 实用价值映射 → Mapping arrows
+      var apps8 = m.desc.replace(/。$/,'').split(/[、，,]/);
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><marker id="map-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/></marker></defs>' +
+        '<rect class="mapping-from" x="14" y="85" width="90" height="40" rx="6"/>' +
+        '<text class="mapping-text" x="59" y="101" font-size="9" font-weight="700">' + G.trunc(conceptName, 4) + '</text>' +
+        '<text x="59" y="114" text-anchor="middle" font-size="7" fill="var(--accent)">核心理论</text>';
+      var ap8 = [
+        {x:160,y:14},{x:320,y:14},{x:160,y:65},{x:320,y:65},
+        {x:160,y:116},{x:320,y:116},{x:160,y:167},{x:320,y:167}
+      ];
+      for (var ai8 = 0; ai8 < Math.min(apps8.length, ap8.length); ai8++) {
+        var p = ap8[ai8];
+        var appText = apps8[ai8].trim().replace(/——.*/,'');
+        var sx = 104, sy = 105, ex = p.x, ey = p.y + 17;
+        svg += '<path class="mapping-arrow" d="M' + sx + ' ' + sy + ' C' + (sx+30) + ' ' + sy + ' ' + (ex-30) + ' ' + ey + ' ' + ex + ' ' + ey + '"/>';
+        svg += '<rect class="mapping-to" x="' + p.x + '" y="' + p.y + '" width="150" height="34" rx="5"/>';
+        svg += '<text class="mapping-text" x="' + (p.x + 75) + '" y="' + (p.y + 15) + '">' + esc(G.trunc(appText, 14)) + '</text>';
+        svg += '<text x="' + (p.x + 130) + '" y="' + (p.y + 28) + '" text-anchor="middle" font-size="7" fill="var(--accent2)">' + ['★★★','★★','★'][ai8 % 3] + '</text>';
+      }
+      svg += '<text x="' + G.cx + '" y="210" text-anchor="middle" font-size="8" fill="var(--muted)">' + esc(conceptName) + '是现代文明的隐性基础设施</text>';
+      svg += '</svg>';
+      break;
+
+    case 9: // 常见误区 → Warning icons with corrections
+      var miscs = parseItems(m.desc, '；');
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<defs><radialGradient id="warn-grad"><stop offset="0%" stop-color="var(--accent2)" stop-opacity="0.1"/><stop offset="100%" stop-color="var(--accent2)" stop-opacity="0"/></radialGradient></defs>' +
+        '<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="8" fill="url(#warn-grad)"/>';
+      var pos9 = [{x:10,y:10},{x:180,y:75},{x:10,y:140},{x:180,y:195}];
+      for (var mi = 0; mi < Math.min(miscs.length, pos9.length); mi++) {
+        var parts = miscs[mi].split('。')[0];
+        var title = parts.split('：')[0];
+        var detail = parts.split('：')[1] || '';
+        var p9 = pos9[mi];
+        svg += '<rect x="' + p9.x + '" y="' + p9.y + '" width="160" height="50" rx="6" fill="var(--red-soft)" stroke="#ef4444" stroke-width="1"/>';
+        svg += '<text x="' + (p9.x+14) + '" y="' + (p9.y+24) + '" font-size="14">⚠️</text>';
+        svg += '<text x="' + (p9.x+34) + '" y="' + (p9.y+18) + '" fill="var(--ink)" font-size="9" font-weight="700">' + esc(G.trunc(title, 12)) + '</text>';
+        svg += '<text x="' + (p9.x+34) + '" y="' + (p9.y+34) + '" fill="var(--muted)" font-size="7">' + esc(G.trunc(detail, 20)) + '</text>';
+      }
+      svg += '<text x="' + G.cx + '" y="' + (H-8) + '" text-anchor="middle" font-size="7" fill="var(--muted)">不要重复别人的认知陷阱——起步前先看路标</text>';
+      svg += '</svg>';
+      break;
+
+    case 10: // 工具箱 → Resource grid
+      var rawResources = m.desc.split('；');
+      var resources = [];
+      rawResources.forEach(function(r) {
+        var parts = r.trim().split('：');
+        if (parts.length >= 2) {
+          resources.push({cat: parts[0].replace(/^入门书|^经典著作|^在线课程|^工具|^社群|^实践项目|^.+?(?=：)/g,function(m){return m;}), name: parts[1].replace(/适合.*/,'').replace(/。/g,'').trim(), note: r});
+        }
+      });
+      svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+      var t10pos = [
+        {x:10,y:10,c:'入门'},{x:175,y:10,c:'经典'},
+        {x:340,y:10,c:'课程'},{x:10,y:80,c:'工具'},
+        {x:175,y:80,c:'社群'},{x:340,y:80,c:'实践'}
+      ];
+      for (var ri = 0; ri < t10pos.length; ri++) {
+        var tp = t10pos[ri];
+        svg += '<rect x="' + tp.x + '" y="' + tp.y + '" width="160" height="28" rx="5" fill="' + G.accent(ri) + '" stroke="' + G.border(ri) + '" stroke-width="1"/>';
+        svg += '<text x="' + (tp.x + 80) + '" y="' + (tp.y + 18) + '" text-anchor="middle" font-size="8" font-weight="600" fill="var(--ink)">' + G.trunc(tp.c, 10) + '</text>';
+      }
+      // Show some resource names
+      var shownRes = [];
+      rawResources.forEach(function(r) {
+        var parts = r.trim().split('：');
+        if (parts.length >= 2) {
+          var name = parts[1].split('适合')[0].split('。')[0].trim().substring(0, 12);
+          shownRes.push(name);
+        }
+      });
+      var rp = [
+        {x:10,y:42},{x:175,y:42},{x:340,y:42},
+        {x:10,y:112},{x:175,y:112},{x:340,y:112}
+      ];
+      for (var si = 0; si < Math.min(shownRes.length, rp.length); si++) {
+        svg += '<text x="' + (rp[si].x + 80) + '" y="' + (rp[si].y + 8) + '" text-anchor="middle" font-size="7" fill="var(--muted)">' + esc(shownRes[si]) + '</text>';
+      }
+      svg += '<text x="' + G.cx + '" y="' + (H-6) + '" text-anchor="middle" font-size="7" fill="var(--muted)">选对工具，看对书，走对路</text>';
+      svg += '</svg>';
+      break;
+
+    default:
+      svg = '';
+      break;
+  }
+  return svg;
+}
+
+// ===== Export =====
+function goToExport() {
+  exportScope = 'all';
+  document.querySelectorAll('.scope-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.scope === 'all');
+  });
+  showPage('export');
+}
+
+function setScope(scope) {
+  exportScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.scope === scope);
+  });
+}
+
+function doExport(format) {
+  let content, filename, mime;
+  const name = currentPath === 'fw' ? currentData.concept.name : currentData.conclusion.question;
+
+  if (format === 'md') {
+    content = generateMarkdown(name);
+    filename = name + '.md';
+    mime = 'text/markdown';
+  } else {
+    content = JSON.stringify(generateJSON(name), null, 2);
+    filename = name + '.json';
+    mime = 'application/json';
+  }
+
+  var blob = new Blob([content], { type: mime + ';charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('已导出 ' + filename);
+}
+
+function generateMarkdown(name) {
+  let md = '# ' + name + '\n\n';
+  if (currentPath === 'fw') {
+    const d = currentData;
+    const includeAll = exportScope === 'all';
+    if (includeAll || currentLayer === 0) {
+      md += '## 概念核心定义\n\n';
+      md += '**' + d.concept.name + '**\n\n';
+      md += d.concept.definition + '\n\n';
+      md += '> 本质：' + d.concept.essence + '\n\n';
+    }
+    if (includeAll || currentLayer === 1) {
+      md += '## 框架体系\n\n';
+      d.system.forEach(m => {
+        md += '### ' + m.num + ' ' + m.name + '\n\n' + m.desc + '\n\n';
+      });
+    }
+    if (includeAll || currentLayer === 2) {
+      md += '## 学习路径\n\n';
+      d.path.forEach(p => {
+        md += '### ' + p.stage + '（' + p.time + '）\n\n' + p.content + '\n\n';
+      });
+    }
+  } else {
+    const d = currentData;
+    const includeAll = exportScope === 'all';
+    if (includeAll || currentLayer === 0) {
+      md += '## 结论与权衡\n\n';
+      md += '**问题：** ' + d.conclusion.question + '\n\n';
+      md += '**结论：** ' + d.conclusion.verdictText + '\n\n';
+      md += d.conclusion.tradeoff + '\n\n';
+    }
+    if (includeAll || currentLayer === 1) {
+      md += '## 支撑维度\n\n';
+      d.dimensions.forEach((m, i) => {
+        md += '### ' + (i+1) + '. [' + m.typeName + '] ' + m.title + '\n\n' + m.detail + '\n\n';
+      });
+    }
+    if (includeAll || currentLayer === 2) {
+      md += '## 行动建议\n\n';
+      d.actions.forEach((a, i) => {
+        md += (i+1) + '. ' + a + '\n';
+      });
+      md += '\n### 备选方案\n\n';
+      d.alternatives.forEach(a => {
+        md += '- **' + a.title + '**：' + a.desc + '\n';
+      });
+    }
+  }
+  md += '\n---\n*由元框架引擎生成 · ' + new Date().toLocaleDateString('zh-CN') + ' · AI 生成，供参考*\n';
+  return md;
+}
+
+function generateJSON(name) {
+  if (exportScope === 'current') {
+    if (currentPath === 'fw') {
+      if (currentLayer === 0) return { layer: 0, type: 'concept', data: currentData.concept };
+      if (currentLayer === 1) return { layer: 1, type: 'system', data: currentData.system };
+      if (currentLayer === 2) return { layer: 2, type: 'path', data: currentData.path };
+    } else {
+      if (currentLayer === 0) return { layer: 0, type: 'conclusion', data: currentData.conclusion };
+      if (currentLayer === 1) return { layer: 1, type: 'dimensions', data: currentData.dimensions };
+      if (currentLayer === 2) return { layer: 2, type: 'actions', data: { actions: currentData.actions, alternatives: currentData.alternatives } };
+    }
+  }
+  return { type: currentPath === 'fw' ? 'framework' : 'decision', query: name, data: currentData, generatedAt: new Date().toISOString() };
+}
+
+// ===== Obsidian Panel (shown on last layer only) =====
+function showObsidianComplete() {
+  if (!currentData || currentPath !== 'fw') return;
+  const panel = document.getElementById('obsPanel');
+  const body = document.getElementById('obsBody');
+  const d = currentData;
+
+  panel.style.display = '';
+  panel.classList.remove('collapsed');
+  document.getElementById('obsToggle').textContent = '▲';
+  document.getElementById('obsStatus').textContent = '已同步完成';
+
+  const sysSummary = d.system.slice(0, 4).map(m => '• ' + m.name).join('<br>');
+  const pathSummary = d.path.map(p => '• ' + p.stage + '（' + p.time + '）').join('<br>');
+
+  body.innerHTML =
+    '<div class="obs-note-title">📓 ' + d.concept.name + '.md</div>' +
+    '<div class="obs-section">' +
+      '<div class="obs-section-title">第一层 · 概念核心定义</div>' +
+      '<div class="obs-section-content"><strong>' + d.concept.name + '</strong><br>' + d.concept.definition.substring(0, 100) + '...</div>' +
+    '</div>' +
+    '<div class="obs-section">' +
+      '<div class="obs-section-title">第二层 · 框架体系（10 模块）</div>' +
+      '<div class="obs-section-content">' + sysSummary + '<br>• ...</div>' +
+    '</div>' +
+    '<div class="obs-section">' +
+      '<div class="obs-section-title">第三层 · 学习路径</div>' +
+      '<div class="obs-section-content">' + pathSummary + '</div>' +
+    '</div>';
+
+  showToast('📓 Obsidian 笔记已同步完成');
+}
+
+function hideObsidianPanel() {
+  var panel = document.getElementById('obsPanel');
+  panel.style.display = 'none';
+}
+
+function toggleObsPanel() {
+  var panel = document.getElementById('obsPanel');
+  panel.classList.toggle('collapsed');
+  document.getElementById('obsToggle').textContent = panel.classList.contains('collapsed') ? '▼' : '▲';
+}
+
+// ===== Toast =====
+
+// ===== History Management =====
+const HISTORY_KEY = '元框架引擎_history';
+const MAX_HISTORY = 20;
+
+function saveHistory(query, mode) {
+  try {
+    let list = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    // Remove duplicate
+    list = list.filter(item => !(item.query === query && item.mode === mode));
+    list.unshift({ query, mode, time: Date.now() });
+    if (list.length > MAX_HISTORY) list = list.slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    renderHistory();
+  } catch(e) {}
+}
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch(e) { return []; }
+}
+
+function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  showToast('历史记录已清空');
+}
+
+function renderHistory() {
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  const items = getHistory();
+  if (!items.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  const modeLabels = { fw: '框架', dc: '决策' };
+  list.innerHTML = items.map(item => {
+    const date = new Date(item.time);
+    const timeStr = (date.getMonth()+1) + '/' + date.getDate() + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
+    return '<div class="history-item" onclick="loadFromHistory(&quot;' + item.query + '&quot;,&quot;' + item.mode + '&quot;)">' +
+      '<span class="h-name">' + esc(item.query) + '</span>' +
+      '<span class="h-meta">' +
+        '<span class="h-mode ' + item.mode + '">' + modeLabels[item.mode] + '</span>' +
+        '<span>' + timeStr + '</span>' +
+      '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function loadFromHistory(query, mode) {
+  switchMode(mode);
+  document.getElementById('searchInput').value = query;
+  handleSearch();
+}
+
+
+// ===== Card Expansion =====
+function toggleCardExpand(card) {
+  const wasExpanded = card.classList.contains('expanded');
+  // Close all other cards
+  document.querySelectorAll('.sys-card.expanded').forEach(c => {
+    if (c !== card) c.classList.remove('expanded');
+  });
+  // Toggle current
+  card.classList.toggle('expanded', !wasExpanded);
+}
+var toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+
+  <div class="svg-tooltip" id="svgTooltip"></div>
+  <div class="kb-hint" id="kbHint"></div>
+</body>
+</html>

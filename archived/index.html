@@ -343,28 +343,6 @@ body.reader-open #app { display: none; }
 }
 .reader-dot.active { background: var(--accent); }
 .reader-dot.done { background: var(--accent); opacity: 0.35; }
-/* 渐进生成态：已生成未核对 */
-.reader-dot.gen { background: var(--rule); }
-/* 渐进生成态：已生成、核对中 */
-.reader-dot.ver { background: var(--accent2); opacity: 0.5; animation: dotpulse 1.1s ease-in-out infinite; }
-/* 渐进生成态：已核对待揭示（缓冲） */
-.reader-dot.ready { background: var(--accent); opacity: 0.65; }
-@keyframes dotpulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.8; } }
-
-/* 阅读器内细进度条：生成 + 核对合并 */
-.reader-genbar {
-  position: relative; width: 100%; height: 3px; border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 10%, transparent); overflow: hidden;
-}
-.reader-genfill {
-  position: absolute; left: 0; top: 0; height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 2px; transition: width 0.4s ease;
-}
-.reader-gentext {
-  position: absolute; right: 0; top: 5px; font-size: 0.62rem; color: var(--muted);
-  letter-spacing: 0.02em; white-space: nowrap; pointer-events: none;
-}
 .reader-capsule {
   padding: 0.28rem 0.7rem; border-radius: 999px;
   border: 1px solid var(--rule);
@@ -484,10 +462,6 @@ body.reader-open #app { display: none; }
 .module-expand button:hover { background: var(--accent-soft); }
 @keyframes cardFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .module-content p { margin-bottom: 0.6rem; }
-/* 标签-内容行布局：标签不换行，内容区换行后与首行内容对齐 */
-.mod-row { display: flex; align-items: flex-start; gap: 0.4em; margin-bottom: 0.6rem; }
-.mod-label { flex-shrink: 0; font-weight: 600; }
-.mod-val { flex: 1; min-width: 0; }
 .module-content ul, .module-content ol { margin-left: 1.2rem; margin-bottom: 0.6rem; }
 .module-content li { margin-bottom: 0.3rem; }
 .module-content code {
@@ -759,8 +733,8 @@ body.reader-open #app { display: none; }
 .viz-card-pro::after { content: '★'; position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.9rem; color: var(--accent); }
 .card-phase-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; }
 .card-phase-duration { font-size: 0.75rem; color: var(--accent); font-weight: 500; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em; }
-.card-phase-item { display: flex; align-items: flex-start; gap: 0.35em; font-size: 0.82rem; line-height: 1.55; margin-bottom: 0.3rem; }
-.card-phase-label { flex-shrink: 0; font-weight: 600; color: var(--ink); }
+.card-phase-item { font-size: 0.82rem; line-height: 1.55; margin-bottom: 0.3rem; }
+.card-phase-label { font-weight: 600; color: var(--ink); }
 .card-phase-text { color: var(--muted); }
 
 @media (max-width: 720px) {
@@ -812,12 +786,6 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 .src-spinner { width: 12px; height: 12px; border: 2px solid color-mix(in srgb, var(--muted) 35%, transparent); border-top-color: var(--accent); border-radius: 50%; animation: src-spin 0.7s linear infinite; }
 @keyframes src-spin { to { transform: rotate(360deg); } }
 .source-panel-loading { font-size: 0.85rem; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 0.5rem; }
-
-/* 事实核对进度：复用首页 #progressBar（见 JS showFactProgress / updateFactProgress），不再使用独立弹窗 */
-
-/* 不确定事实标注：虚线下划线 + 首处‡符号（轻量，不抢视觉） */
-.fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: var(--muted); text-underline-offset: 3px; }
-.fu-note { font-size: 0.65em; color: var(--muted); margin-left: 1px; cursor: help; vertical-align: super; font-weight: 400; }
 
 /* 阅读器导航按钮 */
 .reader-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 110; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 1.5rem; background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 48%, transparent) 35%); pointer-events: none; }
@@ -1057,7 +1025,7 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 // ===== Config =====
 const DB_NAME = 'MetaEngineDB', DB_VER = 1;
 const SETTINGS_KEY = 'metaengine_settings';
-const CACHE_VERSION = 'v16'; // v16=修复parse1正则[-*]?与\**冲突导致书名号内冒号处截断
+const CACHE_VERSION = 'v15'; // v15=三级叶子节点注释(回退二级注释)
 
 // ===== System Prompt (inlined v2.6) =====
 function buildSystemPrompt(concept, searchResults) {
@@ -1533,48 +1501,6 @@ async function callLLM(concept, searchResults) {
   return data.choices[0].message.content;
 }
 
-// ===== 结构化 JSON LLM 调用（事实核对用） =====
-// systemContent / userContent 直接传文本；返回解析后的对象，失败抛错
-async function callLLMJson(systemContent, userContent) {
-  const s = getSettings();
-  if (!s.apiKey) throw new Error('请先设置 API Key');
-  const resp = await fetch(`${s.apiBase}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${s.apiKey}`
-    },
-    body: JSON.stringify({
-      model: s.modelName || 'glm-4-plus',
-      messages: [
-        { role: 'system', content: systemContent },
-        { role: 'user', content: userContent }
-      ],
-      temperature: 0.2,
-      max_tokens: 4000
-    })
-  });
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`API 错误 ${resp.status}: ${err}`);
-  }
-  const data = await resp.json();
-  let text = data.choices[0].message.content || '';
-  // 去掉可能的 ```json 代码围栏
-  text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-  const start = text.indexOf('[');
-  const end = text.lastIndexOf(']');
-  const objStart = text.indexOf('{');
-  const objEnd = text.lastIndexOf('}');
-  if (start !== -1 && end !== -1 && start < (objStart === -1 ? Infinity : objStart)) {
-    return JSON.parse(text.substring(start, end + 1));
-  }
-  if (objStart !== -1 && objEnd !== -1) {
-    return JSON.parse(text.substring(objStart, objEnd + 1));
-  }
-  throw new Error('LLM 未返回可解析的 JSON');
-}
-
 // ===== 流式 LLM 调用（变更单-43） =====
 async function callLLMStream(concept, searchResults, onChunk) {
   const s = getSettings();
@@ -1636,8 +1562,6 @@ async function callLLMStream(concept, searchResults, onChunk) {
 // ===== Generate Flow =====
 let currentConcept = '';
 let readerState = { currentLayer: 0, totalLayers: 0 };
-// 渐进管道状态（生成一层即并行核对下一层，逐层揭示）
-let pipeline = null;
 
 async function startGenerate() {
   const input = document.getElementById('conceptInput');
@@ -1696,29 +1620,11 @@ async function startGenerate() {
     fill.style.width = '20%';
     const searchResults = await searchWebSources(concept);
 
-    // Call LLM (stream) — 渐进管道：生成到某层即后台并行核对该层，同时继续生成下一层；
-    // 首层生成+核对完即开阅读器，并逐层揭示（始终保留 1 层缓冲，避免向前翻页撞到加载墙）。
+    // Call LLM (stream) — 进度检测 + 渐进渲染
     fill.style.width = '15%';
     text.textContent = 'AI 正在生成...';
 
-    const pipe = {
-      concept: currentConcept,
-      rawLayers: [],
-      genDone: [],
-      verifiedMd: [],
-      verDone: [],
-      verPromises: [],
-      structure: { layers: [] },
-      glossary: [],
-      streamDone: false,
-      readerOpen: false,
-      revealedUpTo: -1,
-      totalLayers: 5,
-      _progTarget: 15,
-      _progTimer: null
-    };
-    pipeline = pipe;
-
+    let detectedLayer = 0;
     const layerProgress = {
       1: { pct: 25, label: '第一层·一瞥' },
       2: { pct: 40, label: '第二层·全景地图' },
@@ -1726,79 +1632,124 @@ async function startGenerate() {
       4: { pct: 70, label: '第四层·拓展应用' },
       5: { pct: 85, label: '第五层·渐进学习' },
     };
-    let lastFinalizedK = -1; // 已定界（可送核对）的最高层索引(0-based)
-    const headerRe = /##\s*第[一二三四五]层[:：]\s*(.+)/g;
-
-    // 进度缓动定时器：生成+核对合并驱动（阅读器未开时驱动首页条，开后驱动阅读器内细条）
-    startPipelineProgress(pipe);
+    let earlyRendered = false;
 
     const markdown = await callLLMStream(concept, searchResults, (delta, full) => {
-      const matches = [...full.matchAll(headerRe)];
-      const newCount = matches.length;
-      // 当第 newCount 个层头出现，第 1..(newCount-1) 层已可定界（其后有下一层起点）
-      for (let k = lastFinalizedK + 1; k <= newCount - 2; k++) {
-        finalizeGeneratedLayer(pipe, k, full.slice(matches[k].index, matches[k + 1].index));
+      // 检测层标记
+      const matches = full.match(/##\s*第[一二三四五]层/g);
+      if (matches) {
+        const newCount = matches.length;
+        if (newCount > detectedLayer) {
+          detectedLayer = newCount;
+          const lp = layerProgress[detectedLayer];
+          if (lp) {
+            fill.style.width = lp.pct + '%';
+            text.textContent = '正在生成：' + lp.label + '...';
+          }
+        }
       }
-      if (newCount - 2 > lastFinalizedK) lastFinalizedK = newCount - 2;
-      // 进度标签：当前正在生成第 newCount 层（newCount>=1）
-      const lp = layerProgress[newCount];
-      if (lp) {
-        pipe._progTarget = Math.max(pipe._progTarget, lp.pct);
-        text.textContent = '正在生成：' + lp.label + '...';
+
+      // 拿到第 4 层标题 = 前 3 层已完整，立刻渲染
+      if (!earlyRendered && detectedLayer >= 4) {
+        earlyRendered = true;
+        fill.style.width = '100%';
+        text.textContent = '渲染中...';
+        bar.classList.remove('active');
+
+        // 提取前 3 层的 Markdown（截断到 ## 第四层 之前，正则防变体）
+        const m = full.match(/^##\s*第\s*四\s*层\b/m);
+        const idx = m ? m.index : -1;
+        const first3Markdown = idx > 0 ? full.substring(0, idx) : full;
+        const structure = parseMarkdown(first3Markdown);
+        const validation = validateStructure(structure);
+        if (!validation.valid) {
+          console.warn('格式校验失败:', validation.errors);
+          const lastLayer = structure.layers[structure.layers.length - 1];
+          if (lastLayer) {
+            lastLayer.modules.push({
+              id: 'warn', title: '⚠ 格式校验',
+              content: 'LLM 输出可能存在格式问题：\n\n' + validation.errors.map(e => `- ${e}`).join('\n')
+            });
+          }
+        }
+
+        const data = {
+          concept: currentConcept,
+          markdown: first3Markdown,
+          structure,
+          glossary: extractGlossary(first3Markdown),
+          _cacheVersion: CACHE_VERSION,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        renderResult(data);
+        saveHistory(currentConcept);
+
+        // 异步写缓存
+        dbPut('frameworks', data);
+        setTimeout(() => { bar.style.display = 'none'; }, 300);
       }
     });
 
-    // 流结束：定界剩余层（最后一层没有后继边界）
-    pipe.streamDone = true;
-    {
-      const matches = [...markdown.matchAll(headerRe)];
-      const total = matches.length;
-      pipe.totalLayers = total || 1;
-      readerState.totalLayers = pipe.totalLayers;
-      for (let k = 0; k < total; k++) {
-        if (!pipe.genDone[k]) {
-          const start = matches[k].index;
-          const end = (k + 1 < total) ? matches[k + 1].index : markdown.length;
-          finalizeGeneratedLayer(pipe, k, markdown.slice(start, end));
+    // 流全部结束
+    if (earlyRendered) {
+      const fullStructure = parseMarkdown(markdown);
+      const fullValidation = validateStructure(fullStructure);
+      if (fullValidation.valid) {
+        const fullData = {
+          concept: currentConcept,
+          markdown,
+          structure: fullStructure,
+          glossary: extractGlossary(markdown),
+          _cacheVersion: CACHE_VERSION,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        // 更新缓存为完整版
+        dbPut('frameworks', fullData);
+        syncToObsidian(currentConcept, fullData.markdown, fullData.glossary);
+
+        // 增量追加第 4、5 层（不干扰当前阅读位置）
+        const existingReader = document.getElementById('reader');
+        if (existingReader && existingReader.dataset.concept === currentConcept) {
+          appendRemainingLayers(fullData, 3);
         }
       }
-      if (total === 0) finalizeGeneratedLayer(pipe, 0, markdown);
-      rebuildReaderDots(pipe.totalLayers);
+    } else {
+      // 未提前渲染的兜底路径（总层数 ≤3）
+      fill.style.width = '90%';
+      text.textContent = '解析并保存...';
+      const structure = parseMarkdown(markdown);
+      const validation = validateStructure(structure);
+      if (!validation.valid) {
+        console.warn('格式校验失败:', validation.errors);
+        const lastLayer = structure.layers[structure.layers.length - 1];
+        if (lastLayer) {
+          lastLayer.modules.push({
+            id: 'warn', title: '⚠ 格式校验',
+            content: 'LLM 输出可能存在格式问题：\n\n' + validation.errors.map(e => `- ${e}`).join('\n')
+          });
+        }
+      }
+      const glossary = extractGlossary(markdown);
+      const now = Date.now();
+
+      await dbPut('frameworks', { concept, markdown, structure, glossary, _cacheVersion: CACHE_VERSION, createdAt: now, updatedAt: now });
+      syncToObsidian(concept, markdown, glossary);
+
+      // Save glossary items
+      for (const g of glossary) {
+        await dbPut('glossary', { term: g.term, content: g.content, parentConcept: concept, createdAt: now });
+      }
+
+      fill.style.width = '100%';
+      text.textContent = '完成';
+      renderResult({ concept, markdown, structure, glossary });
+      saveHistory(concept);
+      bar.classList.remove('active');
     }
-
-    // 等待所有层核对完成（兜底：保证最终回写的是已核对内容）
-    await Promise.all(pipe.verPromises);
-    if (pipe._progTimer) clearInterval(pipe._progTimer);
-
-    // 拼接最终已核对内容，回写缓存 + Obsidian
-    const finalMd = pipe.verifiedMd.filter(Boolean).join('\n---\n');
-    const finalStructure = parseMarkdown(finalMd);
-    const finalGlossary = extractGlossary(finalMd);
-    const now = Date.now();
-    await dbPut('frameworks', {
-      concept: currentConcept, markdown: finalMd, structure: finalStructure,
-      glossary: finalGlossary, _cacheVersion: CACHE_VERSION, _verified: true,
-      createdAt: now, updatedAt: now
-    }).catch(() => {});
-    for (const g of finalGlossary) {
-      await dbPut('glossary', { term: g.term, content: g.content, parentConcept: currentConcept, createdAt: now }).catch(() => {});
-    }
-    try { syncToObsidian(currentConcept, finalMd, finalGlossary); } catch (e) {}
-
-    // 若阅读器尚未打开（首层核对超时/失败兜底），强制打开（attachReaderShell 已挂上阅读器并隐藏首页，此处仅确保状态就绪）
-    if (!pipe.readerOpen) {
-      try { openReaderForPipe(pipe); }
-      catch (e) { console.warn('[openReaderForPipe] 兜底开门异常（阅读器应已可见）:', e); }
-    }
-
-    const gfill = document.getElementById('readerGenFill');
-    const gtext = document.getElementById('readerGenText');
-    if (gfill) gfill.style.width = '100%';
-    if (gtext) gtext.textContent = '已就绪';
-    setTimeout(() => { const gb = document.getElementById('readerGenBar'); if (gb) gb.style.opacity = '0'; }, 1400);
-
-    saveHistory(currentConcept);
-    bar.classList.remove('active');
 
   } catch (err) {
     console.error(err);
@@ -1901,7 +1852,6 @@ function renderLayerPage(layer, idx, total, data) {
         content = cardsHtml;
       } else {
         content = marked.parse(mod.content || '');
-        content = content.replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
       }
     }
     // 8 跨领域连接 → 小标题胶囊化
@@ -1912,8 +1862,6 @@ function renderLayerPage(layer, idx, total, data) {
     }
     else {
       content = marked.parse(mod.content || '');
-      // 将 <p><strong>标签</strong>内容...</p> 转为结构化行，换行后内容对齐
-      content = content.replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
     }
 
     modulesHtml += `<div class="module" style="animation-delay:${mi * 0.06}s">
@@ -1993,107 +1941,26 @@ function appendRemainingLayers(data, fromIdx) {
   goToLayer(readerState.currentLayer);
 }
 
-// ===== 事实核对进度（复用首页进度条 + 时间驱动） =====
-let _factTimer = null;
-let _factStartTime = 0;
-const FACT_TIME_CAP = 12000; // 12 秒上限
-const FACT_START_PCT = 86;   // 核对阶段起始百分比（生成在 ~85% 结束）
-
-function showFactProgress() {
-  _factStartTime = Date.now();
-  const bar = document.getElementById('progressBar');
-  const fill = document.getElementById('progressFill');
-  const text = document.getElementById('progressText');
-  if (bar && fill && text) {
-    bar.classList.add('active');
-    bar.style.display = '';
-    fill.style.width = FACT_START_PCT + '%';
-    text.textContent = '正在抽取可核查事实…';
-  }
-  // 时间驱动：每秒推进 ~1.17%（12 秒从 86% → 100%）
-  if (_factTimer) clearInterval(_factTimer);
-  _factTimer = setInterval(() => {
-    const elapsed = Date.now() - _factStartTime;
-    const timePct = Math.min(FACT_START_PCT + (elapsed / FACT_TIME_CAP) * (100 - FACT_START_PCT), 98);
-    const f = document.getElementById('progressFill');
-    if (f) f.style.width = Math.round(timePct) + '%';
-  }, 1000);
-}
-
-function hideFactProgress() {
-  if (_factTimer) { clearInterval(_factTimer); _factTimer = null; }
-}
-
-function updateFactProgress(p) {
-  const fill = document.getElementById('progressFill');
-  const text = document.getElementById('progressText');
-  if (!fill || !text) return;
-
-  if (p.phase === 'extract') {
-    text.textContent = '正在抽取可核查事实…';
-    // 保持时间驱动，不覆盖
-  } else if (p.phase === 'verify') {
-    const ratio = p.total > 0 ? p.done / p.total : 0;
-    const actualPct = FACT_START_PCT + ratio * (100 - FACT_START_PCT);
-    // 取时间驱动和实际进度的较大值，让实际进度可以超前
-    const elapsed = Date.now() - _factStartTime;
-    const timePct = FACT_START_PCT + (elapsed / FACT_TIME_CAP) * (100 - FACT_START_PCT);
-    const showPct = Math.max(actualPct, Math.min(timePct, 98));
-    fill.style.width = Math.round(showPct) + '%';
-    text.textContent = `正在核对事实 ${p.done}/${p.total} · ${Math.round(ratio * 100)}%`;
-  } else if (p.phase === 'done') {
-    if (_factTimer) { clearInterval(_factTimer); _factTimer = null; }
-    fill.style.width = '100%';
-    text.textContent = '事实核对完成，即将展示…';
-  }
-}
-
-async function renderResult(data) {
-  pipeline = null; // 完整渲染（缓存/Obsidian/子词条/重新生成）不使用渐进管道
-  // 事实核对门控：未核对过的内容，先静默修正再展示（绝不让用户看到未核对内容）
-  if (!data._verified) {
-    showFactProgress();
-    try {
-      const patched = await factCheckAndPatch(data.markdown, data.concept, updateFactProgress);
-      data.markdown = patched.markdown;
-      data.structure = parseMarkdown(patched.markdown);
-      data.glossary = extractGlossary(patched.markdown);
-      data.verificationSummary = patched.summary;
-    } catch (e) {
-      console.warn('[factCheck] 核对异常，按原内容渲染:', e);
-    }
-    data._verified = true; // 标记，避免重复核对 / 缓存读回时跳过
-    hideFactProgress();
-    // 回写：缓存存正确版；Obsidian 存带来源标记的正确版
-    try { await dbPut('frameworks', data); } catch (e) {}
-    try { syncToObsidian(data.concept, data.markdown, data.glossary); } catch (e) {}
-  }
+function renderResult(data) {
   const structure = data.structure || parseMarkdown(data.markdown);
   const glossary = data.glossary || [];
   const layers = structure.layers;
-  const total = layers.length || 5;
-  readerState = { currentLayer: 0, totalLayers: total, sources: [], concept: data.concept };
+  const total = layers.length;
+  readerState = { currentLayer: 0, totalLayers: 5, sources: [], concept: data.concept };
 
-  const reader = attachReaderShell(data);
-  const pagesContainer = reader.querySelector('#readerPages');
-  layers.forEach((layer, idx) => {
-    const page = renderLayerPage(layer, idx, total, data);
-    if (idx === 0) page.classList.remove('hidden');
-    pagesContainer.appendChild(page);
-  });
+  const oldReader = document.getElementById('reader');
+  if (oldReader) oldReader.remove();
 
-  updateReaderNav();
-  reader.focus();
-  startSourceVerify(data.concept);
-}
+  const reader = document.createElement('div');
+  reader.className = 'reader';
+  reader.id = 'reader';
+  reader.dataset.concept = data.concept;
 
-// ===== 阅读器外壳（完整渲染 & 渐进管道共用） =====
-function readerShellHTML() {
   let dotsHtml = '';
   for (let i = 0; i < readerState.totalLayers; i++) {
     dotsHtml += `<div class="reader-dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></div>`;
   }
-  return `
+  reader.innerHTML = `
     <div class="reader-progress">
       <div class="reader-row-1">
         <span class="reader-brand">framework</span>
@@ -2127,24 +1994,9 @@ function readerShellHTML() {
           </div>
         </div>
       </div>
-      <div class="reader-genbar" id="readerGenBar">
-        <div class="reader-genfill" id="readerGenFill"></div>
-        <span class="reader-gentext" id="readerGenText"></span>
-      </div>
     </div>
     <div class="reader-pages" id="readerPages"></div>
   `;
-}
-
-function attachReaderShell(data) {
-  const oldReader = document.getElementById('reader');
-  if (oldReader) oldReader.remove();
-
-  const reader = document.createElement('div');
-  reader.className = 'reader';
-  reader.id = 'reader';
-  reader.dataset.concept = data.concept;
-  reader.innerHTML = readerShellHTML();
   document.body.appendChild(reader);
   // 导航按钮放在 reader 外部（body 直子），避免 reader 的 backdrop-filter 创建新包含块导致 fixed 失效
   const nav = document.createElement('div');
@@ -2183,16 +2035,18 @@ function attachReaderShell(data) {
   });
   searchOverlay.addEventListener('click', closeReaderPopups);
 
-  // 完整渲染（已就绪）时隐藏阅读器内细进度条
-  if (data && data._verified) {
-    const gb = document.getElementById('readerGenBar');
-    if (gb) gb.style.display = 'none';
-  }
-  hideHomeProgress();
-  return reader;
-}
+  const pagesContainer = reader.querySelector('#readerPages');
 
-function startSourceVerify(concept) {
+  layers.forEach((layer, idx) => {
+    const page = renderLayerPage(layer, idx, total, data);
+    if (idx === 0) page.classList.remove('hidden');
+    pagesContainer.appendChild(page);
+  });
+
+  updateReaderNav();
+
+  reader.focus();
+
   // 来源校验：所有入口（生成 / 缓存 / Obsidian / 重新生成）统一在此触发
   // 预填 pending 状态，确保面板打开时立即显示渠道列表（而非空白 loading）
   const PENDING_CHANNELS = ['Wikidata', 'SearXNG', '中文维基', 'DuckDuckGo'];
@@ -2216,170 +2070,9 @@ function startSourceVerify(concept) {
   });
 }
 
-function hideHomeProgress() {
-  const bar = document.getElementById('progressBar');
-  const fill = document.getElementById('progressFill');
-  if (bar) { bar.classList.remove('active'); bar.style.display = ''; }
-  if (fill) fill.style.width = '0%';
-}
-
-// ===== 渐进管道：生成↔核对并行、逐层揭示 =====
-function startPipelineProgress(pipe) {
-  pipe._progTarget = 15;
-  if (pipe._progTimer) clearInterval(pipe._progTimer);
-  pipe._progTimer = setInterval(() => {
-    const reader = document.getElementById('reader');
-    const fill = reader ? document.getElementById('readerGenFill') : document.getElementById('progressFill');
-    if (!fill) return;
-    const cur = parseFloat(fill.style.width) || 15;
-    const diff = pipe._progTarget - cur;
-    const next = cur + diff * 0.12 + (diff > 0 ? 0.4 : -0.4);
-    fill.style.width = Math.min(Math.max(next, 15), 100) + '%';
-  }, 400);
-}
-
-function renderPipelineProgress(pipe) {
-  const genLayers = pipe.genDone.filter(Boolean).length;
-  const verLayers = pipe.verDone.filter(Boolean).length;
-  const total = pipe.totalLayers || 5;
-  let target = (genLayers / total) * 55 + (verLayers / total) * 45;
-  if (pipe.streamDone && verLayers >= total) target = 100;
-  pipe._progTarget = target;
-  const text = document.getElementById('reader') ? document.getElementById('readerGenText') : document.getElementById('progressText');
-  if (text) {
-    if (target >= 100) text.textContent = '已就绪';
-    else if (verLayers > 0 && genLayers < total) text.textContent = `生成 ${genLayers}/${total} · 核对 ${verLayers}/${total}`;
-    else text.textContent = `生成 ${genLayers}/${total}`;
-  }
-}
-
-// 单层事实核对（后台并行）：抽取+核对更轻量（每层最多 2 条事实，并发 2）
-async function verifyLayerParallel(raw, concept) {
-  const patched = await factCheckAndPatch(raw, concept, null, 2, 2);
-  return patched.markdown;
-}
-
-// 每层核对硬超时：任何 LLM/搜索调用挂死都不会拖垮管道（否则 verDone 永不置位、阅读器永不打开）
-const VERIFY_LAYER_TIMEOUT = 12000;
-
-// 一层生成完成 → 记录并立即后台触发该层核对，完成后调度揭示
-function finalizeGeneratedLayer(pipe, k, raw) {
-  if (pipe.genDone[k]) return;
-  pipe.genDone[k] = true;
-  pipe.rawLayers[k] = raw;
-  renderPipelineProgress(pipe);
-  const p = (async () => {
-    let md = raw;
-    try {
-      md = await Promise.race([
-        verifyLayerParallel(raw, pipe.concept),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('verify-timeout')), VERIFY_LAYER_TIMEOUT))
-      ]);
-    } catch (e) {
-      // 超时或失败：按原始内容渲染（绝不卡死管道；后续若来源可补，用户仍可读到内容）
-      console.warn('[verifyLayer] 超时/失败，按原内容渲染:', e && e.message);
-      md = raw;
-    }
-    pipe.verifiedMd[k] = md;
-    try {
-      pipe.structure.layers[k] = parseMarkdown(md).layers[0] || { name: `第${k + 1}层`, estimatedTime: '', modules: [] };
-    } catch (e) {
-      pipe.structure.layers[k] = { name: `第${k + 1}层`, estimatedTime: '', modules: [] };
-    }
-    pipe.verDone[k] = true;
-    // 揭示调度本身也兜底，避免其抛错导致 Promise.all reject（进而阻断流结束后的强制开门）
-    try { scheduleReveal(pipe); } catch (e) { console.warn('[scheduleReveal] 异常:', e); }
-  })();
-  pipe.verPromises.push(p);
-}
-
-// 调度：首层就绪即开阅读器；随后逐层揭示（保留 1 层缓冲，避免向前翻页撞加载墙）
-function scheduleReveal(pipe) {
-  renderPipelineProgress(pipe);
-  renderReaderDots();
-  if (!pipe.readerOpen) {
-    // 开门闸门：前两层（第1、2页）都生成+核对完才进入，避免进入后「继续」成死按钮；
-    // 总层数 < 2（极端情况）则仅要求第 0 层就绪
-    const ready0 = pipe.genDone[0] && pipe.verDone[0];
-    const ready1 = (pipe.totalLayers >= 2) ? (pipe.genDone[1] && pipe.verDone[1]) : true;
-    if (ready0 && ready1) openReaderForPipe(pipe);
-    else return;
-  }
-  // 揭示所有已就绪层（去掉 buffer：不再要求下一层先生成，避免前沿页被卡；
-  // 用户读完当前页时下一页通常已就绪，未就绪时底部「继续」会显示禁用的「生成中…」）
-  let i = pipe.revealedUpTo + 1;
-  while (i < readerState.totalLayers && pipe.genDone[i] && pipe.verDone[i]) {
-    appendLayerPageToReader(pipe, i);
-    pipe.revealedUpTo = i;
-    i++;
-  }
-  updateReaderNav();
-  renderReaderDots();
-}
-
-function openReaderForPipe(pipe) {
-  readerState = { currentLayer: 0, totalLayers: pipe.totalLayers, sources: [], concept: pipe.concept };
-  pipeline = pipe;
-  const data = { concept: pipe.concept, glossary: pipe.glossary, structure: { layers: pipe.structure.layers } };
-  attachReaderShell(data);
-  // 首页条进度平滑交接给阅读器内细条
-  const hf = document.getElementById('progressFill');
-  const rf = document.getElementById('readerGenFill');
-  if (hf && rf) rf.style.width = hf.style.width;
-  pipe.readerOpen = true;
-  // 交给我们下方的 scheduleReveal 从 0 揭示所有已就绪层（前两层已就绪 → 一进来看得到两页）
-  pipe.revealedUpTo = -1;
-  startSourceVerify(pipe.concept);
-  scheduleReveal(pipe); // 揭示第 0、1 层
-  goToLayer(0);
-}
-
-function appendLayerPageToReader(pipe, i) {
-  const pagesContainer = document.getElementById('readerPages');
-  if (!pagesContainer) return;
-  if (pagesContainer.querySelector(`.reader-page[data-idx="${i}"]`)) return; // 防重复
-  let layer = pipe.structure.layers[i];
-  if (!layer) {
-    const raw = pipe.verifiedMd[i] || pipe.rawLayers[i] || '';
-    layer = parseMarkdown(raw).layers[0] || { name: `第${i + 1}层`, estimatedTime: '', modules: [] };
-  }
-  const data = { concept: pipe.concept, glossary: pipe.glossary, structure: { layers: pipe.structure.layers } };
-  const page = renderLayerPage(layer, i, readerState.totalLayers, data);
-  if (i === 0) page.classList.remove('hidden');
-  pagesContainer.appendChild(page);
-}
-
-// 阅读器点状导航：每层显示 生成中 / 核对中 / 已就绪(缓冲) / 已读 状态
-function renderReaderDots() {
-  if (!pipeline || !pipeline.readerOpen) return;
-  const dots = document.querySelectorAll('.reader-dot');
-  dots.forEach((d, i) => {
-    d.classList.remove('active', 'done', 'gen', 'ver', 'ready');
-    if (i <= pipeline.revealedUpTo) {
-      d.classList.add(i === readerState.currentLayer ? 'active' : 'done');
-    } else if (pipeline.verDone[i]) {
-      d.classList.add('ready');
-    } else if (pipeline.genDone[i]) {
-      d.classList.add('ver');
-    } else {
-      d.classList.add('gen');
-    }
-  });
-}
-
-function rebuildReaderDots(total) {
-  const cont = document.querySelector('.reader-dots');
-  if (!cont) return;
-  let html = '';
-  for (let i = 0; i < total; i++) html += `<div class="reader-dot" data-idx="${i}"></div>`;
-  cont.innerHTML = html;
-}
-
 function goToLayer(idx) {
   const total = readerState.totalLayers;
   if (idx < 0 || idx >= total) return;
-  // 渐进管道：未揭示的层不可跳转
-  if (pipeline && pipeline.readerOpen && idx > pipeline.revealedUpTo) return;
   readerState.currentLayer = idx;
 
   const pages = document.querySelectorAll('.reader-page');
@@ -2392,7 +2085,6 @@ function goToLayer(idx) {
   });
 
   updateReaderNav();
-  renderReaderDots();
   document.getElementById('reader').scrollTop = 0;
 }
 
@@ -2401,14 +2093,10 @@ function updateReaderNav() {
   if (!nav) return;
   const cur = readerState.currentLayer;
   const total = readerState.totalLayers;
-  // 渐进管道：已揭示到的层之前可继续；未全部就绪时末层显示"生成中"
-  const revealed = (pipeline && pipeline.readerOpen) ? pipeline.revealedUpTo : (total - 1);
   let html = '';
   if (cur > 0) html += `<button class="reader-prev" onclick="goToLayer(${cur - 1})">▲ 上一层</button>`;
-  if (cur < revealed) {
+  if (cur < total - 1) {
     html += `<button class="reader-continue" onclick="goToLayer(${cur + 1})">继续 ▼</button>`;
-  } else if (cur === revealed && revealed < total - 1) {
-    html += `<button class="reader-continue" disabled style="opacity:.5;cursor:default">生成中…</button>`;
   } else {
     html += `<button class="reader-continue" onclick="exportOne(readerConcept())">导出<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
   }
@@ -2428,7 +2116,6 @@ function closeReader() {
   if (so) so.remove();
   document.body.style.overflow = '';
   document.body.classList.remove('reader-open');
-  pipeline = null; // 清除渐进管道状态，避免下次打开时读到陈旧状态
   showPage('pageInput');
 }
 
@@ -2671,8 +2358,7 @@ async function syncToObsidian(concept, markdown, glossary) {
     const resp = await fetch(getObsidianUrl(s.obsidianPath), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // 追加来源标记（兜底：区分系统写入 vs 用户批注）
-      body: JSON.stringify({ concept, markdown: markdown + OBSIDIAN_SOURCE_MARK, glossary, vaultPath: s.obsidianPath })
+      body: JSON.stringify({ concept, markdown, glossary, vaultPath: s.obsidianPath })
     });
     if (resp.ok) console.log('[obsidian] 已同步:', concept);
   } catch (e) {
@@ -2768,10 +2454,10 @@ function parseMindmapCategories(raw) {
   let currentCat = null;
   for (const line of lines) {
     const trimmed = line.trim();
-    const catMatch = trimmed.match(/^-?\s*\**(.+?)\**\s*[:：]?\s*$/) || trimmed.match(/^\s*-\s*\*\*(.+?)\*\*/);
+    const catMatch = trimmed.match(/^[-*]?\s*\**(.+?)\**\s*[:：]?\s*$/) || trimmed.match(/^\s*[-*]\s*\*\*(.+?)\*\*/);
     if (catMatch && !trimmed.match(/^\s*[-*]\s+\S/)) {
       const name = catMatch[1].trim().replace(/\*\*/g, '');
-      if (name && (name.length <= 20 || (name.includes('《') && name.length <= 50))) {
+      if (name && name.length <= 20) {
         currentCat = { name, items: [], annotation: '' };
         categories.push(currentCat);
         continue;
@@ -2860,7 +2546,7 @@ function parseMindmapCategories(raw) {
     if (blines.length < 2) continue;
     const name = blines[0].replace(/^[-*#\d.\s]+/, '').replace(/\*\*/g, '').trim();
     const items = blines.slice(1).map(l => ({ name: l.replace(/^\s*[-*#\d.]+\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1').trim(), annotation: '' })).filter(i => i.name);
-    if (name && (name.length <= 20 || (name.includes('《') && name.length <= 50)) && items.length > 0) categories.push({ name, items });
+    if (name && name.length <= 20 && items.length > 0) categories.push({ name, items });
   }
   if (categories.length > 0) return categories;
 
@@ -3621,21 +3307,19 @@ async function verifySources(concept, onProgress) {
     { label: '中文维基', run: verifyZhWiki },
     { label: 'DuckDuckGo', run: verifyDDG },
   ];
-  const CHANNEL_TIMEOUT = 6000; // 每个渠道独立超时 6 秒
   const sources = channels.map(ch => ({ label: ch.label, status: 'checking', hit: false, url: '', title: '' }));
   if (onProgress) onProgress(sources);
 
-  // 并行跑所有渠道，每个带独立超时兜底（防止 fetch 在 CORS 下挂死不 settle）
-  const tasks = channels.map((ch, i) =>
-    Promise.race([
-      ch.run(concept).catch(() => ({ hit: false, url: '', title: '' })),
-      new Promise(resolve => setTimeout(() => resolve({ hit: false, url: '', title: '' }), CHANNEL_TIMEOUT))
-    ]).then(r => {
+  // 并行跑所有渠道
+  const tasks = channels.map((ch, i) => Promise.resolve()
+    .then(() => ch.run(concept))
+    .then(r => {
       const e = sources[i];
       e.hit = !!r.hit; e.url = r.url || ''; e.title = r.title || '';
       e.status = e.hit ? 'hit' : 'miss';
-      if (onProgress) onProgress(sources);
     })
+    .catch(() => { sources[i].status = 'miss'; })
+    .finally(() => { if (onProgress) onProgress(sources); })
   );
 
   // 全局兜底：到点强制收尾，把仍在 checking 的标记为 miss
@@ -3651,128 +3335,6 @@ async function verifySources(concept, onProgress) {
   await Promise.race([Promise.all(tasks), guard]);
   const verified = sources.some(s => s.hit);
   return { verified, sources };
-}
-
-// ===================================================================
-// L2 事实级核对：生成后、展示前静默修正；查不到出处的标注 ⚠️
-// 设计原则（产品决策）：绝不让用户看到未核对/可能错误的内容；
-// 能确认的冲突直接替换为正确值；不确定的标注"AI 生成、仅供参考"。
-// ===================================================================
-
-// Obsidian 反写时追加的来源标记（兜底：区分系统写入 vs 用户批注）
-const OBSIDIAN_SOURCE_MARK = '\n\n---\n> 📌 本文由「元引擎」自动生成并经过事实核对。带 ⚠️ 标记的内容为 AI 自行生成、未找到权威出处，仅供参考；其余内容已尽量核对，请以原始来源为准。';
-
-// 不确定事实的标注（轻量：首处带符号‡+虚线下划线，后续仅虚线下划线）
-// 用原生 HTML <u> 标签，markdown 渲染器通常透传；Obsidian 也支持
-const FACT_WARN_FULL = (t) => `<u class="fu">${t}</u><sup class="fu-note" title="AI 生成，未找到权威出处，仅供参考">‡</sup>`;
-const FACT_WARN_SHORT = (t) => `<u class="fu">${t}</u>`;
-
-const EXTRACT_SYSTEM = `你是一名严谨的事实核查助手。下面是一篇知识框架内容（Markdown）。请抽取其中所有可被外部权威来源（维基百科、官方网站等）独立验证的【具体事实断言】，重点关注：年份/日期、人名、地名、事件、具体数字、机构名。
-忽略：主观评价、定义性/解释性文字、无法客观验证的表述、框架结构标签。
-对每条事实输出 JSON 数组，元素：{"id":序号,"originalText":原文中承载该事实的短语或短句（尽量原样摘录，便于后续定位替换）,"claim":用一句客观陈述描述该事实,"type":"date|person|place|event|number|org"}。
-只输出 JSON 数组本身，不要任何解释或代码围栏。`;
-
-const VERIFY_SYSTEM = `你是一名事实核查裁判。判断下列事实断言是否正确。
-若正确 verdict="correct"；若错误 verdict="wrong" 并在 correctedText 给出修正后的原文短语（保持原句式，仅替换错误部分）；若搜索摘要不足以判断 verdict="unknown"。
-只输出 JSON 对象：{"verdict":"correct|wrong|unknown","correctedText":"","note":""}，不要解释。`;
-
-// 轻量搜索：DDG + 中文维基并行，各 5s 超时，返回拼接摘要
-async function factSearch(query) {
-  const snippets = [];
-  const tasks = [
-    (async () => {
-      try {
-        const ctrl = new AbortController();
-        const tm = setTimeout(() => ctrl.abort(), 5000);
-        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`;
-        const r = await fetch(url, { signal: ctrl.signal });
-        clearTimeout(tm);
-        const d = await r.json();
-        if (d.AbstractText) snippets.push(d.AbstractText);
-        if (Array.isArray(d.RelatedTopics)) d.RelatedTopics.slice(0, 3).forEach(t => { if (t && t.Text) snippets.push(t.Text); });
-      } catch (e) {}
-    })(),
-    (async () => {
-      try {
-        const ctrl = new AbortController();
-        const tm = setTimeout(() => ctrl.abort(), 5000);
-        const url = `https://zh.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3`;
-        const r = await fetch(url, { signal: ctrl.signal });
-        clearTimeout(tm);
-        const d = await r.json();
-        (d.query && d.query.search || []).forEach(s => snippets.push(s.snippet || s.title));
-      } catch (e) {}
-    })()
-  ];
-  await Promise.allSettled(tasks);
-  return snippets.join('\n').substring(0, 1500);
-}
-
-// 大小写不敏感、仅替换首次出现；返回 {changed,text}
-function safeReplace(text, from, to) {
-  if (!from) return { changed: false, text };
-  const idx = text.toLowerCase().indexOf(from.toLowerCase());
-  if (idx === -1) return { changed: false, text };
-  return { changed: true, text: text.slice(0, idx) + to + text.slice(idx + from.length) };
-}
-
-// 并发受限的 map
-async function mapWithConcurrency(items, limit, worker) {
-  const results = new Array(items.length);
-  let idx = 0;
-  const runners = [];
-  const n = Math.min(limit, items.length);
-  for (let i = 0; i < n; i++) {
-    runners.push((async () => {
-      while (idx < items.length) {
-        const cur = idx++;
-        results[cur] = await worker(items[cur], cur);
-      }
-    })());
-  }
-  await Promise.all(runners);
-  return results;
-}
-
-/**
- * 事实核对主流程：抽取 → 并发逐条判定 → 静默修正 / 标注。
- * 返回 { markdown: 修正后内容, summary: {total,corrected,unknown} }
- */
-async function factCheckAndPatch(markdown, concept, onProgress, maxFacts = 12, concurrency = 3) {
-  onProgress && onProgress({ phase: 'extract', done: 0, total: 0 });
-  let facts = [];
-  try {
-    facts = await callLLMJson(EXTRACT_SYSTEM, `概念：${concept}\n\n内容：\n${markdown}`);
-    if (!Array.isArray(facts)) facts = [];
-  } catch (e) {
-    console.warn('[factCheck] 抽取失败，按原内容渲染:', e);
-    facts = [];
-  }
-  facts = facts.slice(0, maxFacts); // 上限，控制耗时
-  const total = facts.length;
-  let result = markdown;
-  let corrected = 0, unknown = 0;
-  let firstUnknown = true; // 首处 unknown 显示 ‡ 符号，后续仅下划线
-  const lock = { done: 0 };
-  await mapWithConcurrency(facts, concurrency, async (f) => {
-    try {
-      const snippets = await factSearch(`${concept} ${f.claim || f.originalText || ''}`);
-      const judge = await callLLMJson(VERIFY_SYSTEM,
-        `类型：${f.type || 'fact'}\n原文短语：${f.originalText || ''}\n客观陈述：${f.claim || ''}\n\n搜索摘要：\n${snippets}`);
-      if (judge.verdict === 'wrong' && judge.correctedText) {
-        const r = safeReplace(result, f.originalText, judge.correctedText);
-        if (r.changed) { result = r.text; corrected++; }
-      } else if (judge.verdict === 'unknown') {
-        const marked = firstUnknown ? FACT_WARN_FULL(f.originalText) : FACT_WARN_SHORT(f.originalText);
-        const r = safeReplace(result, f.originalText, marked);
-        if (r.changed) { result = r.text; unknown++; if (firstUnknown) firstUnknown = false; }
-      }
-    } catch (e) { /* 单条失败不影响整体 */ }
-    lock.done++;
-    onProgress && onProgress({ phase: 'verify', done: lock.done, total });
-  });
-  onProgress && onProgress({ phase: 'done', done: total, total });
-  return { markdown: result, summary: { total, corrected, unknown } };
 }
 
 function toggleSourcePanel() {
@@ -3807,13 +3369,13 @@ function renderSourcePanel() {
     panel.innerHTML = '<div class="source-panel-inner"><div class="source-panel-title">来源验证</div><div class="source-panel-loading"><span class="src-spinner"></span>正在校验来源...</div></div>';
     return;
   }
-  const done = sources.filter(s => s.status === 'hit' || s.status === 'miss').length;
-  const allDone = done === sources.length;
+  const active = sources.filter(s => s.status === 'checking' || s.status === 'pending').length;
+  const allDone = active === 0;
   const verified = sources.some(s => s.hit);
   let html = '<div class="source-panel-inner">';
   const titleRight = allDone
     ? (verified ? '✅ 已验证' : '⚠️ 未找到可靠来源')
-    : `校验中 ${done}/${sources.length}`;
+    : `校验中 ${sources.length - active}/${sources.length}`;
   html += `<div class="source-panel-title">来源验证 · ${esc(concept)} · ${titleRight}</div>`;
   for (const s of sources) {
     let cls, icon, body;
