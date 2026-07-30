@@ -11,6 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <title>元框架引擎</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>window.__BUILD_TIME__='2026-07-28T14:00:00';console.log('[元引擎] 版本:',window.__BUILD_TIME__);</script>
 <style>
 :root {
@@ -392,7 +394,7 @@ body.reader-open #app { display: none; }
 .reader-more-menu {
   display: none; position: absolute; top: calc(100% + 6px); right: 0;
   min-width: 9rem; flex-direction: column; gap: 2px;
-  background: var(--surface); border: 1px solid var(--rule);
+  background: var(--surface-solid); border: 1px solid var(--rule);
   border-radius: 10px; padding: 4px; z-index: 120;
   box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 12%, transparent);
 }
@@ -759,8 +761,8 @@ body.reader-open #app { display: none; }
 .viz-card-pro::after { content: '★'; position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.9rem; color: var(--accent); }
 .card-phase-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; }
 .card-phase-duration { font-size: 0.75rem; color: var(--accent); font-weight: 500; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em; }
-.card-phase-item { display: flex; align-items: flex-start; gap: 0.35em; font-size: 0.82rem; line-height: 1.55; margin-bottom: 0.3rem; }
-.card-phase-label { flex-shrink: 0; font-weight: 600; color: var(--ink); }
+.card-phase-item { font-size: 0.82rem; line-height: 1.55; margin-bottom: 0.3rem; }
+.card-phase-label { display: block; font-weight: 600; color: var(--ink); margin-bottom: 0.1rem; }
 .card-phase-text { color: var(--muted); }
 
 @media (max-width: 720px) {
@@ -816,8 +818,15 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 /* 事实核对进度：复用首页 #progressBar（见 JS showFactProgress / updateFactProgress），不再使用独立弹窗 */
 
 /* 不确定事实标注：虚线下划线 + 首处‡符号（轻量，不抢视觉） */
-.fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: var(--muted); text-underline-offset: 3px; }
-.fu-note { font-size: 0.65em; color: var(--muted); margin-left: 1px; cursor: help; vertical-align: super; font-weight: 400; }
+.fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: var(--muted); text-underline-offset: 3px; cursor: help; }
+.fu-note { font-size: 0.65em; color: var(--muted); margin-left: 2px; vertical-align: super; font-weight: 400; padding: 0 2px; }
+/* JS 动态 tooltip（fixed 定位，避免被 .layer-body 的 overflow:hidden 裁切） */
+.fu-tooltip {
+  position: fixed; z-index: 9999; pointer-events: none;
+  background: var(--surface-solid); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.72rem; white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 400;
+}
 
 /* 阅读器导航按钮 */
 .reader-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 110; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 1.5rem; background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 48%, transparent) 35%); pointer-events: none; }
@@ -1057,7 +1066,7 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 // ===== Config =====
 const DB_NAME = 'MetaEngineDB', DB_VER = 1;
 const SETTINGS_KEY = 'metaengine_settings';
-const CACHE_VERSION = 'v16'; // v16=修复parse1正则[-*]?与\**冲突导致书名号内冒号处截断
+const CACHE_VERSION = 'v17'; // v17=领域分类提示词：书籍标题含副标题须放入《》内
 
 // ===== System Prompt (inlined v2.6) =====
 function buildSystemPrompt(concept, searchResults) {
@@ -1096,6 +1105,7 @@ function buildSystemPrompt(concept, searchResults) {
 - 每个领域用 **加粗标题** 独占一行
 - 标题下方用列表项（- 子领域：一句注释）列出该领域的具体子领域，每个子领域后必须跟中文冒号和一句 15 字以内的注释，说明该子领域研究什么
 - 至少列出 3 个领域，每个领域至少 2 个子项
+- 若领域标题是书籍/作品名，必须将完整书名（含副标题）放入《》内，如 **《家庭仪式的力量：共餐如何塑造我们的关系》**，禁止将副标题拆出作为列表项
 - 示例：
   **数学基础**
   - 概率论：研究随机现象量化规律的数学分支
@@ -1400,6 +1410,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ===== 事实标注 tooltip（fixed 定位，绕开 .layer-body 的 overflow:hidden 裁剪）=====
+(function setupFuTooltip() {
+  const TIP_TEXT = 'AI 生成，未找到权威出处，仅供参考';
+  const tip = document.createElement('div');
+  tip.className = 'fu-tooltip';
+  tip.style.display = 'none';
+  tip.textContent = TIP_TEXT;
+  document.body.appendChild(tip);
+
+  let activeEl = null;
+  function show(el) {
+    activeEl = el;
+    const r = el.getBoundingClientRect();
+    tip.style.display = 'block';
+    // 先显示以测量宽度，再定位（居中于元素上方）
+    const tw = tip.offsetWidth;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    let top = r.top - tip.offsetHeight - 6;
+    if (top < 8) top = r.bottom + 6; // 上方空间不足则显示在下方
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    activeEl = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('mouseover', (e) => {
+    const fu = e.target.closest && e.target.closest('.fu');
+    if (fu && fu !== activeEl) show(fu);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const fu = e.target.closest && e.target.closest('.fu');
+    if (fu) hide();
+  });
+  window.addEventListener('scroll', hide, true);
+})();
 
 function getSettings() {
   try {
@@ -2410,7 +2458,7 @@ function updateReaderNav() {
   } else if (cur === revealed && revealed < total - 1) {
     html += `<button class="reader-continue" disabled style="opacity:.5;cursor:default">生成中…</button>`;
   } else {
-    html += `<button class="reader-continue" onclick="exportOne(readerConcept())">导出<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
+    html += `<button class="reader-continue" onclick="toggleExportMenu(event)">导出<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;margin-left:2px"><path d="M6 9l6 6 6-6"/></svg></button>`;
   }
   nav.innerHTML = html;
 }
@@ -2609,7 +2657,7 @@ async function exportOne(concept) {
   if (!data) { return; }
 
   // 主框架文件
-  downloadFile(data.markdown, `${concept}-认知框架.md`, 'text/markdown');
+  downloadFile(cleanMarkdownForExport(data.markdown), `${concept}-认知框架.md`, 'text/markdown');
 
   // 词条文件
   const glossary = data.glossary || [];
@@ -2630,17 +2678,472 @@ function downloadFile(content, filename, mime) {
   URL.revokeObjectURL(a.href);
 }
 
+// 导出时清理事实核对标注的 HTML 标签，避免 <u class="fu"> 等原样出现在 md 文件中
+function cleanMarkdownForExport(md) {
+  return md
+    .replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
+    .replace(/<\/?u class="fu">/g, '');
+}
+
 async function exportAll() {
   const all = await dbGetAll('frameworks');
   if (!all.length) { return; }
 
   for (const f of all) {
-    downloadFile(f.markdown, `${f.concept}-认知框架.md`, 'text/markdown');
+    downloadFile(cleanMarkdownForExport(f.markdown), `${f.concept}-认知框架.md`, 'text/markdown');
     for (const g of (f.glossary || [])) {
       const termMd = `# ${g.term}\n\n**所属框架**：${f.concept}\n\n${g.content}\n`;
       downloadFile(termMd, `${g.term}-词条.md`, 'text/markdown');
     }
   }
+}
+
+// ===== 导出样式图（PNG 长图 / PDF）=====
+// 关键：html2canvas 不支持 backdrop-filter 与 color-mix，故导出容器使用「字面量颜色」复刻玻璃质感，
+// 并对生成 HTML 中的 var(--token) 做字符串替换（连 SVG 内联属性一并解析）。
+let _exportStyleInjected = false;
+
+function currentIsDark() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  return cur === 'dark' || (!cur && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+function exportThemeTokens(isDark) {
+  if (isDark) {
+    return {
+      pageBg: '#0E0F13',
+      cardBg: '#191B21', cardBorder: '#2A2C33', ink: '#DCE0E7', titleInk: '#F4F5F7',
+      muted: '#AAB0B8', accent: '#ECE9E3', accent2: '#BBB6AC', onAccent: '#0E0F13',
+      accentSoft: 'rgba(236,233,227,0.10)', glassHi: 'rgba(255,255,255,0.06)',
+      cardShadow: '0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
+      fuColor: '#AAB0B8', bar: '#BBB6AC'
+    };
+  }
+  return {
+    pageBg: '#F1EFEA',
+    cardBg: '#FBFAF8', cardBorder: '#D6D3CD', ink: '#24262B', titleInk: '#161618',
+    muted: '#686562', accent: '#1A1A1C', accent2: '#33333A', onAccent: '#FFFFFF',
+    accentSoft: 'rgba(26,26,28,0.08)', glassHi: 'rgba(255,255,255,0.55)',
+    cardShadow: '0 18px 48px rgba(40,38,34,0.16), inset 0 1px 0 rgba(255,255,255,0.55)',
+    fuColor: '#686562', bar: '#33333A'
+  };
+}
+
+function injectExportStyle(t) {
+  if (_exportStyleInjected) return;
+  const css = `
+  .export-root {
+    box-sizing: border-box; width: 820px; margin: 0 auto; padding: 44px 40px 36px;
+    background: ${t.pageBg}; color: ${t.ink};
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 15px; line-height: 1.75;
+  }
+  .export-root * { box-sizing: border-box; }
+  .export-root .exp-header { margin-bottom: 30px; padding-bottom: 22px; border-bottom: 1px solid ${t.cardBorder}; }
+  .export-root .exp-brand {
+    display: inline-block; font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: 0.04em;
+    font-size: 0.8rem; color: ${t.onAccent}; background: ${t.accent}; padding: 4px 12px; border-radius: 999px;
+  }
+  .export-root .exp-concept { font-family: "Space Grotesk", sans-serif; font-size: 2.1rem; font-weight: 700; color: ${t.titleInk}; margin: 14px 0 8px; line-height: 1.2; }
+  .export-root .exp-meta { font-size: 0.82rem; color: ${t.muted}; letter-spacing: 0.02em; }
+  .export-root .exp-layer { margin-bottom: 26px; }
+  .export-root .exp-layer-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .export-root .exp-layer-num {
+    font-size: 0.78rem; font-weight: 700; color: ${t.onAccent}; background: ${t.accent};
+    padding: 3px 11px; border-radius: 999px; letter-spacing: 0.03em; white-space: nowrap;
+  }
+  .export-root .exp-layer-name { font-size: 1.18rem; font-weight: 700; color: ${t.titleInk}; }
+  .export-root .exp-layer-time { font-size: 0.78rem; color: ${t.muted}; background: ${t.accentSoft}; padding: 2px 10px; border-radius: 6px; }
+  .export-root .exp-layer-bar { height: 3px; border-radius: 2px; background: ${t.bar}; margin: 12px 0 18px; opacity: 0.9; }
+  .export-root .exp-modules { display: flex; flex-direction: column; gap: 14px; }
+  .export-root .module {
+    background: ${t.cardBg}; border: 1px solid ${t.cardBorder}; border-radius: 14px; padding: 18px 20px;
+    box-shadow: ${t.cardShadow};
+  }
+  .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.accent2}; margin-bottom: 10px; }
+  .export-root .module-content { font-size: 0.92rem; color: ${t.ink}; }
+  .export-root .module-content p { margin: 0 0 0.6rem; }
+  .export-root .module-content h1,.export-root .module-content h2,.export-root .module-content h3,.export-root .module-content h4 { color: ${t.titleInk}; margin: 0.8rem 0 0.4rem; font-weight: 700; }
+  .export-root .module-content ul,.export-root .module-content ol { margin: 0 0 0.6rem 1.3rem; padding: 0; }
+  .export-root .module-content li { margin-bottom: 0.3rem; }
+  .export-root .module-content code { background: ${t.accentSoft}; padding: 1px 6px; border-radius: 5px; font-size: 0.85em; }
+  .export-root .module-content pre { background: ${t.accentSoft}; padding: 12px; border-radius: 8px; overflow-x: auto; }
+  .export-root .module-content blockquote { border-left: 3px solid ${t.accent}; padding-left: 12px; color: ${t.muted}; margin: 0 0 0.6rem; }
+  .export-root .module-content a { color: ${t.accent2}; text-decoration: none; }
+  .export-root .mod-row { display: flex; gap: 0.5em; margin-bottom: 0.5rem; }
+  .export-root .mod-label { flex-shrink: 0; font-weight: 700; color: ${t.accent2}; }
+  .export-root .mod-label strong { font-weight: 700; }
+  .export-root .mod-val { flex: 1; min-width: 0; }
+  .export-root .card-phase-item { margin-bottom: 0.55rem; }
+  .export-root .card-phase-label { display: block; font-weight: 700; color: ${t.titleInk}; margin-bottom: 0.15rem; }
+  .export-root .card-phase-text { display: block; color: ${t.ink}; }
+  .export-root .viz-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: ${t.cardBg}; }
+  .export-root .viz-card-pro { border-left: 3px solid ${t.accent}; background: ${t.cardBg}; }
+  .export-root .card-pill { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-bottom: 8px; background: ${t.accentSoft}; color: ${t.accent2}; }
+  .export-root .card-pill.unsolved { background: rgba(128,128,128,0.18); color: ${t.muted}; }
+  .export-root .card-title { font-size: 0.98rem; font-weight: 700; color: ${t.titleInk}; margin-bottom: 4px; }
+  .export-root .card-desc { font-size: 0.88rem; color: ${t.muted}; line-height: 1.6; }
+  .export-root .glossary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .export-root .glossary-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 12px 14px; background: ${t.cardBg}; }
+  .export-root .card-term { font-weight: 700; color: ${t.accent2}; margin-bottom: 4px; font-size: 0.95rem; }
+  .export-root .card-jump { display: none !important; }
+  .export-root .cross-pill { display: inline-block; background: ${t.accentSoft}; color: ${t.accent2}; font-weight: 600; padding: 1px 9px; border-radius: 999px; margin: 0 4px 4px 0; font-size: 0.85rem; }
+  .export-root .miscon-group { display: flex; gap: 14px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid ${t.cardBorder}; }
+  .export-root .miscon-insight-icon { flex-shrink: 0; color: ${t.muted}; font-weight: 700; }
+  .export-root .miscon-insight-content { flex: 1; min-width: 0; font-size: 0.88rem; color: ${t.muted}; line-height: 1.6; }
+  .export-root .accordion { display: flex; flex-direction: column; gap: 8px; }
+  .export-root .acc-item { border: 1px solid ${t.cardBorder}; border-radius: 10px; overflow: hidden; }
+  .export-root .acc-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: ${t.accentSoft}; }
+  .export-root .acc-title { font-weight: 700; color: ${t.titleInk}; font-size: 0.92rem; }
+  .export-root .acc-icon { display: none !important; }
+  .export-root .acc-body { max-height: none !important; overflow: visible !important; display: block !important; }
+  .export-root .acc-body-inner { padding: 13px 15px; font-size: 0.9rem; color: ${t.ink }; }
+  .export-root .progressive .prog-item { max-height: none !important; overflow: visible !important; opacity: 1 !important; display: block !important; margin-bottom: 0.8rem; }
+  .export-root .prog-body { color: ${t.ink }; }
+  .export-root .prog-more-btn { display: none !important; }
+  .export-root .fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: ${t.fuColor}; text-underline-offset: 3px; }
+  .export-root .fu-note { font-size: 0.7em; color: ${t.fuColor}; margin-left: 1px; vertical-align: super; }
+  .export-root svg { max-width: 100%; height: auto; display: block; }
+  .export-root .exp-footer { margin-top: 34px; padding-top: 20px; border-top: 1px solid ${t.cardBorder}; text-align: center; }
+  .export-root .exp-foot-brand { font-family: "Space Grotesk", sans-serif; font-weight: 700; color: ${t.titleInk}; font-size: 0.95rem; letter-spacing: 0.03em; }
+  .export-root .exp-foot-note { font-size: 0.78rem; color: ${t.muted}; margin-top: 6px; }
+  .export-root .exp-mark { color: ${t.accent2}; font-weight: 700; }
+  .export-loading {
+    position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35); color: #fff; font-size: 0.95rem; letter-spacing: 0.02em;
+  }
+  .export-loading .box { background: rgba(20,20,22,0.9); padding: 18px 28px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
+  .export-loading .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: expspin 0.7s linear infinite; }
+  @keyframes expspin { to { transform: rotate(360deg); } }
+  .export-menu {
+    position: fixed; z-index: 210; min-width: 13rem; display: flex; flex-direction: column; gap: 2px;
+    background: var(--surface-solid); border: 1px solid var(--rule); border-radius: 14px; padding: 6px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.32);
+  }
+  .export-menu-sep { height: 1px; background: var(--rule); margin: 4px 2px; opacity: 0.6; }
+  .export-menu button {
+    display: flex; align-items: center; gap: 8px; text-align: left; background: none; border: none;
+    color: ${t.ink}; font-size: 0.88rem; padding: 9px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+  }
+  .export-menu button:hover { background: ${t.accentSoft}; color: ${t.accent2}; }
+  .export-menu .export-sub-toggle { justify-content: space-between; gap: 6px; }
+  .export-menu .export-sub-toggle .exp-caret { transition: transform 0.15s ease; }
+  .export-menu .export-sub-toggle.open .exp-caret { transform: rotate(180deg); }
+  .export-menu .export-sub-toggle.open { color: ${t.accent2}; }
+  .export-menu .export-layer-list { display: flex; flex-direction: column; gap: 2px; margin-top: 3px; padding: 5px 2px 3px; border-top: 1px solid var(--rule); }
+  .export-menu .export-layer-btn { padding-left: 18px; font-size: 0.84rem; }
+  `;
+  const style = document.createElement('style');
+  style.id = 'export-style';
+  style.textContent = css;
+  document.head.appendChild(style);
+  _exportStyleInjected = true;
+}
+
+// 把生成 HTML 里的 var(--token) 解析为字面量（含 SVG 内联属性），绕开 html2canvas 不支持 color-mix/var 的坑
+function resolveCssVars(html) {
+  const isDark = currentIsDark();
+  const cs = getComputedStyle(document.documentElement);
+  const names = ['bg','bg2','ink','title-ink','muted','rule','hairline','accent','accent2','on-accent','accent-soft','accent2-soft','surface-solid','panel-bg'];
+  const map = {};
+  for (const n of names) {
+    const v = cs.getPropertyValue('--' + n).trim();
+    if (v) map[n] = v;
+  }
+  const fbBg = isDark ? '#191B21' : '#FBFAF8';
+  const fb = { 'panel-bg': fbBg, 'on-accent': isDark ? '#0E0F13' : '#FFFFFF' };
+  return html.replace(/var\(--([\w-]+)\)/g, (m, t) => (map[t] !== undefined ? map[t] : (fb[t] || '#999')));
+}
+
+// 复用阅读器模块分支逻辑，产出与界面一致的模块内容 HTML（去掉交互 id）
+function renderModuleContentForExport(mod, data) {
+  const title = (mod.title || '').toLowerCase();
+  let content = '';
+  if (title.includes('领域分类') || title.includes('分类')) {
+    const categories = parseMindmapCategories(mod.content || '');
+    content = categories.length > 0 ? generateMindmapDOM(data.concept, categories) : marked.parse(mod.content || '');
+  } else if (title.includes('发展脉络') || title.includes('时间线') || title.includes('历史')) {
+    content = generateTimelineHTML(mod.content || '');
+  } else if (title.includes('常见误区') || title.includes('误区')) {
+    content = generateMisconHTML(mod.content || '');
+  } else if (title.includes('底层原理') || title.includes('原理')) {
+    content = generateAccordionHTML(mod.content || '');
+  } else if (title.includes('最新前沿') || title.includes('前沿')) {
+    content = generateProgressiveHTML(mod.content || '');
+  } else if (title.includes('核心难题') || title.includes('难题')) {
+    content = generateCardGridHTML(mod.content || '', 'issue');
+  } else if (title.includes('现实映射') || title.includes('现实')) {
+    content = generateCardGridHTML(mod.content || '', 'scenario');
+  } else if (title.includes('推荐学习路径') || title.includes('学习路径')) {
+    content = generateCardGridHTML(mod.content || '', 'path');
+  } else if (title.includes('工具箱') || title.includes('工具')) {
+    content = generateCardGridHTML(mod.content || '', 'tool');
+  } else if (title.includes('核心概念') || title.includes('术语')) {
+    const terms = (data.glossary && data.glossary.length > 0) ? data.glossary : extractGlossaryFromContent(mod.content || '');
+    if (terms.length > 0) {
+      let cards = '<div class="glossary-cards">';
+      for (const g of terms) {
+        cards += `<div class="glossary-card"><div class="card-term">${esc(g.term)}</div><div class="card-desc">${esc(g.content || '')}</div></div>`;
+      }
+      content = cards + '</div>';
+    } else {
+      content = marked.parse(mod.content || '').replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
+    }
+  } else if (title.includes('跨领域') || title.includes('跨域')) {
+    content = marked.parse(mod.content || '').replace(/<strong>([^<]+)<\/strong>/g, '<span class="cross-pill">$1</span>');
+  } else {
+    content = marked.parse(mod.content || '').replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
+  }
+  return content;
+}
+
+// 构建离屏导出容器（带网站设计风格）。layerIdx>=0 时只渲染该层（单页导出）
+function buildExportCard(data, layerIdx = -1) {
+  const isDark = currentIsDark();
+  const t = exportThemeTokens(isDark);
+  injectExportStyle(t);
+  const structure = data.structure || parseMarkdown(data.markdown);
+  const layers = structure.layers || [];
+  const glossary = data.glossary || [];
+  const isSingle = layerIdx >= 0 && !!layers[layerIdx];
+  let html = `<div class="exp-header">
+    <span class="exp-brand">framework</span>
+    <h1 class="exp-concept">${esc(data.concept)}</h1>
+    <div class="exp-meta">元框架引擎 · 五层认知框架 · ${isSingle ? `第 ${layerIdx + 1} 层 · 单页导出` : `共 ${layers.length} 层 · 内容已通过事实核对`}</div>
+  </div>`;
+  const renderList = isSingle ? [layerIdx] : layers.map((_, i) => i);
+  renderList.forEach((li) => {
+    const layer = layers[li];
+    html += `<section class="exp-layer">
+      <div class="exp-layer-head">
+        <span class="exp-layer-num">第 ${li + 1} 层</span>
+        <span class="exp-layer-name">${esc(layer.name || '')}</span>
+        ${layer.estimatedTime ? `<span class="exp-layer-time">${esc(layer.estimatedTime)}</span>` : ''}
+      </div>
+      <div class="exp-layer-bar"></div>
+      <div class="exp-modules">`;
+    for (const mod of (layer.modules || [])) {
+      const c = renderModuleContentForExport(mod, { concept: data.concept, glossary });
+      html += `<div class="module">
+        <div class="module-title">${esc(mod.id)}. ${esc(mod.title)}</div>
+        <div class="module-content">${c}</div>
+      </div>`;
+    }
+    html += `</div></section>`;
+  });
+  html += `<div class="exp-footer">
+    <div class="exp-foot-brand">由元引擎生成</div>
+    <div class="exp-foot-note">内容已通过事实核对 · <span class="exp-mark">‡</span> 标记为 AI 生成、未找到权威出处，仅供参考</div>
+  </div>`;
+  html = resolveCssVars(html);
+  const root = document.createElement('div');
+  root.className = 'export-root';
+  root.innerHTML = html;
+  Object.assign(root.style, { position: 'fixed', left: '-10000px', top: '0', width: '820px' });
+  document.body.appendChild(root);
+  return root;
+}
+
+function showExportLoading(text) {
+  let el = document.getElementById('exportLoading');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'exportLoading';
+    el.className = 'export-loading';
+    el.innerHTML = `<div class="box"><span class="spin"></span><span class="txt"></span></div>`;
+    document.body.appendChild(el);
+  }
+  el.querySelector('.txt').textContent = text;
+  el.style.display = 'flex';
+}
+function hideExportLoading() {
+  const el = document.getElementById('exportLoading');
+  if (el) el.style.display = 'none';
+}
+
+function checkExportLibs() {
+  if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+    alert('导出图片/PDF 所需组件未加载（可能处于离线环境）。请连网后刷新页面再试，或先用「Markdown」导出。');
+    return false;
+  }
+  return true;
+}
+
+async function exportPng(concept) {
+  if (!checkExportLibs()) return;
+  const data = await dbGet('frameworks', concept);
+  if (!data) return;
+  showExportLoading('正在生成 PNG 长图…');
+  // 等一帧，确保容器布局完成
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const root = buildExportCard(data);
+  try {
+    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    canvas.toBlob((blob) => {
+      if (blob) downloadFile(blob, `${concept}-认知框架.png`, 'image/png');
+      root.remove();
+      hideExportLoading();
+    }, 'image/png');
+  } catch (e) {
+    console.error('[exportPng] 失败:', e);
+    root.remove();
+    hideExportLoading();
+    alert('PNG 导出失败：' + (e.message || e));
+  }
+}
+
+async function exportPdf(concept) {
+  if (!checkExportLibs()) return;
+  const data = await dbGet('frameworks', concept);
+  if (!data) return;
+  showExportLoading('正在生成 PDF 文档…');
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const root = buildExportCard(data);
+  try {
+    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pw = 210, ph = 297;
+    const imgW = pw;
+    const imgH = canvas.height * imgW / canvas.width;
+    let heightLeft = imgH, pos = 0;
+    pdf.addImage(imgData, 'PNG', 0, pos, imgW, imgH);
+    heightLeft -= ph;
+    while (heightLeft > 0) {
+      pos -= ph;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, pos, imgW, imgH);
+      heightLeft -= ph;
+    }
+    pdf.save(`${concept}-认知框架.pdf`);
+    root.remove();
+    hideExportLoading();
+  } catch (e) {
+    console.error('[exportPdf] 失败:', e);
+    root.remove();
+    hideExportLoading();
+    alert('PDF 导出失败：' + (e.message || e));
+  }
+}
+
+// 导出指定层（第 li 层，0 基）为带设计风格的单页 PNG
+async function exportSingleLayer(li, e) {
+  if (e) e.stopPropagation();
+  closeExportMenuOnce();
+  if (!checkExportLibs()) return;
+  const concept = readerConcept();
+  if (!concept) return;
+  const data = await dbGet('frameworks', concept);
+  if (!data) return;
+  if (!data.structure || !data.structure.layers || !data.structure.layers[li]) {
+    alert('该页尚未就绪，请稍候或等全部生成后再试。');
+    return;
+  }
+  showExportLoading(`正在导出第 ${li + 1} 层…`);
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const root = buildExportCard(data, li);
+  try {
+    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    canvas.toBlob((blob) => {
+      if (blob) downloadFile(blob, `${concept}-第${li + 1}层.png`, 'image/png');
+      root.remove();
+      hideExportLoading();
+    }, 'image/png');
+  } catch (err) {
+    console.error('[exportSingleLayer] 失败:', err);
+    root.remove();
+    hideExportLoading();
+    alert('单页导出失败：' + (err.message || err));
+  }
+}
+
+// 导出菜单（阅读器底部「导出 ▾」）
+async function toggleExportMenu(e) {
+  e.stopPropagation();
+  const existing = document.getElementById('exportMenu');
+  if (existing) { closeExportMenuOnce(); return; }
+  // 确保导出样式（含 .export-menu 的 fixed/z-index）已注入，否则菜单会退化成文档流普通 div
+  injectExportStyle(exportThemeTokens(currentIsDark()));
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  // 读取已生成的各层名称，供「导出单页」列表展示
+  const concept = readerConcept();
+  let layers = [];
+  if (concept) {
+    const data = await dbGet('frameworks', concept);
+    if (data && data.structure && data.structure.layers) layers = data.structure.layers;
+  }
+  const total = layers.length || readerState.totalLayers || 0;
+  let layerBtns;
+  if (total > 0) {
+    const arr = [];
+    for (let i = 0; i < total; i++) {
+      const nm = layers[i] && layers[i].name ? ' · ' + esc(layers[i].name) : '';
+      arr.push(`<button class="export-layer-btn" onclick="exportSingleLayer(${i}, event)">第 ${i + 1} 层${nm}</button>`);
+    }
+    layerBtns = arr.join('');
+  } else {
+    layerBtns = `<button class="export-layer-btn" disabled style="opacity:.5;cursor:default">无可用单页</button>`;
+  }
+  const menu = document.createElement('div');
+  menu.id = 'exportMenu';
+  menu.className = 'export-menu';
+  menu.innerHTML = `
+    <button onclick="doExport('md')">Markdown (.md)</button>
+    <button onclick="doExport('png')">整篇 PNG 长图</button>
+    <button onclick="doExport('pdf')">整篇 PDF 文档</button>
+    <div class="export-menu-sep"></div>
+    <button class="export-sub-toggle" onclick="toggleExportLayerList(event)">导出单页 <span class="exp-caret">▾</span></button>
+    <div class="export-layer-list" id="exportLayerList" style="display:none">${layerBtns}</div>`;
+  document.body.appendChild(menu);
+  menu._anchor = rect;
+  const mr = menu.getBoundingClientRect();
+  let left = rect.left + rect.width / 2 - mr.width / 2;
+  left = Math.max(12, Math.min(left, window.innerWidth - mr.width - 12));
+  menu.style.left = left + 'px';
+  menu.style.top = (rect.top - mr.height - 10) + 'px';
+  setTimeout(() => document.addEventListener('click', closeExportMenuOnce, { once: true }), 0);
+  document.addEventListener('keydown', escCloseExportMenu, { once: true });
+}
+
+// 展开/收起「导出单页」的层选择列表，并按锚点按钮重新定位菜单
+function toggleExportLayerList(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('exportMenu');
+  if (!menu) return;
+  const list = document.getElementById('exportLayerList');
+  if (!list) return;
+  const willShow = list.style.display === 'none';
+  list.style.display = willShow ? 'flex' : 'none';
+  e.currentTarget.classList.toggle('open', willShow);
+  // 展开/收起后整体重定位，确保菜单留在视口内（底部贴住导出按钮上方）
+  const rect = menu._anchor;
+  if (rect) {
+    const mr = menu.getBoundingClientRect();
+    let top = rect.top - mr.height - 10;
+    if (top < 12) top = 12;
+    let left = rect.left + rect.width / 2 - mr.width / 2;
+    left = Math.max(12, Math.min(left, window.innerWidth - mr.width - 12));
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+  }
+}
+function escCloseExportMenu(e) { if (e.key === 'Escape') closeExportMenuOnce(); }
+function closeExportMenuOnce() {
+  const m = document.getElementById('exportMenu');
+  if (m) m.remove();
+  const o = document.getElementById('exportMenuOverlay');
+  if (o) o.remove();
+  document.removeEventListener('keydown', escCloseExportMenu);
+}
+function doExport(kind) {
+  closeExportMenuOnce();
+  const concept = readerConcept();
+  if (!concept) return;
+  if (kind === 'md') exportOne(concept);
+  else if (kind === 'png') exportPng(concept);
+  else if (kind === 'pdf') exportPdf(concept);
 }
 
 // ===== Cache =====
@@ -2672,7 +3175,7 @@ async function syncToObsidian(concept, markdown, glossary) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       // 追加来源标记（兜底：区分系统写入 vs 用户批注）
-      body: JSON.stringify({ concept, markdown: markdown + OBSIDIAN_SOURCE_MARK, glossary, vaultPath: s.obsidianPath })
+      body: JSON.stringify({ concept, markdown: cleanMarkdownForExport(markdown) + OBSIDIAN_SOURCE_MARK, glossary, vaultPath: s.obsidianPath })
     });
     if (resp.ok) console.log('[obsidian] 已同步:', concept);
   } catch (e) {
@@ -3676,8 +4179,8 @@ const OBSIDIAN_SOURCE_MARK = '\n\n---\n> 📌 本文由「元引擎」自动生�
 
 // 不确定事实的标注（轻量：首处带符号‡+虚线下划线，后续仅虚线下划线）
 // 用原生 HTML <u> 标签，markdown 渲染器通常透传；Obsidian 也支持
-const FACT_WARN_FULL = (t) => `<u class="fu">${t}</u><sup class="fu-note" title="AI 生成，未找到权威出处，仅供参考">‡</sup>`;
-const FACT_WARN_SHORT = (t) => `<u class="fu">${t}</u>`;
+const FACT_WARN_FULL = (t) => `<u class="fu" data-tip="AI 生成，未找到权威出处，仅供参考">${t}</u><sup class="fu-note">‡</sup>`;
+const FACT_WARN_SHORT = (t) => `<u class="fu" data-tip="AI 生成，未找到权威出处，仅供参考">${t}</u>`;
 
 const EXTRACT_SYSTEM = `你是一名严谨的事实核查助手。下面是一篇知识框架内容（Markdown）。请抽取其中所有可被外部权威来源（维基百科、官方网站等）独立验证的【具体事实断言】，重点关注：年份/日期、人名、地名、事件、具体数字、机构名。
 忽略：主观评价、定义性/解释性文字、无法客观验证的表述、框架结构标签。
