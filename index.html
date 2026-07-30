@@ -2770,7 +2770,13 @@ function parseMindmapCategories(raw) {
     const trimmed = line.trim();
     const catMatch = trimmed.match(/^-?\s*\**(.+?)\**\s*[:：]?\s*$/) || trimmed.match(/^\s*-\s*\*\*(.+?)\*\*/);
     if (catMatch && !trimmed.match(/^\s*[-*]\s+\S/)) {
-      const name = catMatch[1].trim().replace(/\*\*/g, '');
+      let name = catMatch[1].trim().replace(/\*\*/g, '');
+      // 书名号规则：若有《，取《到最后一个》，中间字符（冒号/破折号/逗号等）一律保留
+      if (name.includes('《')) {
+        const start = name.indexOf('《');
+        const end = name.lastIndexOf('》');
+        if (end > start) name = name.slice(start, end + 1);
+      }
       if (name && (name.length <= 20 || (name.includes('《') && name.length <= 50))) {
         currentCat = { name, items: [], annotation: '' };
         categories.push(currentCat);
@@ -2858,7 +2864,13 @@ function parseMindmapCategories(raw) {
   for (const block of blocks) {
     const blines = block.trim().split('\n').filter(l => l.trim());
     if (blines.length < 2) continue;
-    const name = blines[0].replace(/^[-*#\d.\s]+/, '').replace(/\*\*/g, '').trim();
+    let name = blines[0].replace(/^[-*#\d.\s]+/, '').replace(/\*\*/g, '').trim();
+    // 书名号规则：若有《，取《到最后一个》
+    if (name.includes('《')) {
+      const start = name.indexOf('《');
+      const end = name.lastIndexOf('》');
+      if (end > start) name = name.slice(start, end + 1);
+    }
     const items = blines.slice(1).map(l => ({ name: l.replace(/^\s*[-*#\d.]+\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1').trim(), annotation: '' })).filter(i => i.name);
     if (name && (name.length <= 20 || (name.includes('《') && name.length <= 50)) && items.length > 0) categories.push({ name, items });
   }
