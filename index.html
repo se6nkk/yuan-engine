@@ -27,7 +27,7 @@
   --on-accent: #FFFFFF;        /* 强调底色（按钮）上的文字 */
   --accent-soft: rgba(26,26,28,0.10);
   --accent2-soft: rgba(90,90,94,0.10);
-  --surface: rgba(255,253,250,0.62);   /* 半透明奶油玻璃（替代纯白），reader 实底上接近实色 */
+  --surface: rgba(255,253,250,0.42);   /* 半透明奶油玻璃（替代纯白），更低不透明度强化玻璃透感 */
   --surface-solid: #FBFAF8;            /* 实体表面，需不透明时（如输入框）用 */
   --shadow: rgba(0,0,0,0.06); --shadow-lg: rgba(0,0,0,0.12);
   --green: #10b981; --red-soft: rgba(239,68,68,0.1);
@@ -300,8 +300,8 @@ body.reader-open #app { display: none; }
 /* Result Reader: full-screen paged reading flow */
 .reader {
   position: fixed; inset: 0; z-index: 100;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 52%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
   overflow-y: auto;
   animation: readerIn 0.4s ease;
 }
@@ -312,9 +312,9 @@ body.reader-open #app { display: none; }
   position: sticky; top: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: stretch;
   gap: 0.5rem; padding: 0.5rem 1.2rem 0.6rem;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--bg) 56%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
 }
 .reader-row-1 { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .reader-row-2 {
@@ -358,13 +358,13 @@ body.reader-open #app { display: none; }
 .reader-more-wrap { position: relative; display: none; }
 .reader-capsules { display: flex; align-items: center; gap: 0.4rem; }
 .reader-more-btn {
-  padding: 0.28rem 0.5rem; border-radius: 999px;
+  padding: 0.32rem 0.55rem; border-radius: 999px;
   border: 1px solid var(--rule);
   background: transparent;
   color: var(--muted); cursor: pointer;
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
   transition: all 0.2s; font-family: 'Space Grotesk', -apple-system, sans-serif;
-  line-height: 1;
+  line-height: 1; display: grid; place-items: center;
 }
 .reader-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 .reader-more-menu {
@@ -506,9 +506,8 @@ body.reader-open #app { display: none; }
 }
 .acc-item.acc-open .acc-btn { transform: rotate(90deg); color: var(--accent); background: var(--accent-soft); }
 .acc-icon {
+  width: 15px; height: 15px;
   display: block;
-  line-height: 0;
-  text-align: center;
 }
 .acc-body {
   max-height: 0; overflow: hidden;
@@ -758,46 +757,52 @@ body.reader-open #app { display: none; }
 /* 框架内搜索 */
 .reader-search-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 0.3rem 0.5rem; border-radius: 6px; transition: all 0.2s; }
 .reader-search-btn:hover { color: var(--accent); background: var(--accent-soft); }
-.reader-search-panel { position: fixed; top: 3.6rem; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 0.45rem; z-index: 20; display: flex; align-items: center; gap: 0.6rem; box-shadow: 0 8px 32px var(--shadow); }
+.reader-search-panel { position: fixed; top: 6rem; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); border-radius: 999px; padding: 0.45rem; z-index: 120; display: flex; align-items: center; gap: 0.6rem; backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3); box-shadow: 0 8px 32px color-mix(in srgb, var(--ink) 14%, transparent), inset 0 1px 0 rgba(255,255,255,0.45); }
 .reader-search-panel.hidden { display: none; }
 .reader-search-panel input { flex: 1; min-width: 0; box-sizing: border-box; height: 2rem; border: none; background: color-mix(in srgb, var(--bg) 60%, transparent); border-radius: 999px; outline: none; font-size: 0.95rem; color: var(--ink); padding: 0 1rem; }
 .reader-search-panel span#readerSearchStatus { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
 .reader-search-panel button { flex: none; width: 2rem; height: 2rem; padding: 0; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 0.9rem; border-radius: 999px; transition: all 0.2s; }
 .reader-search-panel button:hover { color: var(--accent); background: var(--accent-soft); }
-#readerSearchOverlay { position: fixed; inset: 0; z-index: 19; background: transparent; }
+#readerSearchOverlay { position: fixed; inset: 0; z-index: 115; background: transparent; }
 #readerSearchOverlay.hidden { display: none; }
 mark.reader-highlight { background: rgba(245, 158, 11, 0.25); border-radius: 2px; padding: 0 2px; }
 mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 
 /* 来源验证面板 */
-.source-panel { position: fixed; top: 3.6rem; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; background: var(--surface); border: 1px solid var(--rule); border-radius: 1.5rem; z-index: 20; box-shadow: 0 8px 32px var(--shadow); overflow: hidden; transition: max-height 0.3s ease; }
+.source-panel { position: fixed; top: 6rem; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); border-radius: 1.5rem; z-index: 120; backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3); box-shadow: 0 8px 32px color-mix(in srgb, var(--ink) 14%, transparent), inset 0 1px 0 rgba(255,255,255,0.45); overflow: hidden; transition: max-height 0.3s ease; }
 .source-panel.hidden { display: none; }
 .source-panel-inner { padding: 0.8rem 1rem; }
 .source-panel-title { font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 0.6rem; }
 .source-panel-loading { font-size: 0.85rem; color: var(--muted); font-style: italic; }
-.source-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule); font-size: 0.85rem; }
+.source-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; font-size: 0.85rem; }
 .source-item:last-child { border-bottom: none; }
-.source-icon { flex-shrink: 0; }
+.source-icon { flex-shrink: 0; width: 1rem; display: inline-flex; align-items: center; justify-content: center; }
 .source-label { flex-shrink: 0; width: 5rem; color: var(--muted); }
 .source-item.hit a { color: var(--accent); text-decoration: none; }
 .source-item.hit a:hover { text-decoration: underline; }
 .source-item.miss span:last-child { color: var(--muted); }
+.source-item.checking { color: var(--muted); }
+.src-status { font-size: 0.8rem; color: var(--muted); }
+.src-spinner { width: 12px; height: 12px; border: 2px solid color-mix(in srgb, var(--muted) 35%, transparent); border-top-color: var(--accent); border-radius: 50%; animation: src-spin 0.7s linear infinite; }
+@keyframes src-spin { to { transform: rotate(360deg); } }
+.source-panel-loading { font-size: 0.85rem; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 0.5rem; }
 
 /* 阅读器导航按钮 */
-.reader-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 110; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 1.5rem; background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 72%, transparent) 35%); pointer-events: none; }
+.reader-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 110; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 1.5rem; background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 48%, transparent) 35%); pointer-events: none; }
 .reader-nav button { pointer-events: auto; opacity: 1; transform: translateY(0); }
-.reader-continue {   padding: 0.7rem 2rem; border-radius: 999px; border: none; background: var(--accent); color: var(--on-accent); font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px color-mix(in srgb, var(--ink) 22%, transparent); }
+.reader-continue { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; height: 2.6rem; min-width: 7rem; padding: 0 2rem; border-radius: 999px; border: none; background: var(--accent); color: var(--on-accent); font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px color-mix(in srgb, var(--ink) 22%, transparent); }
   .reader-nav .reader-continue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 28%, transparent); }
 .reader-nav .reader-continue:active { transform: scale(0.97); }
-.reader-prev { padding: 0.7rem 1.2rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--muted); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.reader-prev { display: inline-flex; align-items: center; justify-content: center; height: 2.6rem; min-width: 7rem; padding: 0 1.6rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--muted); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
 .reader-prev:hover { border-color: var(--accent); color: var(--accent); }
 
 /* Settings Panel */
 .settings-panel {
   position: fixed; top: 0; right: -23.75rem; width: 22.5rem; max-width: 90vw; height: 100vh;
-  background: var(--surface); border-left: 1px solid var(--rule); z-index: 200;
+  background: var(--surface); border-left: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); z-index: 200;
   padding: 1.5rem; transition: right 0.3s ease; overflow-y: auto;
-  box-shadow: -8px 0 32px rgba(0,0,0,0.08);
+  backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: -8px 0 32px color-mix(in srgb, var(--ink) 14%, transparent), inset 1px 0 0 rgba(255,255,255,0.4);
 }
 .settings-panel.open { right: 0; }
 .settings-overlay {
@@ -819,12 +824,14 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 .confirm-overlay.open { display: flex; }
 .confirm-box {
   width: min(26rem, 100%);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--r-panel);
-  box-shadow: 0 20px 60px color-mix(in srgb, var(--ink) 22%, transparent);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--ink) 22%, transparent), inset 0 1px 0 rgba(255,255,255,0.4);
   padding: 1.6rem 1.6rem 1.3rem;
-  font-family: 'Space Grotesk', -apple-system, 'PingFang SC', system-ui, sans-serif;
+  font-family: "Space Grotesk", -apple-system, "PingFang SC", system-ui, sans-serif;
 }
 .confirm-box h3 { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: 0.7rem; }
 .confirm-box p { font-size: 0.88rem; line-height: 1.65; color: var(--muted); margin-bottom: 1.3rem; }
@@ -838,7 +845,22 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 .confirm-btn:hover { border-color: var(--accent); color: var(--accent); }
 .confirm-btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .confirm-btn.primary:hover { opacity: 0.88; color: var(--on-accent); }
-.settings-panel h3 { font-size: 1.1rem; margin-bottom: 1.2rem; }
+.settings-panel h3 { font-size: 1.1rem; margin-bottom: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
+/* Theme mode radio group (system/light/dark) */
+.theme-mode-group { display: flex; gap: 0.4rem; }
+.theme-mode-opt {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  padding: 0.55rem 0.4rem; border-radius: 10px; border: 1.5px solid var(--rule);
+  background: var(--bg); cursor: pointer; font-size: 0.82rem; color: var(--muted);
+  transition: all 0.2s; user-select: none;
+}
+.theme-mode-opt:hover { border-color: var(--accent); }
+.theme-mode-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.theme-mode-opt input { accent-color: var(--accent); }
+/* Obsidian path row */
+.obs-path-row { display: flex; gap: 0.5rem; align-items: stretch; }
+.obs-path-row input { flex: 1; min-width: 0; }
+.obs-browse-btn { flex-shrink: 0; white-space: nowrap; }
 .form-group { margin-bottom: 1.2rem; }
 .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--muted); }
 .form-group input, .form-group select {
@@ -855,6 +877,7 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   background: var(--bg2); color: var(--ink); font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
 }
 .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-icon { width: 1em; height: 1em; display: inline-block; vertical-align: -0.15em; }
 
 /* Export bar */
 .export-bar { display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 1rem; }
@@ -949,9 +972,14 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   </div>
 </div>
 <div class="settings-panel" id="settingsPanel">
-  <h3>⚙️ 设置</h3>
+  <h3>SETTINGS</h3>
   <div class="form-group">
-    <button class="btn-secondary" onclick="toggleTheme()" style="width:100%;margin-bottom:0.5rem;">🌙 切换深色/浅色模式</button>
+    <label>外观主题</label>
+    <div class="theme-mode-group">
+      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="system" checked> <span>跟随系统</span></label>
+      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="light"> <span>浅色</span></label>
+      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="dark"> <span>暗色</span></label>
+    </div>
   </div>
   <div class="form-group">
     <label>API Key</label>
@@ -974,11 +1002,20 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
     </div>
   </div>
   <div class="form-group">
+    <label>Obsidian 笔记库名称（Vault）</label>
+    <div class="obs-path-row">
+      <input type="text" id="obsidianPath" placeholder="例如 MyVault（Obsidian 中显示的库名）">
+      <button class="btn-secondary obs-browse-btn" onclick="browseObsidianPath()" type="button">选择…</button>
+      <input type="file" id="obsidianDirInput" webkitdirectory directory multiple style="display:none">
+    </div>
+    <div class="hint">用于同步到 Obsidian 本地服务（Local REST API）。可点「选择…」选取库文件夹自动填入，或直接手动填写库名；未配置则内容仅存于本地缓存，每次可能不一致</div>
+  </div>
+  <div class="form-group">
     <button class="btn-secondary" onclick="saveSettings()">保存设置</button>
     <button class="btn-secondary" onclick="clearCache()" style="margin-left:0.5rem;color:var(--accent2)">清空缓存</button>
   </div>
   <div class="form-group">
-    <button class="btn-secondary" onclick="exportAll()">📥 导出全部缓存</button>
+    <button class="btn-secondary" onclick="exportAll()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出全部框架实例</button>
   </div>
 </div>
 
@@ -1246,7 +1283,13 @@ function loadSettings() {
     document.getElementById('apiBase').value = s.apiBase || 'https://open.bigmodel.cn/api/paas/v4';
     document.getElementById('modelName').value = s.modelName || 'glm-4-plus';
     document.querySelector(`input[name="genMode"][value="${s.genMode || 'cache'}"]`).checked = true;
-    if (s.theme) document.documentElement.setAttribute('data-theme', s.theme);
+    // Theme mode: system / light / dark
+    const themeMode = s.themeMode || 'system';
+    const modeRadio = document.querySelector(`input[name="themeMode"][value="${themeMode}"]`);
+    if (modeRadio) modeRadio.checked = true;
+    applyThemeMode(themeMode);
+    // Obsidian path
+    document.getElementById('obsidianPath').value = s.obsidianPath || '';
   } catch(e) {}
 }
 
@@ -1256,11 +1299,75 @@ function saveSettings() {
     apiBase: document.getElementById('apiBase').value.trim(),
     modelName: document.getElementById('modelName').value.trim(),
     genMode: document.querySelector('input[name="genMode"]:checked').value,
-    theme: document.documentElement.getAttribute('data-theme') || 'light'
+    themeMode: document.querySelector('input[name="themeMode"]:checked').value,
+    obsidianPath: document.getElementById('obsidianPath').value.trim()
   };
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   closeSettings();
 }
+
+/** Apply theme mode: 'system' | 'light' | 'dark' */
+function applyThemeMode(mode) {
+  if (mode === 'system') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', mode);
+  }
+  // Sync topbar toggle visual to effective dark state
+  const effectiveDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  syncThemeSwitch(effectiveDark);
+  // Save mode
+  const s = getSettings(); s.themeMode = mode;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+/** Handle theme mode radio change in settings panel */
+document.addEventListener('DOMContentLoaded', () => {
+  // Delegate radio change for themeMode
+  document.addEventListener('change', (e) => {
+    if (e.target.name === 'themeMode') {
+      applyThemeMode(e.target.value);
+    }
+  });
+  // Listen for OS scheme changes when in "system" mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const s = getSettings();
+    if ((s.themeMode || 'system') === 'system') {
+      syncThemeSwitch(e.matches);
+    }
+  });
+});
+
+/** Browse for Obsidian vault folder */
+function browseObsidianPath() {
+  const dirInput = document.getElementById('obsidianDirInput');
+  // Chrome / Edge：原生文件夹选择器（直接返回目录句柄）
+  if ('showDirectoryPicker' in window) {
+    window.showDirectoryPicker()
+      .then(dirHandle => { document.getElementById('obsidianPath').value = dirHandle.name; })
+      .catch(() => {}); // 用户取消
+    return;
+  }
+  // Safari / Firefox 等：用 webkitdirectory 选文件夹，取顶层文件夹名作为 Vault 名
+  if (dirInput) {
+    dirInput.value = '';
+    dirInput.click();
+  }
+}
+// webkitdirectory 选中后的处理：取顶层文件夹名
+document.addEventListener('DOMContentLoaded', () => {
+  const dirInput = document.getElementById('obsidianDirInput');
+  if (dirInput) {
+    dirInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files && files.length) {
+        const rel = files[0].webkitRelativePath || '';
+        const name = rel.split('/')[0] || files[0].name;
+        document.getElementById('obsidianPath').value = name;
+      }
+    });
+  }
+});
 
 function getSettings() {
   try {
@@ -1268,14 +1375,23 @@ function getSettings() {
   } catch(e) { return {}; }
 }
 
-// ===== Theme =====
+// ===== Theme (3-state: system / light / dark) =====
 function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  const s = getSettings(); s.theme = isDark ? 'light' : 'dark';
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-  // 同步滑动开关
-  syncThemeSwitch(!isDark);
+  const s = getSettings();
+  const currentMode = s.themeMode || 'system';
+  const currentAttr = document.documentElement.getAttribute('data-theme');
+  const isDark = currentAttr === 'dark' || (!currentAttr && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  // If in system mode, clicking toggles to manual; otherwise flip light↔dark
+  let newMode;
+  if (currentMode === 'system') {
+    newMode = isDark ? 'light' : 'dark';
+  } else {
+    newMode = isDark ? 'light' : 'dark';
+  }
+  applyThemeMode(newMode);
+  // Sync settings panel radio
+  const radio = document.querySelector(`input[name="themeMode"][value="${newMode}"]`);
+  if (radio) radio.checked = true;
 }
 /** 同步滑动开关 UI 状态（checked=暗色），同时处理首页与阅读器内的开关 */
 function syncThemeSwitch(isDark) {
@@ -1635,16 +1751,6 @@ async function startGenerate() {
       bar.classList.remove('active');
     }
 
-    // 异步来源校验（不阻塞渲染）
-    verifySources(concept).then(vr => {
-      if (typeof readerState !== 'undefined') {
-        readerState.sources = vr.sources;
-        readerState.concept = concept;
-        const panel = document.getElementById('sourcePanel');
-        if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
-      }
-    }).catch(() => {});
-
   } catch (err) {
     console.error(err);
   } finally {
@@ -1879,7 +1985,7 @@ function renderResult(data) {
             <button class="reader-capsule" onclick="confirmRegenerate(readerConcept())">REGENERATE</button>
           </div>
           <div class="reader-more-wrap">
-            <button class="reader-more-btn" onclick="toggleReaderMore(this)" title="更多操作">▾</button>
+            <button class="reader-more-btn" onclick="toggleReaderMore(this)" title="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;display:block"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="reader-more-menu">
               <button class="reader-more-item" onclick="toggleSourcePanel();closeReaderMore()">SOURCES</button>
               <button class="reader-more-item" onclick="toggleReaderSearch();closeReaderMore()">SEARCH</button>
@@ -1889,13 +1995,6 @@ function renderResult(data) {
         </div>
       </div>
     </div>
-    <div id="sourcePanel" class="source-panel hidden"></div>
-    <div id="readerSearchPanel" class="reader-search-panel hidden">
-      <input id="readerSearchInput" type="text" placeholder="搜索当前框架（标题、模块、内容）" />
-      <span id="readerSearchStatus"></span>
-      <button onclick="closeReaderSearch()">✕</button>
-    </div>
-    <div id="readerSearchOverlay" class="hidden"></div>
     <div class="reader-pages" id="readerPages"></div>
   `;
   document.body.appendChild(reader);
@@ -1904,6 +2003,17 @@ function renderResult(data) {
   nav.className = 'reader-nav';
   nav.id = 'readerNav';
   document.body.appendChild(nav);
+  // 搜索框 / 来源面板同样移到 reader 外部，避免随阅读器内容滚动
+  const sourcePanel = document.createElement('div');
+  sourcePanel.id = 'sourcePanel'; sourcePanel.className = 'source-panel hidden';
+  document.body.appendChild(sourcePanel);
+  const searchPanel = document.createElement('div');
+  searchPanel.id = 'readerSearchPanel'; searchPanel.className = 'reader-search-panel hidden';
+  searchPanel.innerHTML = '<input id="readerSearchInput" type="text" placeholder="搜索当前框架（标题、模块、内容）" /><span id="readerSearchStatus"></span><button onclick="closeReaderSearch()">✕</button>';
+  document.body.appendChild(searchPanel);
+  const searchOverlay = document.createElement('div');
+  searchOverlay.id = 'readerSearchOverlay'; searchOverlay.className = 'hidden';
+  document.body.appendChild(searchOverlay);
   document.body.style.overflow = 'hidden';
   document.body.classList.add('reader-open');
   // 同步阅读器内主题开关到当前主题
@@ -1911,8 +2021,8 @@ function renderResult(data) {
   const isDarkNow = curTheme === 'dark' || (!curTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
   syncThemeSwitch(isDarkNow);
 
-  // 搜索事件绑定
-  const searchInput = reader.querySelector('#readerSearchInput');
+  // 搜索事件绑定（searchInput 现在在 body 直子，不在 reader 内）
+  const searchInput = document.getElementById('readerSearchInput');
   searchInput.addEventListener('input', e => performReaderSearch(e.target.value));
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -1923,7 +2033,7 @@ function renderResult(data) {
       closeReaderSearch();
     }
   });
-  reader.querySelector('#readerSearchOverlay').addEventListener('click', closeReaderPopups);
+  searchOverlay.addEventListener('click', closeReaderPopups);
 
   const pagesContainer = reader.querySelector('#readerPages');
 
@@ -1936,6 +2046,28 @@ function renderResult(data) {
   updateReaderNav();
 
   reader.focus();
+
+  // 来源校验：所有入口（生成 / 缓存 / Obsidian / 重新生成）统一在此触发
+  // 预填 pending 状态，确保面板打开时立即显示渠道列表（而非空白 loading）
+  const PENDING_CHANNELS = ['Wikidata', 'SearXNG', '中文维基', 'DuckDuckGo'];
+  readerState.sources = PENDING_CHANNELS.map(label => ({ label, status: 'pending', hit: false, url: '', title: '' }));
+  verifySources(concept, (liveSources) => {
+    readerState.sources = liveSources;
+    const panel = document.getElementById('sourcePanel');
+    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
+  }).then(vr => {
+    readerState.sources = vr.sources;
+    const panel = document.getElementById('sourcePanel');
+    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
+  }).catch((err) => {
+    console.warn('[verifySources] 校验异常:', err);
+    // 标记所有剩余 pending 为 miss，让用户能看到结果
+    readerState.sources = readerState.sources.map(s =>
+      s.status === 'pending' ? { ...s, status: 'miss' } : s
+    );
+    const panel = document.getElementById('sourcePanel');
+    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
+  });
 }
 
 function goToLayer(idx) {
@@ -1966,7 +2098,7 @@ function updateReaderNav() {
   if (cur < total - 1) {
     html += `<button class="reader-continue" onclick="goToLayer(${cur + 1})">继续 ▼</button>`;
   } else {
-    html += `<button class="reader-continue" onclick="exportOne(readerConcept())">导出</button>`;
+    html += `<button class="reader-continue" onclick="exportOne(readerConcept())">导出<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
   }
   nav.innerHTML = html;
 }
@@ -1976,6 +2108,12 @@ function closeReader() {
   if (reader) reader.remove();
   const nav = document.getElementById('readerNav');
   if (nav) nav.remove();
+  const sp = document.getElementById('sourcePanel');
+  if (sp) sp.remove();
+  const spn = document.getElementById('readerSearchPanel');
+  if (spn) spn.remove();
+  const so = document.getElementById('readerSearchOverlay');
+  if (so) so.remove();
   document.body.style.overflow = '';
   document.body.classList.remove('reader-open');
   showPage('pageInput');
@@ -2205,12 +2343,22 @@ async function clearCache() {
 }
 
 // ===== Obsidian sync =====
+function getObsidianUrl(path) {
+  const s = getSettings();
+  const vault = s.obsidianPath || '';
+  return 'http://127.0.0.1:8765/save';
+}
 async function syncToObsidian(concept, markdown, glossary) {
   try {
-    const resp = await fetch('http://127.0.0.1:8765/save', {
+    const s = getSettings();
+    if (!s.obsidianPath) {
+      console.log('[obsidian] 未配置笔记库路径，跳过同步');
+      return;
+    }
+    const resp = await fetch(getObsidianUrl(s.obsidianPath), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ concept, markdown, glossary })
+      body: JSON.stringify({ concept, markdown, glossary, vaultPath: s.obsidianPath })
     });
     if (resp.ok) console.log('[obsidian] 已同步:', concept);
   } catch (e) {
@@ -2220,9 +2368,11 @@ async function syncToObsidian(concept, markdown, glossary) {
 
 async function readFromObsidian(concept) {
   try {
+    const s = getSettings();
+    if (!s.obsidianPath) return null;
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3000);
-    const resp = await fetch(`http://127.0.0.1:8765/concept?q=${encodeURIComponent(concept)}`, { signal: ctrl.signal });
+    const resp = await fetch(`http://127.0.0.1:8765/concept?q=${encodeURIComponent(concept)}&vault=${encodeURIComponent(s.obsidianPath)}`, { signal: ctrl.signal });
     clearTimeout(t);
     if (!resp.ok) return null;
     const data = await resp.json();
@@ -2772,7 +2922,7 @@ function generateAccordionHTML(raw) {
     <div class="acc-item${i === 0 ? ' acc-open' : ''}">
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="acc-title">${esc(it.title)}</span>
-        <span class="acc-btn"><span class="acc-icon">▸</span></span>
+        <span class="acc-btn"><svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
       </div>
       <div class="acc-body"><div class="acc-body-inner">${marked.parse(it.body)}</div></div>
     </div>
@@ -3085,84 +3235,104 @@ async function searchWebSources(concept) {
 
 // ===== 四级来源校验（变更单-40） =====
 
-async function verifySources(concept) {
-  const sources = [];
-  const timeout = 5000;
+// ===== 来源校验（逐渠道实时回报进度） =====
+const SOURCE_TIMEOUT = 5000;
 
-  // L1: Wikidata SPARQL
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeout);
-    const sparqlUrl = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(
-      `SELECT ?item ?itemLabel ?itemDescription WHERE { ?item rdfs:label "${concept}"@zh. SERVICE wikibase:label { bd:serviceParam wikibase:language "zh". } } LIMIT 1`
-    );
-    const res = await fetch(sparqlUrl, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
-    clearTimeout(timer);
-    const data = await res.json();
-    const bindings = (data.results && data.results.bindings) || [];
-    if (bindings.length > 0) {
-      const b = bindings[0];
-      const qid = b.item.value.split('/').pop();
-      sources.push({ level: 1, label: 'Wikidata', url: b.item.value, title: (b.itemLabel && b.itemLabel.value) || concept, hit: true });
-    } else {
-      sources.push({ level: 1, label: 'Wikidata', url: '', title: '', hit: false });
-    }
-  } catch (e) {
-    sources.push({ level: 1, label: 'Wikidata', url: '', title: '', hit: false });
+async function verifyWikidata(concept) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SOURCE_TIMEOUT);
+  const sparqlUrl = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(
+    `SELECT ?item ?itemLabel ?itemDescription WHERE { ?item rdfs:label "${concept}"@zh. SERVICE wikibase:label { bd:serviceParam wikibase:language "zh". } } LIMIT 1`
+  );
+  const res = await fetch(sparqlUrl, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+  clearTimeout(timer);
+  const data = await res.json();
+  const bindings = (data.results && data.results.bindings) || [];
+  if (bindings.length > 0) {
+    const b = bindings[0];
+    return { hit: true, url: b.item.value, title: (b.itemLabel && b.itemLabel.value) || concept };
   }
+  return { hit: false, url: '', title: '' };
+}
 
-  // L2: SearXNG（复用已有 searchWebSources）
-  try {
-    const sr = await searchWebSources(concept);
-    if (sr.snippets && sr.snippets.length > 0) {
-      const s = sr.snippets[0];
-      sources.push({ level: 2, label: 'SearXNG', url: s.url || '', title: s.text ? s.text.substring(0, 60) : concept, hit: true });
-    } else {
-      sources.push({ level: 2, label: 'SearXNG', url: '', title: '', hit: false });
-    }
-  } catch (e) {
-    sources.push({ level: 2, label: 'SearXNG', url: '', title: '', hit: false });
+async function verifySearXNG(concept) {
+  const sr = await searchWebSources(concept);
+  if (sr.snippets && sr.snippets.length > 0) {
+    const s = sr.snippets[0];
+    return { hit: true, url: s.url || '', title: s.text ? s.text.substring(0, 60) : concept };
   }
+  return { hit: false, url: '', title: '' };
+}
 
-  // L3: 中文维基 API
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeout);
-    const wikiUrl = `https://zh.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=${encodeURIComponent(concept)}&format=json&srlimit=1`;
-    const res = await fetch(wikiUrl, { signal: ctrl.signal });
-    clearTimeout(timer);
-    const data = await res.json();
-    const results = (data.query && data.query.search) || [];
-    if (results.length > 0) {
-      const r = results[0];
-      const pageUrl = `https://zh.wikipedia.org/wiki?curid=${r.pageid}`;
-      sources.push({ level: 3, label: '中文维基', url: pageUrl, title: r.title, hit: true });
-    } else {
-      sources.push({ level: 3, label: '中文维基', url: '', title: '', hit: false });
-    }
-  } catch (e) {
-    sources.push({ level: 3, label: '中文维基', url: '', title: '', hit: false });
+async function verifyZhWiki(concept) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SOURCE_TIMEOUT);
+  const wikiUrl = `https://zh.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=${encodeURIComponent(concept)}&format=json&srlimit=1`;
+  const res = await fetch(wikiUrl, { signal: ctrl.signal });
+  clearTimeout(timer);
+  const data = await res.json();
+  const results = (data.query && data.query.search) || [];
+  if (results.length > 0) {
+    const r = results[0];
+    return { hit: true, url: `https://zh.wikipedia.org/wiki?curid=${r.pageid}`, title: r.title };
   }
+  return { hit: false, url: '', title: '' };
+}
 
-  // L4: DDG Instant Answer
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeout);
-    const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(concept)}&format=json&no_html=1`;
-    const res = await fetch(ddgUrl, { signal: ctrl.signal });
-    clearTimeout(timer);
-    const data = await res.json();
-    const ddgUrl2 = data.AbstractURL || (data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].FirstURL) || '';
-    const ddgTitle = data.Heading || (data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].Text) || '';
-    if (ddgUrl2) {
-      sources.push({ level: 4, label: 'DDG', url: ddgUrl2, title: ddgTitle || concept, hit: true });
-    } else {
-      sources.push({ level: 4, label: 'DDG', url: '', title: '', hit: false });
-    }
-  } catch (e) {
-    sources.push({ level: 4, label: 'DDG', url: '', title: '', hit: false });
+async function verifyDDG(concept) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SOURCE_TIMEOUT);
+  const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(concept)}&format=json&no_html=1`;
+  const res = await fetch(ddgUrl, { signal: ctrl.signal });
+  clearTimeout(timer);
+  const data = await res.json();
+  const ddgUrl2 = data.AbstractURL || (data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].FirstURL) || '';
+  const ddgTitle = data.Heading || (data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].Text) || '';
+  if (ddgUrl2) {
+    return { hit: true, url: ddgUrl2, title: ddgTitle || concept };
   }
+  return { hit: false, url: '', title: '' };
+}
 
+/**
+ * 并行校验 4 个渠道来源，每完成一个就调用 onProgress(sources) 实时刷新 UI。
+ * 全局硬超时（VERIFY_HARD_TIMEOUT）兜底，任何渠道挂死都不会拖垮整体。
+ * @returns {Promise<{verified:boolean, sources:Array}>}
+ */
+const VERIFY_HARD_TIMEOUT = 12000;
+async function verifySources(concept, onProgress) {
+  const channels = [
+    { label: 'Wikidata', run: verifyWikidata },
+    { label: 'SearXNG', run: verifySearXNG },
+    { label: '中文维基', run: verifyZhWiki },
+    { label: 'DuckDuckGo', run: verifyDDG },
+  ];
+  const sources = channels.map(ch => ({ label: ch.label, status: 'checking', hit: false, url: '', title: '' }));
+  if (onProgress) onProgress(sources);
+
+  // 并行跑所有渠道
+  const tasks = channels.map((ch, i) => Promise.resolve()
+    .then(() => ch.run(concept))
+    .then(r => {
+      const e = sources[i];
+      e.hit = !!r.hit; e.url = r.url || ''; e.title = r.title || '';
+      e.status = e.hit ? 'hit' : 'miss';
+    })
+    .catch(() => { sources[i].status = 'miss'; })
+    .finally(() => { if (onProgress) onProgress(sources); })
+  );
+
+  // 全局兜底：到点强制收尾，把仍在 checking 的标记为 miss
+  const guard = new Promise(resolve => setTimeout(() => {
+    let changed = false;
+    for (const e of sources) {
+      if (e.status === 'checking') { e.status = 'miss'; changed = true; }
+    }
+    if (changed && onProgress) onProgress(sources);
+    resolve();
+  }, VERIFY_HARD_TIMEOUT));
+
+  await Promise.race([Promise.all(tasks), guard]);
   const verified = sources.some(s => s.hit);
   return { verified, sources };
 }
@@ -3194,19 +3364,32 @@ function renderSourcePanel() {
   const panel = document.getElementById('sourcePanel');
   if (!panel) return;
   const sources = (readerState && readerState.sources) || [];
+  const concept = readerState ? readerState.concept : '';
   if (sources.length === 0) {
-    panel.innerHTML = '<div class="source-panel-inner"><div class="source-panel-title">来源验证</div><div class="source-panel-loading">正在校验来源...</div></div>';
+    panel.innerHTML = '<div class="source-panel-inner"><div class="source-panel-title">来源验证</div><div class="source-panel-loading"><span class="src-spinner"></span>正在校验来源...</div></div>';
     return;
   }
-  const concept = readerState.concept || '';
+  const active = sources.filter(s => s.status === 'checking' || s.status === 'pending').length;
+  const allDone = active === 0;
   const verified = sources.some(s => s.hit);
   let html = '<div class="source-panel-inner">';
-  html += `<div class="source-panel-title">来源验证 · ${esc(concept)} ${verified ? '✅' : '⚠️'}</div>`;
+  const titleRight = allDone
+    ? (verified ? '✅ 已验证' : '⚠️ 未找到可靠来源')
+    : `校验中 ${sources.length - active}/${sources.length}`;
+  html += `<div class="source-panel-title">来源验证 · ${esc(concept)} · ${titleRight}</div>`;
   for (const s of sources) {
-    const cls = s.hit ? 'source-item hit' : 'source-item miss';
-    const icon = s.hit ? '✅' : '⬜';
-    const link = s.hit && s.url ? `<a href="${s.url}" target="_blank" rel="noopener">${esc(s.title || s.label)}</a>` : `<span>${esc(s.title || '（未命中）')}</span>`;
-    html += `<div class="${cls}"><span class="source-icon">${icon}</span><span class="source-label">${esc(s.label)}</span>${link}</div>`;
+    let cls, icon, body;
+    if (s.status === 'pending' || s.status === 'checking') {
+      cls = 'source-item checking'; icon = '<span class="src-spinner"></span>';
+      body = '<span class="src-status">校验中…</span>';
+    } else if (s.hit) {
+      cls = 'source-item hit'; icon = '✅';
+      body = s.url ? `<a href="${s.url}" target="_blank" rel="noopener">${esc(s.title || s.label)}</a>` : `<span>${esc(s.title || '（未命中）')}</span>`;
+    } else {
+      cls = 'source-item miss'; icon = '⬜';
+      body = '<span class="src-status">（未命中）</span>';
+    }
+    html += `<div class="${cls}"><span class="source-icon">${icon}</span><span class="source-label">${esc(s.label)}</span>${body}</div>`;
   }
   html += '</div>';
   panel.innerHTML = html;
