@@ -1066,7 +1066,7 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 // ===== Config =====
 const DB_NAME = 'MetaEngineDB', DB_VER = 1;
 const SETTINGS_KEY = 'metaengine_settings';
-const CACHE_VERSION = 'v17'; // v17=领域分类提示词：书籍标题含副标题须放入《》内
+const CACHE_VERSION = 'v18'; // v18=概念类型判定：新增综艺+强制先查搜索再判定防幻觉
 
 // ===== System Prompt (inlined v2.6) =====
 function buildSystemPrompt(concept, searchResults) {
@@ -1077,7 +1077,7 @@ function buildSystemPrompt(concept, searchResults) {
   }
   return `你是一位顶尖的认知科学专家与知识工程师。你的任务是为用户输入的概念「${concept}」生成一个完整的五层渐进认知框架。
 
-**重要：概念类型判定。** 若输入是一个**具体作品名**（动画、电影、电视剧、小说、游戏、漫画等），你必须分析该作品本身（故事设定、世界观、主题思想、创作背景等），**严禁**将其名称拆字做字面哲学解读。例如：输入"灵笼"应分析国产动画《灵笼》的世界观与设定，而非解读"灵魂的笼子"这一抽象概念。若无法确认该名称是否为具体作品，优先参考下方网络搜索信息判断。
+**重要：概念类型判定。** 若输入是一个**具体作品名**（动画、电影、电视剧、综艺、小说、游戏、漫画等），你必须分析该作品本身（故事设定、世界观、主题思想、创作背景等），**严禁**将其名称拆字做字面哲学解读。例如：输入"灵笼"应分析国产动画《灵笼》的世界观与设定，而非解读"灵魂的笼子"这一抽象概念。**开始输出前必须查阅下方网络搜索信息**，根据搜索结果确认输入是否为具体作品：搜索明确指向某作品则按作品分析，搜索无明确结果再按抽象概念处理，严禁在未查证的情况下自行臆断。
 
 输出格式要求：
 使用 Markdown 格式，严格按照以下 12 个模块的结构输出。各模块有独立字数范围，请严格遵守，不可为凑总字数而稀释重头模块、也不可为省字而跳过低字数模块。
@@ -2281,7 +2281,13 @@ function startPipelineProgress(pipe) {
     if (!fill) return;
     const cur = parseFloat(fill.style.width) || 15;
     const diff = pipe._progTarget - cur;
-    const next = cur + diff * 0.12 + (diff > 0 ? 0.4 : -0.4);
+    // 逼近目标（含到顶 100%）时直接吸附，避免 cur 在目标两侧反复 +/-0.4 触发过渡抖动
+    if (Math.abs(diff) < 0.5) {
+      fill.style.width = pipe._progTarget + '%';
+      return;
+    }
+    const step = diff * 0.12;
+    const next = cur + step + (step >= 0 ? 0.4 : -0.4);
     fill.style.width = Math.min(Math.max(next, 15), 100) + '%';
   }, 400);
 }
@@ -2682,7 +2688,7 @@ function downloadFile(content, filename, mime) {
 function cleanMarkdownForExport(md) {
   return md
     .replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
-    .replace(/<\/?u class="fu">/g, '');
+    .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
 }
 
 async function exportAll() {
@@ -2705,7 +2711,21 @@ let _exportStyleInjected = false;
 
 function currentIsDark() {
   const cur = document.documentElement.getAttribute('data-theme');
-  return cur === 'dark' || (!cur && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (cur === 'dark') return true;
+  if (cur === 'light') return false;
+  // system 模式或无属性：回退到 media query + computed 样式双重保险
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) return true;
+  // 最终兜底：读一个已知元素的计算后颜色判断主题（防止 data-theme 未及时同步）
+  try {
+    const cs = getComputedStyle(document.documentElement);
+    const bg = cs.getPropertyValue('--bg').trim();
+    if (bg) {
+      // 解析 rgb/rgba 或 hex，暗色背景通常亮度 < 128
+      const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (m) return (parseInt(m[1]) + parseInt(m[2]) + parseInt(m[3])) / 3 < 128;
+    }
+  } catch(e) {}
+  return false;
 }
 
 function exportThemeTokens(isDark) {
@@ -2716,21 +2736,22 @@ function exportThemeTokens(isDark) {
       muted: '#AAB0B8', accent: '#ECE9E3', accent2: '#BBB6AC', onAccent: '#0E0F13',
       accentSoft: 'rgba(236,233,227,0.10)', glassHi: 'rgba(255,255,255,0.06)',
       cardShadow: '0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
+      menuBg: 'rgba(30,33,40,0.88)', menuBorder: 'rgba(255,255,255,0.14)',
       fuColor: '#AAB0B8', bar: '#BBB6AC'
     };
   }
   return {
     pageBg: '#F1EFEA',
-    cardBg: '#FBFAF8', cardBorder: '#D6D3CD', ink: '#24262B', titleInk: '#161618',
-    muted: '#686562', accent: '#1A1A1C', accent2: '#33333A', onAccent: '#FFFFFF',
+    cardBg: '#FBFAF8', cardBorder: '#D6D3CD', ink: '#1a1a1c', titleInk: '#111214',
+    muted: '#5a5754', accent: '#1A1A1C', accent2: '#2d2e32', onAccent: '#FFFFFF',
     accentSoft: 'rgba(26,26,28,0.08)', glassHi: 'rgba(255,255,255,0.55)',
     cardShadow: '0 18px 48px rgba(40,38,34,0.16), inset 0 1px 0 rgba(255,255,255,0.55)',
+    menuBg: 'rgba(255,255,255,0.90)', menuBorder: 'rgba(0,0,0,0.10)',
     fuColor: '#686562', bar: '#33333A'
   };
 }
 
 function injectExportStyle(t) {
-  if (_exportStyleInjected) return;
   const css = `
   .export-root {
     box-sizing: border-box; width: 820px; margin: 0 auto; padding: 44px 40px 36px;
@@ -2758,10 +2779,13 @@ function injectExportStyle(t) {
   .export-root .exp-modules { display: flex; flex-direction: column; gap: 14px; }
   .export-root .module {
     background: ${t.cardBg}; border: 1px solid ${t.cardBorder}; border-radius: 14px; padding: 18px 20px;
-    box-shadow: ${t.cardShadow};
+    /* 导出完全不用阴影，html2canvas 会把任何 shadow 渲染成半透明层蒙在文字上 */
+    box-shadow: none;
   }
-  .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.accent2}; margin-bottom: 10px; }
-  .export-root .module-content { font-size: 0.92rem; color: ${t.ink}; }
+  .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.titleInk} !important; margin-bottom: 10px; }
+  .export-root .module-content { font-size: 0.92rem; color: ${t.ink} !important; }
+  .export-root .module-content * { color: ${t.ink} !important; }
+  .export-root .module-content strong, .export-root .module-content b, .export-root .module-content h1, .export-root .module-content h2, .export-root .module-content h3, .export-root .module-content h4 { color: ${t.titleInk} !important; }
   .export-root .module-content p { margin: 0 0 0.6rem; }
   .export-root .module-content h1,.export-root .module-content h2,.export-root .module-content h3,.export-root .module-content h4 { color: ${t.titleInk}; margin: 0.8rem 0 0.4rem; font-weight: 700; }
   .export-root .module-content ul,.export-root .module-content ol { margin: 0 0 0.6rem 1.3rem; padding: 0; }
@@ -2775,8 +2799,8 @@ function injectExportStyle(t) {
   .export-root .mod-label strong { font-weight: 700; }
   .export-root .mod-val { flex: 1; min-width: 0; }
   .export-root .card-phase-item { margin-bottom: 0.55rem; }
-  .export-root .card-phase-label { display: block; font-weight: 700; color: ${t.titleInk}; margin-bottom: 0.15rem; }
-  .export-root .card-phase-text { display: block; color: ${t.ink}; }
+  .export-root .card-phase-label { display: block; font-weight: 700; color: ${t.titleInk} !important; margin-bottom: 0.15rem; }
+  .export-root .card-phase-text { display: block; color: ${t.ink} !important; }
   .export-root .viz-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: ${t.cardBg}; }
   .export-root .viz-card-pro { border-left: 3px solid ${t.accent}; background: ${t.cardBg}; }
   .export-root .card-pill { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-bottom: 8px; background: ${t.accentSoft}; color: ${t.accent2}; }
@@ -2817,13 +2841,14 @@ function injectExportStyle(t) {
   @keyframes expspin { to { transform: rotate(360deg); } }
   .export-menu {
     position: fixed; z-index: 210; min-width: 13rem; display: flex; flex-direction: column; gap: 2px;
-    background: var(--surface-solid); border: 1px solid var(--rule); border-radius: 14px; padding: 6px;
+    background: ${t.menuBg}; backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid ${t.menuBorder}; border-radius: 14px; padding: 6px;
     box-shadow: 0 18px 48px rgba(0,0,0,0.32);
   }
   .export-menu-sep { height: 1px; background: var(--rule); margin: 4px 2px; opacity: 0.6; }
   .export-menu button {
     display: flex; align-items: center; gap: 8px; text-align: left; background: none; border: none;
-    color: ${t.ink}; font-size: 0.88rem; padding: 9px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+    color: ${t.titleInk}; font-size: 0.88rem; padding: 9px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap;
   }
   .export-menu button:hover { background: ${t.accentSoft}; color: ${t.accent2}; }
   .export-menu .export-sub-toggle { justify-content: space-between; gap: 6px; }
@@ -2833,11 +2858,13 @@ function injectExportStyle(t) {
   .export-menu .export-layer-list { display: flex; flex-direction: column; gap: 2px; margin-top: 3px; padding: 5px 2px 3px; border-top: 1px solid var(--rule); }
   .export-menu .export-layer-btn { padding-left: 18px; font-size: 0.84rem; }
   `;
-  const style = document.createElement('style');
-  style.id = 'export-style';
+  let style = document.getElementById('export-style');
+  if (!style) {
+    style = document.createElement('style');
+    style.id = 'export-style';
+    document.head.appendChild(style);
+  }
   style.textContent = css;
-  document.head.appendChild(style);
-  _exportStyleInjected = true;
 }
 
 // 把生成 HTML 里的 var(--token) 解析为字面量（含 SVG 内联属性），绕开 html2canvas 不支持 color-mix/var 的坑
@@ -2936,12 +2963,33 @@ function buildExportCard(data, layerIdx = -1) {
     <div class="exp-foot-note">内容已通过事实核对 · <span class="exp-mark">‡</span> 标记为 AI 生成、未找到权威出处，仅供参考</div>
   </div>`;
   html = resolveCssVars(html);
+  // 清理事实核对标注的 HTML 标签，避免 <u class="fu" data-tip="..."> 原样出现在导出图片中
+  html = html.replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
+             .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
   const root = document.createElement('div');
   root.className = 'export-root';
   root.innerHTML = html;
   Object.assign(root.style, { position: 'fixed', left: '-10000px', top: '0', width: '820px' });
   document.body.appendChild(root);
+  // 用内联 !important 把文字颜色强制写死为当前主题 token，彻底压过主阅读器样式表
+  // （如 .viz-card .card-desc 等同特异性规则）与任何残留内联色，保证导出文字跟随主题
+  applyExportColors(root, t);
   return root;
+}
+
+// 把导出容器内所有文字颜色按当前主题 token 写成内联 !important（独立于 CSS 级联，保证主题跟随）
+function applyExportColors(root, t) {
+  const set = (sel, val) => root.querySelectorAll(sel).forEach(el => el.style.setProperty('color', val, 'important'));
+  // 正文：覆盖模块内容内所有元素（包括 card-desc / card-term / miscon-insight-content 等）
+  set('.module-content, .module-content *', t.ink);
+  // 标题与强调
+  set('.module-title, .exp-layer-name, .exp-concept, .card-phase-label, .card-phase-text, .acc-title, .card-title, .card-term, .module-content strong, .module-content b, .module-content h1, .module-content h2, .module-content h3, .module-content h4', t.titleInk);
+  // 弱化说明文字
+  set('.card-desc, .miscon-insight-content, .acc-body-inner, .exp-meta, .exp-foot-note, .exp-layer-time, .card-pill.unsolved, .module-content blockquote, .module-content .muted-text', t.muted);
+  // 强调色文字（状态胶囊、跨域标签）
+  set('.card-pill:not(.unsolved), .cross-pill, .module-content a', t.accent2);
+  // 品牌/层号胶囊：保持高对比（accent 底 + onAccent 字），不被上面的规则覆盖
+  set('.exp-brand, .exp-layer-num', t.onAccent);
 }
 
 function showExportLoading(text) {
