@@ -122,6 +122,10 @@ const I18N = {
     settings_lang_en: 'English',
     settings_llm_key: 'LLM API Key（生成用��',
     settings_llm_key_hint: '🔒 仅存本地浏览器，不发往任何第三方服务器',
+    settings_key_title: 'API Key',
+    settings_key_desc: '一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。',
+    settings_key_save: '保存并关闭',
+    settings_more: '更多设置',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key（搜索用）',
     settings_ds_key_hint: '用于联网搜索和交叉验证。留空则自动复用上面的 LLM API Key。',
@@ -179,6 +183,10 @@ const I18N = {
     settings_lang_en: 'English',
     settings_llm_key: 'LLM API Key (for generation)',
     settings_llm_key_hint: '🔒 Stored locally, never sent to third parties',
+    settings_key_title: 'API Key',
+    settings_key_desc: 'One key for everything: generation + web search + cross-verification. We recommend DeepSeek (free credits on signup, ~$0.001/search).',
+    settings_key_save: 'Save & Close',
+    settings_more: 'More Settings',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key (for search)',
     settings_ds_key_hint: 'For web search & cross-verification. Falls back to LLM API Key if empty.',
@@ -616,10 +624,8 @@ function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
     document.getElementById('apiKey').value = s.apiKey || '';
-    document.getElementById('apiBase').value = s.apiBase || 'https://open.bigmodel.cn/api/paas/v4';
-    document.getElementById('modelName').value = s.modelName || 'glm-4-plus';
-    const dsEl = document.getElementById('deepseekApiKey');
-    if (dsEl) dsEl.value = s.deepseekApiKey || '';
+    document.getElementById('apiBase').value = s.apiBase || 'https://api.deepseek.com';
+    document.getElementById('modelName').value = s.modelName || 'deepseek-chat';
     document.querySelector(`input[name="genMode"][value="${s.genMode || 'cache'}"]`).checked = true;
     // Theme mode: system / light / dark
     const themeMode = s.themeMode || 'system';
@@ -641,12 +647,10 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  const dsEl = document.getElementById('deepseekApiKey');
   const s = {
     apiKey: document.getElementById('apiKey').value.trim(),
     apiBase: document.getElementById('apiBase').value.trim(),
     modelName: document.getElementById('modelName').value.trim(),
-    deepseekApiKey: dsEl ? dsEl.value.trim() : '',
     genMode: document.querySelector('input[name="genMode"]:checked').value,
     themeMode: document.querySelector('input[name="themeMode"]:checked').value,
     lang: currentLang,
@@ -4654,8 +4658,9 @@ const QUICK_EXAMPLES = ['博弈论', '熵增定律', 'CRISPR', '机器学习', '
 // ===== Onboarding Guide (first-time users) =====
 const ONBOARDING_KEY = 'metaengine_onboarded';
 const ONBOARDING_STEPS = [
+  { icon: '🔑', zh: '设置 API Key', en: 'Set API Key', desc_zh: '一个 Key 搞定所有功能。推荐 DeepSeek（注册即送额度）。', desc_en: 'One key for everything. DeepSeek recommended (free credits).', keyInput: true },
   { icon: '🔍', zh: '输入任意概念', en: 'Enter any concept', desc_zh: '从博弈论到显眼包，学术或流行都行', desc_en: 'From Game Theory to trending memes' },
-  { icon: '🌐', zh: 'AI 联网搜索', en: 'AI web search', desc_zh: 'DeepSeek 实时搜索 + 交叉验证，杜绝编造', desc_en: 'Real-time search with cross-verification' },
+  { icon: '🌐', zh: 'AI 联网搜索', en: 'AI web search', desc_zh: '实时搜索 + 交叉验证，杜绝编造', desc_en: 'Real-time search with cross-verification' },
   { icon: '🧠', zh: '生成认知框架', en: 'Generate framework', desc_zh: '12 模块深度拆解，每条认知都有出处', desc_en: '12-module deep breakdown, every claim sourced' },
   { icon: '📂', zh: '同步到 Obsidian', en: 'Sync to Obsidian', desc_zh: '一键存入你的知识库，随时回顾', desc_en: 'One click into your vault, review anytime' },
 ];
@@ -4671,10 +4676,19 @@ function showOnboarding() {
     const s = ONBOARDING_STEPS[step];
     const title = currentLang === 'en' ? s.en : s.zh;
     const desc = currentLang === 'en' ? s.desc_en : s.desc_zh;
+    const keyExtra = s.keyInput ? `
+      <div style="margin:1rem 0;text-align:left">
+        <input type="password" id="onboardKey" class="onboard-key-input" placeholder="sk-..." autocomplete="off"
+               value="${(JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')).apiKey || ''}">
+        <div style="font-size:0.7rem;color:var(--text-3);margin-top:0.3rem">
+          ${currentLang === 'en' ? '🔒 Stored locally only' : '🔒 仅存本地浏览器'}
+        </div>
+      </div>` : '';
     box.innerHTML = `
       <div class="onboard-icon">${s.icon}</div>
       <h2 class="onboard-title">${title}</h2>
       <p class="onboard-desc">${desc}</p>
+      ${keyExtra}
       <div class="onboard-dots">${ONBOARDING_STEPS.map((_, i) => `<span class="onboard-dot ${i === step ? 'active' : ''}"></span>`).join('')}</div>
       <div class="onboard-actions">
         <button class="onboard-skip">${t('confirm_skip') || '跳过'}</button>
@@ -4682,6 +4696,16 @@ function showOnboarding() {
       </div>`;
     box.querySelector('.onboard-skip').onclick = () => { overlay.remove(); localStorage.setItem(ONBOARDING_KEY, '1'); };
     box.querySelector('.onboard-next').onclick = () => {
+      if (s.keyInput) {
+        const keyEl = document.getElementById('onboardKey');
+        const key = keyEl ? keyEl.value.trim() : '';
+        if (key) {
+          const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+          cfg.apiKey = key;
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
+          try { loadSettings(); } catch(_) {}
+        }
+      }
       if (step < ONBOARDING_STEPS.length - 1) { step++; render(); }
       else { overlay.remove(); localStorage.setItem(ONBOARDING_KEY, '1'); }
     };
@@ -4879,6 +4903,12 @@ try { if (typeof performReaderSearch === 'function') window.performReaderSearch 
 try { if (typeof jumpToMatch === 'function') window.jumpToMatch = jumpToMatch; } catch(e) {}
 try { if (typeof renderQuickExamples === 'function') window.renderQuickExamples = renderQuickExamples; } catch(e) {}
 try { if (typeof setupKeyboard === 'function') window.setupKeyboard = setupKeyboard; } catch(e) {}
+try { if (typeof t === 'function') window.t = t; } catch(e) {}
+try { if (typeof setLang === 'function') window.setLang = setLang; } catch(e) {}
+try { if (typeof openDonate === 'function') window.openDonate = openDonate; } catch(e) {}
+try { if (typeof closeDonate === 'function') window.closeDonate = closeDonate; } catch(e) {}
+try { if (typeof showOnboarding === 'function') window.showOnboarding = showOnboarding; } catch(e) {}
+try { if (typeof closeOnboarding === 'function') window.closeOnboarding = closeOnboarding; } catch(e) {}
 
 // ===== Init =====
 // 容错隔离：每个初始化子步骤独立 try/catch，单个子系统失败不再中断整段初始化

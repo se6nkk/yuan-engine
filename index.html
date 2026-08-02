@@ -1414,6 +1414,15 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 .onboard-skip:hover { border-color: var(--accent); color: var(--accent); }
 .onboard-next { border: none; background: var(--accent); color: var(--on-accent); }
 .onboard-next:hover { opacity: 0.9; }
+.onboard-key-input {
+  width: 100%; padding: 0.55rem 0.8rem; border-radius: 10px;
+  border: 1.5px solid var(--rule); background: var(--bg);
+  font-size: 0.85rem; font-family: "SF Mono","Fira Code","JetBrains Mono",monospace;
+  color: var(--ink); outline: none; transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.onboard-key-input:focus { border-color: var(--accent); }
+.onboard-key-input::placeholder { color: var(--text-3); }
 .confirm-btn.primary:hover { opacity: 0.88; color: var(--on-accent); }
 .settings-panel h3 { font-size: 1.1rem; margin-bottom: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
 /* Theme mode radio group (system/light/dark) */
@@ -1485,6 +1494,56 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   text-align: center;
   padding: 1rem 0;
   border-top: 1px solid var(--border-2);
+}
+
+/* API Key 卡片 */
+.settings-key-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.settings-key-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text-1);
+}
+.key-icon { font-size: 1.3rem; }
+.key-desc {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+}
+.settings-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+.settings-divider::before,
+.settings-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-2);
+}
+.form-group.compact {
+  margin-bottom: 0.5rem;
+}
+.form-group.compact label {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin-bottom: 0.2rem;
 }
 .donate-settings-btn {
   background: var(--card-1);
@@ -1635,6 +1694,25 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 </div>
 <div class="settings-panel" id="settingsPanel">
   <h3 data-i18n="settings_title">SETTINGS</h3>
+
+  <!-- API Key 卡片（独立区域） -->
+  <div class="settings-key-card">
+    <div class="settings-key-header">
+      <span class="key-icon">🔑</span>
+      <span data-i18n="settings_key_title">API Key</span>
+    </div>
+    <p class="key-desc" data-i18n="settings_key_desc">一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。</p>
+    <input type="password" id="apiKey" placeholder="sk-...">
+    <div class="hint" data-i18n="settings_llm_key_hint">🔒 仅存本地浏览器，不发往任何第三方服务器</div>
+    <div class="form-group compact">
+      <label data-i18n="settings_api_base">API Base URL</label>
+      <input type="text" id="apiBase" value="https://api.deepseek.com">
+    </div>
+    <button class="btn-primary" onclick="saveSettings();closeSettings();" style="margin-top:0.5rem;width:100%" data-i18n="settings_key_save">保存并关闭</button>
+  </div>
+
+  <!-- 分隔线 -->
+  <div class="settings-divider"><span data-i18n="settings_more">更多设置</span></div>
   <div class="form-group">
     <label data-i18n="settings_language">界面语言</label>
     <div class="theme-mode-group">
@@ -1644,29 +1722,8 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   </div>
   <div class="form-group">
     <label data-i18n="settings_theme">外观主题</label>
-    <div class="theme-mode-group">
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="system" checked> <span data-i18n="settings_theme_system">跟随系统</span></label>
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="light"> <span data-i18n="settings_theme_light">浅色</span></label>
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="dark"> <span data-i18n="settings_theme_dark">暗色</span></label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label data-i18n="settings_llm_key">LLM API Key（生成用）</label>
-    <input type="password" id="apiKey" placeholder="sk-...">
-    <div class="hint" data-i18n="settings_llm_key_hint">🔒 仅存本地浏览器，不发往任何第三方服务器</div>
-  </div>
-  <div class="form-group">
-    <label data-i18n="settings_api_base">API Base URL</label>
-    <input type="text" id="apiBase" value="https://open.bigmodel.cn/api/paas/v4">
-  </div>
-  <div class="form-group">
-    <label data-i18n="settings_ds_key">DeepSeek API Key（搜索用）</label>
-    <input type="password" id="deepseekApiKey" placeholder="sk-..." autocomplete="off">
-    <div class="hint" data-i18n="settings_ds_key_hint">用于联网搜索获取资料来源。留空则使用旧版搜索管道。</div>
-  </div>
-  <div class="form-group">
     <label data-i18n="settings_model">模型名称</label>
-    <input type="text" id="modelName" value="glm-4-plus">
+    <input type="text" id="modelName" value="deepseek-chat">
   </div>
   <div class="form-group">
     <label data-i18n="settings_gen_mode">生成策略</label>
