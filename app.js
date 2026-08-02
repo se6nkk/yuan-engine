@@ -1930,6 +1930,12 @@ async function startGenerate() {
 
   } catch (err) {
     console.error(err);
+    try {
+      const msg = err && err.message ? err.message : String(err);
+      text.textContent = '出错了: ' + msg;
+      text.style.color = '#b00020';
+      alert('生成失败: ' + msg);
+    } catch(_) {}
   } finally {
     setTimeout(() => { btn.disabled = false; bar.classList.remove('active'); bar.style.display = ''; fill.style.width = '0%'; }, 800);
   }
