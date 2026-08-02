@@ -7,12 +7,9 @@ src-tauri/target/
 .workbuddy/
 _backup_pre_vite/
 archived/
-workflow/marvis_outbox/pending/
-workflow/trae_outbox/pending/
-workflow/wb_outbox/pending/
-workflow/status.json
-workflow/.watcher.log
-workflow/.watcher_state.dir/
+workflow/
+vendor/
+prompts/
 *.log
 *.app
 *.app.old

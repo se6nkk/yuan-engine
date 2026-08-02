@@ -40,7 +40,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 ## 功能
 
 - **智能搜索** — DeepSeek 联网搜索，实时获取最新资料
-- **交叉验证** — 搜索结果先经 AI 事实核查，用可信度分数淘汰面包搜索结果
+- **交叉验证** — 搜索结果先经 AI 事实核查，用可信度分数淘汰部分搜索结果
 - **12 模块认知框架** — 定义、核心概念、发展脉络、关键人物、底层原理、最新前沿、应用场景、常见误区、现实映射、学习方法、跨学科连接、批判思考
 - **P0 防编造** — 发展脉络、底层原理、最新前沿、现实映射 4 个模块绝对禁止 AI 编造
 - **Obsidian 同步** — 一键将生成的 .md 文件写入 Obsidian vault
@@ -59,20 +59,28 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 ### 桌面版（需要 Obsidian 同步）
 
-从 [Releases](https://github.com/se6nkk/yuan-engine/releases) 下载最新 `.dmg`，双击安装即可。
+从 [Releases](https://github.com/se6nkk/yuan-engine/releases) 下载最新 `.dmg`，打开后把 `元引擎.app` 拖入 Applications 文件夹。
 
-> macOS 10.15+。首次打开需右键 → 打开（未签名应用）。
+> macOS 10.15+。应用未签名，首次打开会被系统拦截，请按以下步骤操作：
+>
+> 1. 双击 `元引擎.app`，如果提示「已损坏」或「无法验证开发者」，点「取消」
+> 2. 打开 **终端**（Spotlight 搜索「终端」）
+> 3. 粘贴以下命令并回车：
+>    ```bash
+>    xattr -cr /Applications/元引擎.app
+>    ```
+> 4. 再次双击 `元引擎.app` 即可正常打开
 
 ---
 
 ## 快速开始
 
-1. **设置 API Key** — 打开设置面板，填入 DeepSeek API Key（用于联网搜索）和 LLM API Key（用于生成框架）
+1. **设置 API Key** — 首次打开会弹出引导页，填入 DeepSeek API Key 即可（搜索和生成共用同一个 Key）
 2. **输入概念** — 在首页输入框输入任意概念，如「博弈论」「熵增定律」「CRISPR」
 3. **点击生成** — 等待搜索 → 验证 → 生成完成
 4. **同步 OB** — 设置 Obsidian vault 路径，框架自动写入 vault
 
-> DeepSeek API Key 获取：https://platform.deepseek.com — 搜索成本约 ¥0.001/次，¥10 可用约 2000 次。
+> DeepSeek API Key 获取：https://platform.deepseek.com/api_keys — 注册后创建，新用户送 500 万 token 免费额度，搜索成本约 ¥0.001/次。
 
 ---
 
@@ -81,7 +89,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 - **前端** — Vanilla JS + Vite
 - **桌面** — Tauri v2（macOS）
 - **搜索** — DeepSeek API（联网搜索 + 交叉验证）
-- **生成** — 智谱 GLM-4-Plus / 兼容 OpenAI 格式的任意 LLM
+- **生成** — DeepSeek API（deepseek-chat 模型，搜索与生成共用一个 Key）
 - **存储** — IndexedDB（缓存）+ localStorage（设置）+ 本地文件（Obsidian vault）
 
 ---
