@@ -124,7 +124,7 @@ const I18N = {
     settings_llm_key_hint: '🔒 仅存本地浏览器，不发往任何第三方服务器',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key（搜索用）',
-    settings_ds_key_hint: '用于联网搜索获取资料来源。留空则使用旧版搜索管道。',
+    settings_ds_key_hint: '用于联网搜索和交叉验证。留空则自动复用上面的 LLM API Key。',
     settings_model: '模型名称',
     settings_gen_mode: '生成策略',
     settings_gen_cache: '默认模式 — 已有框架直接返回，不消耗 API',
@@ -181,7 +181,7 @@ const I18N = {
     settings_llm_key_hint: '🔒 Stored locally, never sent to third parties',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key (for search)',
-    settings_ds_key_hint: 'Used for web search to obtain sources. Leave blank to use legacy pipeline.',
+    settings_ds_key_hint: 'For web search & cross-verification. Falls back to LLM API Key if empty.',
     settings_model: 'Model Name',
     settings_gen_mode: 'Generation Strategy',
     settings_gen_cache: 'Default — return cached framework, no API cost',
@@ -1158,7 +1158,8 @@ const DEEPSEEK_API_BASE = 'https://api.deepseek.com';
  */
 async function searchWithDeepSeek(concept) {
   const s = getSettings();
-  if (!s.deepseekApiKey) return null;
+  const dsKey = s.deepseekApiKey || s.apiKey;
+  if (!dsKey) return null;
 
   const searchPrompt = `请通过联网搜索全面检索以下概念的资料，用中文回复。
 
@@ -1178,7 +1179,7 @@ async function searchWithDeepSeek(concept) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${s.deepseekApiKey}`
+        'Authorization': `Bearer ${dsKey}`
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
@@ -1223,7 +1224,8 @@ async function searchWithDeepSeek(concept) {
  */
 async function crossVerify(searchContent, concept) {
   const s = getSettings();
-  if (!s.deepseekApiKey) return { confidence: 0.5, summary: 'API未配置，跳过验证' };
+  const dsKey = s.deepseekApiKey || s.apiKey;
+  if (!dsKey) return { confidence: 0.5, summary: 'API未配置，跳过验证' };
 
   const verifyPrompt = `请对以下关于「${concept}」的搜索结果进行事实核查。
 
@@ -1246,7 +1248,7 @@ ${searchContent.slice(0, 2500)}
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${s.deepseekApiKey}`
+        'Authorization': `Bearer ${dsKey}`
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
