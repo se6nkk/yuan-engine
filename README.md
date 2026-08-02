@@ -18,7 +18,7 @@
 | **OB 同步** | 不支持（可下载 .md） | ✅ 自动写入 Obsidian vault |
 | **API Key** | 存浏览器 localStorage | 存浏览器 localStorage |
 | **数据** | 100% 本地处理 | 100% 本地处理 |
-| **地址** | [yuan-engine.pages.dev](https://yuan-engine.pages.dev) | [GitHub Releases](https://github.com/your-username/yuan-engine/releases) |
+| **地址** | [se6nkk.github.io/yuan-engine](https://se6nkk.github.io/yuan-engine) | [GitHub Releases](https://github.com/se6nkk/yuan-engine/releases) |
 
 > **在线版也能用。** 生成完点「导出」下载 .md 文件，手动拖入 Obsidian 即可。核心功能（搜索、验证、生成）两个版本完全一样。
 
@@ -53,13 +53,13 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 ### 在线版（推荐先用这个体验）
 
-直接打开 [在线版](https://yuan-engine.pages.dev)，无需安装。
+直接打开 [在线版](https://se6nkk.github.io/yuan-engine)，无需安装。
 
 > 需要 Chrome / Edge 浏览器以获得最佳体验。Safari / Firefox 也可用，但部分功能（目录选择）受限。
 
 ### 桌面版（需要 Obsidian 同步）
 
-从 [Releases](https://github.com/your-username/yuan-engine/releases) 下载最新 `.dmg`，双击安装即可。
+从 [Releases](https://github.com/se6nkk/yuan-engine/releases) 下载最新 `.dmg`，双击安装即可。
 
 > macOS 10.15+。首次打开需右键 → 打开（未签名应用）。
 
