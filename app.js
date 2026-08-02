@@ -1860,7 +1860,7 @@ async function startGenerate() {
     // 进度缓动定时器：生成+核对合并驱动（阅读器未开时驱动首页条，开后驱动阅读器内细条）
     startPipelineProgress(pipe);
 
-    const markdown = await callLLMStream(concept, null, systemPrompt, (delta, full) => {
+    const markdown = await callLLMStream(concept, null, (delta, full) => {
       const matches = [...full.matchAll(headerRe)];
       const newCount = matches.length;
       // 当第 newCount 个层头出现，第 1..(newCount-1) 层已可定界（其后有下一层起点）
