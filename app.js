@@ -915,8 +915,19 @@ async function tauriWriteObsidian(files) {
 
 function getSettings() {
   try {
-    return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-  } catch(e) { return {}; }
+    const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    return {
+      apiBase: raw.apiBase || 'https://api.deepseek.com',
+      modelName: raw.modelName || 'deepseek-chat',
+      genMode: raw.genMode || 'cache',
+      lang: raw.lang || 'zh',
+      themeMode: raw.themeMode || 'system',
+      apiKey: raw.apiKey || '',
+      deepseekApiKey: raw.deepseekApiKey || '',
+      obsidianPath: raw.obsidianPath || '',
+      ...raw
+    };
+  } catch(e) { return { apiBase: 'https://api.deepseek.com', modelName: 'deepseek-chat', genMode: 'cache', lang: 'zh', themeMode: 'system', apiKey: '', deepseekApiKey: '', obsidianPath: '' }; }
 }
 
 // ===== Theme (3-state: system / light / dark) =====
@@ -4709,6 +4720,8 @@ function showOnboarding() {
         if (key) {
           const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
           cfg.apiKey = key;
+          cfg.apiBase = cfg.apiBase || 'https://api.deepseek.com';
+          cfg.modelName = cfg.modelName || 'deepseek-chat';
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
           try { loadSettings(); } catch(_) {}
         }
