@@ -1715,7 +1715,7 @@ async function runV25PreGenerate(concept) {
         moduleConfig: modConfig,
         verification  // 交叉验证结果，供 system prompt 标注可疑内容
       };
-      return { abort: false, systemPrompt: buildSystemPrompt(concept, wikiData) };
+      return { abort: false, systemPrompt: buildSystemPrompt(concept, wikiData), urlCandidates: dsResult.urlCandidates || [] };
     }
     // barren: 素材枯竭也要诚实返回，不降级到会编造的旧管道
     if (quality === 'barren') {
@@ -1845,6 +1845,7 @@ async function startGenerate() {
 
     const pipe = {
       concept: currentConcept,
+      urlCandidates: pre.urlCandidates || [],
       rawLayers: [],
       genDone: [],
       verifiedMd: [],
@@ -1913,7 +1914,13 @@ async function startGenerate() {
     if (pipe._progTimer) clearInterval(pipe._progTimer);
 
     // 拼接最终已核对内容，回写缓存 + Obsidian
-    const finalMd = pipe.verifiedMd.filter(Boolean).join('\n---\n');
+    let finalMd = pipe.verifiedMd.filter(Boolean).join('\n---\n');
+    // 在末尾追加参考链接（如存在）
+    const urls = pipe.urlCandidates || [];
+    if (urls.length > 0) {
+      const refBlock = '\n\n---\n\n**参考链接**\n\n' + urls.map((u, i) => `来源「${i + 1}」：${u}`).join('\n');
+      finalMd += refBlock;
+    }
     const finalStructure = parseMarkdown(finalMd);
     const finalGlossary = extractGlossary(finalMd);
     const now = Date.now();
@@ -2341,28 +2348,20 @@ function attachReaderShell(data) {
   return reader;
 }
 
-function startSourceVerify(concept) {
-  // 来源校验：所有入口（生成 / 缓存 / Obsidian / 重新生成）统一在此触发
-  // 预填 pending 状态，确保面板打开时立即显示渠道列表（而非空白 loading）
-  const PENDING_CHANNELS = ['Wikidata', 'SearXNG', '中文维基', 'DuckDuckGo'];
-  readerState.sources = PENDING_CHANNELS.map(label => ({ label, status: 'pending', hit: false, url: '', title: '' }));
-  verifySources(concept, (liveSources) => {
-    readerState.sources = liveSources;
-    const panel = document.getElementById('sourcePanel');
-    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
-  }).then(vr => {
-    readerState.sources = vr.sources;
-    const panel = document.getElementById('sourcePanel');
-    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
-  }).catch((err) => {
-    console.warn('[verifySources] 校验异常:', err);
-    // 标记所有剩余 pending 为 miss，让用户能看到结果
-    readerState.sources = readerState.sources.map(s =>
-      s.status === 'pending' ? { ...s, status: 'miss' } : s
-    );
-    const panel = document.getElementById('sourcePanel');
-    if (panel && !panel.classList.contains('hidden')) renderSourcePanel();
-  });
+function startSourceVerify(concept, urls) {
+  // 不再做并行渠道验证，直接展示搜索到的参考链接
+  if (urls && urls.length > 0) {
+    readerState.sources = urls.map((url, i) => ({
+      label: `来源「${i + 1}」`,
+      status: 'hit',
+      hit: true,
+      url: url,
+      title: ''
+    }));
+  } else {
+    readerState.sources = [{ label: '参考链接', status: 'miss', hit: false, url: '', title: '未找到参考链接' }];
+  }
+  renderSourcePanel();
 }
 
 function hideHomeProgress() {
@@ -2489,7 +2488,7 @@ function openReaderForPipe(pipe) {
   pipe.readerOpen = true;
   // 交给我们下方的 scheduleReveal 从 0 揭示所有已就绪层（前两层已就绪 → 一进来看得到两页）
   pipe.revealedUpTo = -1;
-  startSourceVerify(pipe.concept);
+  startSourceVerify(pipe.concept, pipe.urlCandidates);
   scheduleReveal(pipe); // 揭示第 0、1 层
   goToLayer(0);
 }
@@ -4574,31 +4573,15 @@ function renderSourcePanel() {
   if (!panel) return;
   const sources = (readerState && readerState.sources) || [];
   const concept = readerState ? readerState.concept : '';
-  if (sources.length === 0) {
-    panel.innerHTML = '<div class="source-panel-inner"><div class="source-panel-title">来源验证</div><div class="source-panel-loading"><span class="src-spinner"></span>正在校验来源...</div></div>';
-    return;
-  }
-  const done = sources.filter(s => s.status === 'hit' || s.status === 'miss').length;
-  const allDone = done === sources.length;
-  const verified = sources.some(s => s.hit);
   let html = '<div class="source-panel-inner">';
-  const titleRight = allDone
-    ? (verified ? '✅ 已验证' : '⚠️ 未找到可靠来源')
-    : `校验中 ${done}/${sources.length}`;
-  html += `<div class="source-panel-title">来源验证 · ${esc(concept)} · ${titleRight}</div>`;
-  for (const s of sources) {
-    let cls, icon, body;
-    if (s.status === 'pending' || s.status === 'checking') {
-      cls = 'source-item checking'; icon = '<span class="src-spinner"></span>';
-      body = '<span class="src-status">校验中…</span>';
-    } else if (s.hit) {
-      cls = 'source-item hit'; icon = '✅';
-      body = s.url ? `<a href="${s.url}" target="_blank" rel="noopener">${esc(s.title || s.label)}</a>` : `<span>${esc(s.title || '（未命中）')}</span>`;
-    } else {
-      cls = 'source-item miss'; icon = '⬜';
-      body = '<span class="src-status">（未命中）</span>';
+  html += `<div class="source-panel-title">参考链接 · ${esc(concept)}</div>`;
+  const hits = sources.filter(s => s.hit && s.url);
+  if (hits.length === 0) {
+    html += '<div class="source-item miss"><span class="source-icon">⬜</span><span class="source-label">未找到参考链接</span></div>';
+  } else {
+    for (const s of hits) {
+      html += `<div class="source-item hit"><span class="source-icon">🔗</span><a href="${s.url}" target="_blank" rel="noopener" class="source-label" style="color:var(--accent);text-decoration:underline;">${esc(s.label)}</a></div>`;
     }
-    html += `<div class="${cls}"><span class="source-icon">${icon}</span><span class="source-label">${esc(s.label)}</span>${body}</div>`;
   }
   html += '</div>';
   panel.innerHTML = html;
