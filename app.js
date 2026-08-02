@@ -845,9 +845,10 @@ async function buildObsidianFiles(concept) {
   const glossary = data.glossary || [];
   for (const g of glossary) {
     if (g && g.term && g.content) {
+      const fullContent = extractTermFullContent(g.term, data.markdown || '') || g.content;
       files.push({
         name: `${g.term}-词条.md`,
-        content: `# ${g.term}\n\n${g.content}\n${OBSIDIAN_SOURCE_MARK}`,
+        content: `# ${g.term}\n\n${fullContent}\n${OBSIDIAN_SOURCE_MARK}`,
       });
     }
   }
@@ -1024,6 +1025,32 @@ function extractGlossaryFromContent(content) {
     if (match) glossary.push({ term: match[1].trim(), content: match[2].trim() });
   }
   return glossary;
+}
+
+/** 从完整 markdown 中提取某个词条的详细模块内容（而非一行定义） */
+function extractTermFullContent(termName, fullMarkdown) {
+  const esc = termName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // 策略1: 找 ### 标题中包含该词条的模块
+  const headingRe = new RegExp(`###\\s+\\d+\\.\\s*[^\\n]*${esc}[^\\n]*\\n([\\s\\S]*?)(?=###\\s+\\d+\\.|##\\s|$)`, 'i');
+  let m = fullMarkdown.match(headingRe);
+  if (m) return m[1].trim();
+
+  // 策略2: 找任意 ### 标题中含该词条
+  const anyHeadingRe = new RegExp(`###\\s+[^\\n]*${esc}[^\\n]*\\n([\\s\\S]*?)(?=###|##\\s|$)`, 'i');
+  m = fullMarkdown.match(anyHeadingRe);
+  if (m) return m[1].trim();
+
+  // 策略3: 找提及该词条最多的模块段（≥2 次提及才采纳）
+  const sections = fullMarkdown.split(/(?=###\s)/);
+  let best = '', bestCnt = 0;
+  for (const sec of sections) {
+    const cnt = (sec.match(new RegExp(esc, 'gi')) || []).length;
+    if (cnt > bestCnt) { bestCnt = cnt; best = sec; }
+  }
+  if (bestCnt >= 2) return best.trim();
+
+  // 兜底：返回 null，调用方用 g.content
+  return null;
 }
 
 // ===== LLM Call =====
@@ -2778,10 +2805,11 @@ async function exportOne(concept) {
   // 主框架文件（带来源标记，方便 Obsidian 用户区分系统写入 vs 手动批注）
   downloadFile(cleanMarkdownForExport(data.markdown) + OBSIDIAN_SOURCE_MARK, `${concept}-认知框架.md`, 'text/markdown');
 
-  // 词条文件
+  // 词条文件（优先提取完整模块内容，而非一行定义）
   const glossary = data.glossary || [];
   for (const g of glossary) {
-    const termMd = `# ${g.term}\n\n**所属框架**：${concept}\n\n${g.content}\n`;
+    const fullContent = extractTermFullContent(g.term, data.markdown || '') || g.content;
+    const termMd = `# ${g.term}\n\n**所属框架**：${concept}\n\n${fullContent}\n`;
     downloadFile(termMd, `${g.term}-词条.md`, 'text/markdown');
   }
 }
@@ -2811,7 +2839,8 @@ async function exportAll() {
   for (const f of all) {
     downloadFile(cleanMarkdownForExport(f.markdown), `${f.concept}-认知框架.md`, 'text/markdown');
     for (const g of (f.glossary || [])) {
-      const termMd = `# ${g.term}\n\n**所属框架**：${f.concept}\n\n${g.content}\n`;
+      const fullContent = extractTermFullContent(g.term, f.markdown || '') || g.content;
+      const termMd = `# ${g.term}\n\n**所属框架**：${f.concept}\n\n${fullContent}\n`;
       downloadFile(termMd, `${g.term}-词条.md`, 'text/markdown');
     }
   }
@@ -3404,7 +3433,8 @@ async function syncToObsidian(concept, markdown, glossary) {
       if (Array.isArray(glossary)) {
         for (const g of glossary) {
           if (g && g.term && g.content) {
-            await writeFileToDir(handle, `${g.term}-词条.md`, `# ${g.term}\n\n${g.content}\n${OBSIDIAN_SOURCE_MARK}`);
+            const fullContent = extractTermFullContent(g.term, markdown || '') || g.content;
+            await writeFileToDir(handle, `${g.term}-词条.md`, `# ${g.term}\n\n${fullContent}\n${OBSIDIAN_SOURCE_MARK}`);
           }
         }
       }
