@@ -268,6 +268,7 @@ function applySavedLang() {
 function buildSystemPrompt(concept, wikiData) {
   // 构建来源上下文
   let sourceCtx = '';
+  let module3Rule = ''; // 模块3动态规则（如未填充则空）
   if (wikiData) {
     if (wikiData.source === 'zh_wiki' || wikiData.source === 'en_wiki') {
       const lang = wikiData.source === 'zh_wiki' ? '中文维基百科' : '英文维基百科';
