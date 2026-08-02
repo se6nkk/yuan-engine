@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -582,7 +582,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   --blob-blend: normal; --blob-opacity: 0.55;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+input, textarea, select, button { font-size: 16px; } /* prevent iOS zoom on focus */
+html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
 body {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   background: var(--bg); color: var(--ink); line-height: 1.7; font-size: 16px;
@@ -594,6 +595,7 @@ body {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   filter: blur(70px); opacity: var(--blob-opacity);
   mix-blend-mode: var(--blob-blend);
+  overflow: hidden;
 }
 .blob { position: absolute; border-radius: 50%; will-change: transform; }
 .b1 { width: 46vw; height: 46vw; left: 24%; top: 14%; background: var(--blob-pink); animation: drift1 9s ease-in-out infinite; }
@@ -1704,6 +1706,7 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
     <p class="key-desc" data-i18n="settings_key_desc">一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。</p>
     <input type="password" id="apiKey" placeholder="sk-...">
     <div class="hint" data-i18n="settings_llm_key_hint">🔒 仅存本地浏览器，不发往任何第三方服务器</div>
+    <div class="key-howto" data-i18n-html="settings_key_howto" style="margin-top:0.4rem;font-size:0.75rem;color:var(--text-3);line-height:1.5"></div>
     <div class="form-group compact">
       <label data-i18n="settings_api_base">API Base URL</label>
       <input type="text" id="apiBase" value="https://api.deepseek.com">

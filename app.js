@@ -125,6 +125,7 @@ const I18N = {
     settings_key_title: 'API Key',
     settings_key_desc: '一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。',
     settings_key_save: '保存并关闭',
+    settings_key_howto: '如何获取 Key？→ <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a> 注册后创建，新用户送 500 万 token 免费额度。',
     settings_more: '更多设置',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key（搜索用）',
@@ -186,6 +187,7 @@ const I18N = {
     settings_key_title: 'API Key',
     settings_key_desc: 'One key for everything: generation + web search + cross-verification. We recommend DeepSeek (free credits on signup, ~$0.001/search).',
     settings_key_save: 'Save & Close',
+    settings_key_howto: 'How to get a key? → <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a> Sign up and create one. New users get 5M free tokens.',
     settings_more: 'More Settings',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key (for search)',
@@ -4663,7 +4665,7 @@ const QUICK_EXAMPLES = ['博弈论', '熵增定律', 'CRISPR', '机器学习', '
 // ===== Onboarding Guide (first-time users) =====
 const ONBOARDING_KEY = 'metaengine_onboarded';
 const ONBOARDING_STEPS = [
-  { icon: '🔑', zh: '设置 API Key', en: 'Set API Key', desc_zh: '一个 Key 搞定所有功能。推荐 DeepSeek（注册即送额度）。', desc_en: 'One key for everything. DeepSeek recommended (free credits).', keyInput: true },
+  { icon: '🔑', zh: '设置 API Key', en: 'Set API Key', desc_zh: '一个 Key 搞定所有功能。推荐 DeepSeek（<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">注册即送额度</a>）。', desc_en: 'One key for everything. DeepSeek recommended (<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">free credits on signup</a>).', keyInput: true },
   { icon: '🔍', zh: '输入任意概念', en: 'Enter any concept', desc_zh: '从博弈论到显眼包，学术或流行都行', desc_en: 'From Game Theory to trending memes' },
   { icon: '🌐', zh: 'AI 联网搜索', en: 'AI web search', desc_zh: '实时搜索 + 交叉验证，杜绝编造', desc_en: 'Real-time search with cross-verification' },
   { icon: '🧠', zh: '生成认知框架', en: 'Generate framework', desc_zh: '12 模块深度拆解，每条认知都有出处', desc_en: '12-module deep breakdown, every claim sourced' },
