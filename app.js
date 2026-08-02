@@ -2948,7 +2948,7 @@ function injectExportStyle(t) {
   .export-root .card-pill { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-bottom: 8px; background: ${t.accentSoft}; color: ${t.accent2}; }
   .export-root .card-pill.unsolved { background: rgba(128,128,128,0.18); color: ${t.muted}; }
   .export-root .card-title { font-size: 0.98rem; font-weight: 700; color: ${t.titleInk}; margin-bottom: 4px; }
-  .export-root .card-desc { font-size: 0.88rem; color: ${t.muted}; line-height: 1.6; }
+  .export-root .card-desc { font-size: 0.88rem; color: ${t.ink}; line-height: 1.6; }
   .export-root .glossary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .export-root .glossary-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 12px 14px; background: ${t.cardBg}; }
   .export-root .card-term { font-weight: 700; color: ${t.accent2}; margin-bottom: 4px; font-size: 0.95rem; }
@@ -2956,16 +2956,16 @@ function injectExportStyle(t) {
   .export-root .cross-pill { display: inline-block; background: ${t.accentSoft}; color: ${t.accent2}; font-weight: 600; padding: 1px 9px; border-radius: 999px; margin: 0 4px 4px 0; font-size: 0.85rem; }
   .export-root .miscon-group { display: flex; gap: 14px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid ${t.cardBorder}; }
   .export-root .miscon-insight-icon { flex-shrink: 0; color: ${t.muted}; font-weight: 700; }
-  .export-root .miscon-insight-content { flex: 1; min-width: 0; font-size: 0.88rem; color: ${t.muted}; line-height: 1.6; }
+  .export-root .miscon-insight-content { flex: 1; min-width: 0; font-size: 0.88rem; color: ${t.ink}; line-height: 1.6; }
   .export-root .accordion { display: flex; flex-direction: column; gap: 8px; }
   .export-root .acc-item { border: 1px solid ${t.cardBorder}; border-radius: 10px; overflow: hidden; }
   .export-root .acc-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: ${t.accentSoft}; }
   .export-root .acc-title { font-weight: 700; color: ${t.titleInk}; font-size: 0.92rem; }
   .export-root .acc-icon { display: none !important; }
   .export-root .acc-body { max-height: none !important; overflow: visible !important; display: block !important; }
-  .export-root .acc-body-inner { padding: 13px 15px; font-size: 0.9rem; color: ${t.ink }; }
+  .export-root .acc-body-inner { padding: 13px 15px; font-size: 0.9rem; color: ${t.ink}; }
   .export-root .progressive .prog-item { max-height: none !important; overflow: visible !important; opacity: 1 !important; display: block !important; margin-bottom: 0.8rem; }
-  .export-root .prog-body { color: ${t.ink }; }
+  .export-root .prog-body { color: ${t.ink}; }
   .export-root .prog-more-btn { display: none !important; }
   .export-root .fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: ${t.fuColor}; text-underline-offset: 3px; }
   .export-root .fu-note { font-size: 0.7em; color: ${t.fuColor}; margin-left: 1px; vertical-align: super; }
@@ -3127,7 +3127,9 @@ function applyExportColors(root, t) {
   // 标题与强调
   set('.module-title, .exp-layer-name, .exp-concept, .card-phase-label, .card-phase-text, .acc-title, .card-title, .card-term, .module-content strong, .module-content b, .module-content h1, .module-content h2, .module-content h3, .module-content h4', t.titleInk);
   // 弱化说明文字
-  set('.card-desc, .miscon-insight-content, .acc-body-inner, .exp-meta, .exp-foot-note, .exp-layer-time, .card-pill.unsolved, .module-content blockquote, .module-content .muted-text', t.muted);
+  set('.exp-meta, .exp-foot-note, .exp-layer-time, .card-pill.unsolved, .module-content blockquote, .module-content .muted-text', t.muted);
+  // 正文卡片描述、误区内容、手风琴内容等 — 使用正文色保证可读性
+  set('.card-desc, .miscon-insight-content, .acc-body-inner, .prog-body', t.ink);
   // 强调色文字（状态胶囊、跨域标签）
   set('.card-pill:not(.unsolved), .cross-pill, .module-content a', t.accent2);
   // 品牌/层号胶囊：保持高对比（accent 底 + onAccent 字），不被上面的规则覆盖

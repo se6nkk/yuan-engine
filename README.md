@@ -14,7 +14,7 @@
 
 | | 🌐 在线版 | 💻 桌面版 |
 |---|---|---|
-| **怎么用** | 浏览器打开，即开即用 | 下载 DMG，拖入 Applications |
+| **怎么用** | 浏览器打开，即开即用 | 下载 DMG，双击安装 |
 | **OB 同步** | 不支持（可下载 .md） | ✅ 自动写入 Obsidian vault |
 | **API Key** | 存浏览器 localStorage | 存浏览器 localStorage |
 | **数据** | 100% 本地处理 | 100% 本地处理 |
@@ -39,7 +39,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 ## 功能
 
-- **智能搜索** — DeepSeek 联网搜索优先，旧版四级管道兜底（中英维基 → SearXNG）
+- **智能搜索** — DeepSeek 联网搜索，实时获取最新资料
 - **交叉验证** — 搜索结果先经 AI 事实核查，用可信度分数淘汰面包搜索结果
 - **12 模块认知框架** — 定义、核心概念、发展脉络、关键人物、底层原理、最新前沿、应用场景、常见误区、现实映射、学习方法、跨学科连接、批判思考
 - **P0 防编造** — 发展脉络、底层原理、最新前沿、现实映射 4 个模块绝对禁止 AI 编造
@@ -59,7 +59,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 ### 桌面版（需要 Obsidian 同步）
 
-从 [Releases](https://github.com/your-username/yuan-engine/releases) 下载最新 `.dmg`，拖入 Applications 即可。
+从 [Releases](https://github.com/your-username/yuan-engine/releases) 下载最新 `.dmg`，双击安装即可。
 
 > macOS 10.15+。首次打开需右键 → 打开（未签名应用）。
 
@@ -80,7 +80,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 - **前端** — Vanilla JS + Vite
 - **桌面** — Tauri v2（macOS）
-- **搜索** — DeepSeek API（联网搜索）+ 四级降级管道
+- **搜索** — DeepSeek API（联网搜索 + 交叉验证）
 - **生成** — 智谱 GLM-4-Plus / 兼容 OpenAI 格式的任意 LLM
 - **存储** — IndexedDB（缓存）+ localStorage（设置）+ 本地文件（Obsidian vault）
 
@@ -100,7 +100,7 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 - [x] 中英双语 UI
 - [ ] Windows 版本
 - [ ] 批量生成（多个概念一键跑）
-- [ ] 高级导出（PDF 合集）
+- [x] 高级导出（PNG / PDF / Markdown）
 - [ ] 知识图谱可视化
 
 ---
