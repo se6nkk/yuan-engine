@@ -763,7 +763,7 @@ function refreshFsAccessStatus() {
       : '⚠ 此浏览器支持目录直写，但当前页面不在安全上下文（file://），API 已被禁用。请用本地服务（http://localhost:端口）打开本页后再选目录。';
   } else {
     el.style.color = 'var(--accent2)';
-    el.textContent = '⚠ 此浏览器未实现 showDirectoryPicker（如 Safari / Firefox）：可「选择目录」记录位置，但无法自动写入，请走右下角「同步 OB」或右上角「导出」手动保存 .md。';
+    el.textContent = '⚠ Safari / Firefox 不支持自动写入：导出或同步后文件将下载到「下载」文件夹，请手动移入 Obsidian vault。';
   }
 }
 
@@ -1029,25 +1029,22 @@ function extractGlossaryFromContent(content) {
 
 /** 从完整 markdown 中提取某个词条的详细模块内容（而非一行定义） */
 function extractTermFullContent(termName, fullMarkdown) {
+  if (!termName || !fullMarkdown) return null;
   const esc = termName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // 策略1: 找 ### 标题中包含该词条的模块
-  const headingRe = new RegExp(`###\\s+\\d+\\.\\s*[^\\n]*${esc}[^\\n]*\\n([\\s\\S]*?)(?=###\\s+\\d+\\.|##\\s|$)`, 'i');
-  let m = fullMarkdown.match(headingRe);
-  if (m) return m[1].trim();
+  const re = new RegExp(esc, 'i');
 
-  // 策略2: 找任意 ### 标题中含该词条
-  const anyHeadingRe = new RegExp(`###\\s+[^\\n]*${esc}[^\\n]*\\n([\\s\\S]*?)(?=###|##\\s|$)`, 'i');
-  m = fullMarkdown.match(anyHeadingRe);
-  if (m) return m[1].trim();
+  // 按模块分割（以 ### N. 标题为分隔）
+  const sections = fullMarkdown.split(/(?=###\s+\d+\.)/);
 
-  // 策略3: 找提及该词条最多的模块段（≥2 次提及才采纳）
-  const sections = fullMarkdown.split(/(?=###\s)/);
-  let best = '', bestCnt = 0;
+  // 收集所有提及该词条的模块
+  const matching = [];
   for (const sec of sections) {
-    const cnt = (sec.match(new RegExp(esc, 'gi')) || []).length;
-    if (cnt > bestCnt) { bestCnt = cnt; best = sec; }
+    if (re.test(sec)) matching.push(sec.trim());
   }
-  if (bestCnt >= 2) return best.trim();
+
+  if (matching.length > 0) {
+    return matching.join('\n\n---\n\n').trim();
+  }
 
   // 兜底：返回 null，调用方用 g.content
   return null;
@@ -1953,7 +1950,7 @@ async function startGenerate() {
     const now = Date.now();
     await dbPut('frameworks', {
       concept: currentConcept, markdown: finalMd, structure: finalStructure,
-      glossary: finalGlossary, _cacheVersion: CACHE_VERSION, _verified: true,
+      glossary: finalGlossary, urlCandidates: pipe.urlCandidates || [], _cacheVersion: CACHE_VERSION, _verified: true,
       createdAt: now, updatedAt: now
     }).catch(() => {});
     for (const g of finalGlossary) {
@@ -2265,7 +2262,12 @@ async function renderResult(data) {
 
   updateReaderNav();
   reader.focus();
-  startSourceVerify(data.concept);
+  // 参考链接：优先用缓存的 urlCandidates，老缓存则从正文提取
+  let refUrls = data.urlCandidates || [];
+  if (!refUrls.length && data.markdown) {
+    refUrls = extractUrlsFromMarkdown(data.markdown);
+  }
+  startSourceVerify(data.concept, refUrls);
 }
 
 // ===== 阅读器外壳（完整渲染 & 渐进管道共用） =====
@@ -2373,6 +2375,22 @@ function attachReaderShell(data) {
   }
   hideHomeProgress();
   return reader;
+}
+
+/** 从 markdown 内容中提取 URL 列表（用于老缓存数据没有 urlCandidates 时的兜底） */
+function extractUrlsFromMarkdown(md) {
+  if (!md) return [];
+  const urls = [];
+  // 匹配 markdown 链接 [text](url) 中的 url
+  const mdLinkRe = /\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g;
+  let m;
+  while ((m = mdLinkRe.exec(md)) !== null) urls.push(m[2]);
+  // 匹配裸 URL
+  const bareRe = /https?:\/\/[^\s\)\]\>"'`]+/g;
+  while ((m = bareRe.exec(md)) !== null) {
+    if (!urls.includes(m[0])) urls.push(m[0]);
+  }
+  return urls.slice(0, 10);
 }
 
 function startSourceVerify(concept, urls) {
