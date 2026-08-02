@@ -1027,27 +1027,9 @@ function extractGlossaryFromContent(content) {
   return glossary;
 }
 
-/** 从完整 markdown 中提取某个词条的详细模块内容（而非一行定义） */
+/** 词条导出：直接使用完整框架 markdown，确保内容不缺失 */
 function extractTermFullContent(termName, fullMarkdown) {
-  if (!termName || !fullMarkdown) return null;
-  const esc = termName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(esc, 'i');
-
-  // 按模块分割（以 ### N. 标题为分隔）
-  const sections = fullMarkdown.split(/(?=###\s+\d+\.)/);
-
-  // 收集所有提及该词条的模块
-  const matching = [];
-  for (const sec of sections) {
-    if (re.test(sec)) matching.push(sec.trim());
-  }
-
-  if (matching.length > 0) {
-    return matching.join('\n\n---\n\n').trim();
-  }
-
-  // 兜底：返回 null，调用方用 g.content
-  return null;
+  return fullMarkdown || null;
 }
 
 // ===== LLM Call =====
