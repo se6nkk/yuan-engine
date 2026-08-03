@@ -933,7 +933,7 @@ function getSettings() {
     const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
     return {
       apiBase: raw.apiBase || 'https://api.deepseek.com',
-      modelName: raw.modelName || 'deepseek-chat',
+      modelName: raw.modelName || 'deepseek-v4-pro',
       genMode: raw.genMode || 'cache',
       lang: raw.lang || 'zh',
       themeMode: raw.themeMode || 'system',
@@ -1057,7 +1057,7 @@ async function callLLM(concept, searchResults) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-chat',
+      model: s.modelName || 'deepseek-v4-pro',
       messages: [
         { role: 'system', content: buildSystemPrompt(concept, searchResults) },
         { role: 'user', content: '请开始生成。' }
@@ -1091,7 +1091,7 @@ async function callLLMJson(systemContent, userContent, opts) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-chat',
+      model: s.modelName || 'deepseek-v4-pro',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: userContent }
@@ -1138,7 +1138,7 @@ async function callLLMStream(concept, searchResults, onChunk, systemPromptOverri
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-chat',
+      model: s.modelName || 'deepseek-v4-pro',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: '请开始生成。' }
@@ -1783,9 +1783,15 @@ function friendlyError(err) {
   if (status === '403' || msg.indexOf('permission') !== -1 || msg.indexOf('forbidden') !== -1) {
     return { text: 'API Key 无权限（403），请检查 Key 状态', action: 'openSettings', color: '#e67e22' };
   }
-  // 接口地址错误
+  // 接口地址错误 / 模型名错误（DeepSeek 经常更新支持列表）
   if (status === '404' || msg.indexOf('not found') !== -1) {
     return { text: 'API 地址错误（404），请检查设置中的接口地址', action: null, color: '#e67e22' };
+  }
+  // 模型名不在支持列表中（DeepSeek 经常更新：deepseek-v4-pro / deepseek-v3 等）
+  if (status === '400' && /supported API model names/i.test(msg)) {
+    var modelsMatch = msg.match(/are\s+(.+?)(?:[。."]|$)/);
+    var modelsHint = modelsMatch ? '当前支持：' + modelsMatch[1] : '请检查设置中的模型名称';
+    return { text: '模型名不支持。' + modelsHint + '（请到设置里改成新模型名）', action: 'openSettings', color: '#e67e22' };
   }
   // API 限流 / 配额
   if (status === '429' || msg.indexOf('rate_limit') !== -1 || msg.indexOf('too many') !== -1) {
@@ -4802,7 +4808,7 @@ function showOnboarding() {
           const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
           cfg.apiKey = key;
           cfg.apiBase = cfg.apiBase || 'https://api.deepseek.com';
-          cfg.modelName = cfg.modelName || 'deepseek-chat';
+          cfg.modelName = cfg.modelName || 'deepseek-v4-pro';
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
           try { loadSettings(); } catch(_) {}
         }
