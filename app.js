@@ -1825,6 +1825,7 @@ async function startGenerate() {
 
   const s = getSettings();
   if (!s.apiKey) { openSettings(); return; }
+  bootStep('[生成] 开始：' + concept + ' | Key=***' + (s.apiKey||'').slice(-4));
 
   currentConcept = concept;
   const btn = document.getElementById('genBtn');
@@ -1872,6 +1873,7 @@ async function startGenerate() {
 
     // ===== v24 防幻觉管道：四级降级 =====
     const pre = await runV25PreGenerate(concept);
+    bootStep('[生成] preGenerate 完成：abort=' + pre.abort + ' state=' + pre.state);
     if (pre.abort) {
       fill.style.width = '100%';
       // NO_SOURCE 也用更温和的颜色（橙色），NOT_FOUND 用红色
@@ -1919,6 +1921,7 @@ async function startGenerate() {
 
     // 进度缓动定时器：生成+核对合并驱动（阅读器未开时驱动首页条，开后驱动阅读器内细条）
     startPipelineProgress(pipe);
+    bootStep('[生成] 调用 LLM 流式生成...');
 
     const markdown = await callLLMStream(concept, null, (delta, full) => {
       const matches = [...full.matchAll(headerRe)];
@@ -1957,6 +1960,7 @@ async function startGenerate() {
     // 等待所有层核对完成（兜底：保证最终回写的是已核对内容）
     await Promise.all(pipe.verPromises);
     if (pipe._progTimer) clearInterval(pipe._progTimer);
+    bootStep('[生成] 流完成，层数=' + pipe.totalLayers + ' 准备打开阅读器...');
 
     // 拼接最终已核对内容，回写缓存 + Obsidian
     let finalMd = pipe.verifiedMd.filter(Boolean).join('\n---\n');
@@ -1996,6 +2000,7 @@ async function startGenerate() {
 
   } catch (err) {
     console.error(err);
+    bootStep('[生成] 出错：' + ((err && err.message) || String(err)));
     // 立即停掉进度条动画（不��让 bar "跑完再弹窗"）
     if (pipeline && pipeline._progTimer) { clearInterval(pipeline._progTimer); pipeline._progTimer = null; }
     try {
