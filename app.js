@@ -2998,6 +2998,11 @@ function injectExportStyle(t) {
   .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.titleInk} !important; margin-bottom: 10px; }
   .export-root .module-content { font-size: 0.92rem; color: ${t.ink} !important; }
   .export-root .module-content * { color: ${t.ink} !important; }
+  /* SVG 文字/线条统一使用导出 token（html2canvas 不支持 fill:currentColor 跟随，强制覆盖） */
+  .export-root svg text, .export-root svg tspan { fill: ${t.ink} !important; }
+  .export-root svg path[stroke="var(--ink)"], .export-root svg line[stroke="var(--ink)"] { stroke: ${t.ink} !important; }
+  .export-root svg [fill^="var(--title-ink)"] { fill: ${t.titleInk} !important; }
+  .export-root svg [fill^="var(--muted)"] { fill: ${t.muted} !important; }
   .export-root .module-content strong, .export-root .module-content b, .export-root .module-content h1, .export-root .module-content h2, .export-root .module-content h3, .export-root .module-content h4 { color: ${t.titleInk} !important; }
   .export-root .module-content p { margin: 0 0 0.6rem; }
   .export-root .module-content h1,.export-root .module-content h2,.export-root .module-content h3,.export-root .module-content h4 { color: ${t.titleInk}; margin: 0.8rem 0 0.4rem; font-weight: 700; }
@@ -3081,14 +3086,30 @@ function injectExportStyle(t) {
 }
 
 // 把生成 HTML 里的 var(--token) 解析为字面量（含 SVG 内联属性），绕开 html2canvas 不支持 color-mix/var 的坑
-function resolveCssVars(html) {
+// 可选 override：导出场景传入 exportTokens（来自 exportThemeTokens），让 SVG 的 fill 与导出 CSS 的 t.ink 完全一致
+function resolveCssVars(html, exportTokens) {
   const isDark = currentIsDark();
-  const cs = getComputedStyle(document.documentElement);
-  const names = ['bg','bg2','ink','title-ink','muted','rule','hairline','accent','accent2','on-accent','accent-soft','accent2-soft','surface-solid','panel-bg'];
   const map = {};
-  for (const n of names) {
-    const v = cs.getPropertyValue('--' + n).trim();
-    if (v) map[n] = v;
+  if (exportTokens) {
+    // 导出场景：用导出 token 直接映射到 CSS 变量名
+    map['bg'] = exportTokens.pageBg;
+    map['bg2'] = exportTokens.cardBg;
+    map['ink'] = exportTokens.ink;
+    map['title-ink'] = exportTokens.titleInk;
+    map['muted'] = exportTokens.muted;
+    map['accent'] = exportTokens.accent;
+    map['accent2'] = exportTokens.accent2;
+    map['on-accent'] = exportTokens.onAccent;
+    map['accent-soft'] = exportTokens.accentSoft;
+    map['rule'] = exportTokens.cardBorder;
+  } else {
+    // 在线场景：从页面 CSS 读取
+    const cs = getComputedStyle(document.documentElement);
+    const names = ['bg','bg2','ink','title-ink','muted','rule','hairline','accent','accent2','on-accent','accent-soft','accent2-soft','surface-solid','panel-bg'];
+    for (const n of names) {
+      const v = cs.getPropertyValue('--' + n).trim();
+      if (v) map[n] = v;
+    }
   }
   const fbBg = isDark ? '#191B21' : '#FBFAF8';
   const fb = { 'panel-bg': fbBg, 'on-accent': isDark ? '#0E0F13' : '#FFFFFF' };
@@ -3175,7 +3196,7 @@ function buildExportCard(data, layerIdx = -1) {
     <div class="exp-foot-brand">由元引擎生成</div>
     <div class="exp-foot-note">内容已通过事实核对 · <span class="exp-mark">‡</span> 标记为 AI 生成、未找到权威出处，仅供参考</div>
   </div>`;
-  html = resolveCssVars(html);
+  html = resolveCssVars(html, t);
   // 清理事实核对标注的 HTML 标签，避免 <u class="fu" data-tip="..."> 原样出现在导出图片中
   html = html.replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
              .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
