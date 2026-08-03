@@ -3527,6 +3527,19 @@ function showToast(msg, type) {
 
 // ===== Obsidian 同步（纯前端：支持直写则自动写入目录，不支持则提示手动下载 .md）=====
 async function syncToObsidian(concept, markdown, glossary) {
+  // App 模式：走 Rust 原生写盘
+  if (isTauriEnv()) {
+    try {
+      const files = await buildObsidianFiles(concept, markdown, glossary);
+      if (!files.length) { return; }
+      const r = await tauriWriteObsidian(files);
+      showToast(`已同步 ${r.n} 个文件到：${r.dir}`, 'ok');
+    } catch (e) {
+      // App 模式下静默失败，不弹 toast 打断生成流程
+      console.warn('[sync] Tauri write failed:', e);
+    }
+    return;
+  }
   // 支持 File System Access API：生成完自动直写目录（静默，无需用户操作）
   if (fsDirectWriteSupported()) {
     const handle = await getObsidianHandle();
