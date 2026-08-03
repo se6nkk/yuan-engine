@@ -2650,6 +2650,11 @@ function goToLayer(idx) {
   if (pipeline && pipeline.readerOpen && idx > pipeline.revealedUpTo) return;
   readerState.currentLayer = idx;
 
+  // App 模式：到最后一层时后台自动同步（静默，不停 toast）
+  if (isTauriEnv() && idx === total - 1) {
+    syncObsidianNow(true).catch(e => console.warn('[auto-sync] silent fail:', e));
+  }
+
   const pages = document.querySelectorAll('.reader-page');
   pages.forEach((p, i) => p.classList.toggle('hidden', i !== idx));
 
@@ -2678,7 +2683,7 @@ function updateReaderNav() {
   } else if (cur === revealed && revealed < total - 1) {
     html += `<button class="reader-continue" disabled style="opacity:.5;cursor:default">生成中…</button>`;
   } else {
-    html += `<button class="reader-continue" onclick="syncObsidianNow()">同步 OB</button>`;
+    html += `<button class="reader-continue" onclick="openDonate()">☕ 支持元引擎</button>`;
   }
   nav.innerHTML = html;
 }
@@ -3458,21 +3463,22 @@ function doExport(kind) {
 }
 
 // 阅读器底部「同步 OB」按钮：支持直写则自动写入目录，否则直接下载 .md
-async function syncObsidianNow() {
+// silent=true 时静默执行（用于后台自动同步，不弹 toast）
+async function syncObsidianNow(silent) {
   const concept = readerConcept();
   if (!concept) return;
-  bootStep('[同步] 点击「同步 OB」→ isTauriEnv()=' + isTauriEnv());
+  bootStep('[同步] 触发 → isTauriEnv()=' + isTauriEnv() + ' silent=' + !!silent);
   // App 模式：走原生 Rust 命令直接写盘（无需浏览器 API）
   if (isTauriEnv()) {
     try {
       const files = await buildObsidianFiles(concept);
-      if (!files.length) { showToast('未找到缓存数据，无法同步', 'warn'); return; }
+      if (!files.length) { if (!silent) showToast('未找到缓存数据，无法同步', 'warn'); return; }
       const r = await tauriWriteObsidian(files);
       bootStep('[同步] 原生写盘成功：' + r.n + ' 个文件 → ' + r.dir);
-      showToast(`已同步 ${r.n} 个文件到：${r.dir}`, 'ok');
+      if (!silent) showToast(`已同步 ${r.n} 个文件到：${r.dir}`, 'ok');
     } catch (e) {
       bootStep('[同步] 原生写盘失败：' + (e && e.message));
-      showToast('同步失败：' + (e && e.message ? e.message : e), 'warn');
+      if (!silent) showToast('同步失败：' + (e && e.message ? e.message : e), 'warn');
     }
     return;
   }
