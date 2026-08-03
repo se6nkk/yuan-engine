@@ -2470,7 +2470,7 @@ function hideHomeProgress() {
 
 // ===== 渐进管道：生成↔核对并行、逐层揭示 =====
 function startPipelineProgress(pipe) {
-  pipe._progTarget = 10;
+  pipe._progTarget = Math.max(pipe._progTarget || 10, 10);
   if (pipe._progTimer) clearInterval(pipe._progTimer);
   pipe._progTimer = setInterval(() => {
     const reader = document.getElementById('reader');
@@ -2499,7 +2499,7 @@ function renderPipelineProgress(pipe) {
   const completed = verLayers;
   let target = Math.max(15, 10 + (completed / total) * 90);
   if (pipe.streamDone && completed >= total) target = 100;
-  pipe._progTarget = target;
+  pipe._progTarget = Math.max(pipe._progTarget, target);
   const text = document.getElementById('reader') ? document.getElementById('readerGenText') : document.getElementById('progressText');
   if (text) {
     if (target >= 100) text.textContent = '已就绪';
