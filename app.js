@@ -856,8 +856,12 @@ async function buildObsidianFiles(concept) {
     content: cleanMarkdownForExport(data.markdown || '') + OBSIDIAN_SOURCE_MARK,
   });
   const glossary = data.glossary || [];
+  const seen = new Set();
   for (const g of glossary) {
     if (g && g.term && g.content) {
+      const key = g.term.toLowerCase();
+      if (seen.has(key)) continue; // 同一概念多个变体（如 MCP / MCP协议 / MCP服务器）只取第一个
+      seen.add(key);
       const fullContent = extractTermFullContent(g.term, data.markdown || '') || g.content;
       files.push({
         name: `${g.term}-词条.md`,
@@ -1010,6 +1014,7 @@ function parseMarkdown(md) {
 
 function extractGlossary(md) {
   const glossary = [];
+  const seen = new Set();
   // Find module 10 content (核心概念索引)
   const m10 = md.match(/###\s*10[.\s、]\s*核心概念[^\n]*\n([\s\S]*?)(?=###\s*\d|$)/);
   if (m10) {
@@ -1017,7 +1022,12 @@ function extractGlossary(md) {
     for (const line of lines) {
       let match = line.match(/(?:[-*]|\d+\.)\s*\*\*(.+?)\*\*[：:]\s*(.+)/);
       if (!match) match = line.match(/(?:[-*]|\d+\.)\s*\*\*(.+?)\*\*\s*[-—]\s*(.+)/);
-      if (match) glossary.push({ term: match[1].trim(), content: match[2].trim() });
+      if (match) {
+        const key = match[1].trim().toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        glossary.push({ term: match[1].trim(), content: match[2].trim() });
+      }
     }
   }
   return glossary;
@@ -2708,7 +2718,11 @@ function closeReader() {
 // 获取当前阅读器概念（供顶栏下拉菜单调用）
 function readerConcept() {
   const reader = document.getElementById('reader');
-  return reader ? (reader.dataset.concept || '') : '';
+  if (reader && reader.dataset.concept) return reader.dataset.concept;
+  // 回退链：readerState → pipeline → 空
+  if (readerState && readerState.concept) return readerState.concept;
+  if (pipeline && pipeline.concept) return pipeline.concept;
+  return '';
 }
 // 切换 ▾ 下拉菜单
 function toggleReaderMore(btn) {
