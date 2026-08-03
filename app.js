@@ -3640,9 +3640,13 @@ function parseMindmapCategories(raw) {
   let currentCat = null;
   for (const line of lines) {
     const trimmed = line.trim();
+    // 跳过明显的 URL、数据来源、参考链接行（不解析为分类）
+    if (/^https?:\/\//i.test(trimmed) || /^(参考链接|数据来源|来源|参考文献|出处)[：:]/i.test(trimmed) || /^\[(\d+|来源)\]/i.test(trimmed)) continue;
     const catMatch = trimmed.match(/^-?\s*\**(.+?)\**\s*[:：]?\s*$/) || trimmed.match(/^\s*-\s*\*\*(.+?)\*\*/);
     if (catMatch && !trimmed.match(/^\s*[-*]\s+\S/)) {
       let name = catMatch[1].trim().replace(/\*\*/g, '');
+      // 过滤：名称本身是 URL、域名、或为纯数字引用
+      if (/^https?:\/\//i.test(name) || /^\d{1,2}\/\d{1,2}\/下$/i.test(name)) continue;
       // 书名号规则：若有《，取《到最后一个》，中间字符（冒号/破折号/逗号等）一律保留
       if (name.includes('《')) {
         const start = name.indexOf('《');
@@ -3659,6 +3663,8 @@ function parseMindmapCategories(raw) {
       const itemMatch = trimmed.match(/^\s*[-*]\s+(.+)/);
       if (itemMatch) {
         const rawItem = itemMatch[1].trim().replace(/^\[.*?\]\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+        // 过滤：item 是 URL、纯数字引用、或明显不是分类的内容
+        if (/^https?:\/\//i.test(rawItem) || /^\[.*\]\(https?:\/\//i.test(rawItem) || /^[\[\d]/.test(rawItem) && /^\d+\.$/i.test(rawItem)) continue;
         // 拆分三级节点名与注释：概率论：研究随机现象的数学分支
         const sepIdx = rawItem.search(/[：:—]/);
         if (sepIdx !== -1) {
@@ -3675,7 +3681,9 @@ function parseMindmapCategories(raw) {
       }
     }
   }
-  if (categories.length > 0 && categories.some(c => c.items.length > 0)) return categories;
+  // 过滤空分类（所有子项都被过滤掉了）
+  const filtered = categories.filter(c => c.items.length > 0);
+  if (filtered.length > 0 && filtered.some(c => c.items.length > 0)) return filtered;
 
   // 解析2：冒号分隔（类别：项1、项2 或 类别：\n- 项1\n- 项2）
   categories.length = 0;
@@ -4062,22 +4070,34 @@ function generateMisconHTML(raw) {
   if (items.length === 0) {
     return '<div class="miscon-fallback">' + marked.parse(raw) + '</div>';
   }
-  return items.map(it => `
+  // 过滤"待补充"项：正解和洞察都为空（或只有"待补充"占位）的项不显示
+  const hasContent = items.filter(it => {
+    const rightEmpty = !it.right || /^[（(]待补充[）)]$/.test(it.right.trim());
+    const insightEmpty = !it.insight || /^[（(]待补充[）)]$/.test(it.insight.trim());
+    return !rightEmpty || !insightEmpty;
+  });
+  // 全部都是待补充 → 直接显示"暂无常见误区"
+  if (hasContent.length === 0) {
+    return '<div class="miscon-fallback">该概念暂无常见误区记录。</div>';
+  }
+  return hasContent.map(it => `
     <div class="miscon-group">
       <div class="miscon-left-body">
         <div class="miscon-row">
           <span class="miscon-icon miscon-icon-wrong">✗</span>
           <div class="miscon-row-text"><span class="label">误区</span><div class="body">${esc(it.wrong)}</div></div>
         </div>
+        ${it.right && !/^[（(]待补充[）)]$/.test(it.right.trim()) ? `
         <div class="miscon-row">
           <span class="miscon-icon miscon-icon-right">✓</span>
-          <div class="miscon-row-text"><span class="label">正解</span><div class="body">${esc(it.right || '（待补充）')}</div></div>
-        </div>
+          <div class="miscon-row-text"><span class="label">正解</span><div class="body">${esc(it.right)}</div></div>
+        </div>` : ''}
       </div>
+      ${it.insight && !/^[（(]待补充[）)]$/.test(it.insight.trim()) ? `
       <div class="miscon-insight-col">
         <span class="miscon-insight-icon">•</span>
-        <div class="miscon-insight-content"><div class="label">洞察</div>${esc(it.insight || '（待补充）')}</div>
-      </div>
+        <div class="miscon-insight-content"><div class="label">洞察</div>${esc(it.insight)}</div>
+      </div>` : ''}
     </div>
   `).join('');
 }
