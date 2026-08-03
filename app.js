@@ -2055,21 +2055,29 @@ function renderLayerPage(layer, idx, total, data) {
     let content = '';
     let moduleExtraClass = '';
     const title = (mod.title || '').toLowerCase();
+    // 清理 LLM 回显的 prompt 指令（不应暴露给用户）
+    let rawContent = mod.content || '';
+    rawContent = rawContent.replace(/[（(]?\s*P0\s*模块[，,]\s*(仅列出来源中明确信息|仅使用来源中明确信息|极度保守)[)）]?\s*(；来源未涉及处标注「⚠️ 暂无可靠来源」)?\s*/gi, '');
+    rawContent = rawContent.replace(/[（(]\s*P0\s*模块[：:]\s*全部跳过[)）]?\s*/gi, '');
+    rawContent = rawContent.replace(/^>\s*⚠️\s*搜索结果深度不足，该模块需要更丰富的参考资料。\s*/gmi, '');
+    rawContent = rawContent.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
+    rawContent = rawContent.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
+    rawContent = rawContent.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
 
     // 领域分类 → 思维导图 SVG
     if (title.includes('领域分类') || title.includes('分类')) {
-      const categories = parseMindmapCategories(mod.content || '');
+      const categories = parseMindmapCategories(rawContent);
       if (categories.length > 0) {
         content = generateMindmapDOM(data.concept, categories);
         moduleExtraClass = ' module-mindmap';
       } else {
-        content = marked.parse(mod.content || '');
+        content = marked.parse(rawContent);
       }
     }
     // 发展脉络 → 时间轴 SVG
     else if (title.includes('发展脉络') || title.includes('时间线') || title.includes('历史')) {
-      const tlItems = parseTimelineItems(mod.content || '');
-      content = generateTimelineHTML(mod.content || '');
+      const tlItems = parseTimelineItems(rawContent);
+      content = generateTimelineHTML(rawContent);
       moduleExtraClass = ' module-timeline';
       if (tlItems.length > 0) {
         content += `<span data-tl-items="${encodeURIComponent(JSON.stringify(tlItems))}" hidden></span>`;
@@ -2077,43 +2085,43 @@ function renderLayerPage(layer, idx, total, data) {
     }
     // 常见误区 → 结构化 HTML
     else if (title.includes('常见误区') || title.includes('误区')) {
-      content = generateMisconHTML(mod.content || '');
+      content = generateMisconHTML(rawContent);
     }
     // 5 底层原理 → 可折叠手风琴
     else if (title.includes('底层原理') || title.includes('原理')) {
-      content = generateAccordionHTML(mod.content || '');
+      content = generateAccordionHTML(rawContent);
       moduleExtraClass = ' module-accordion';
     }
     // 6 最新前沿 → 渐进式逐段展开
     else if (title.includes('最新前沿') || title.includes('前沿')) {
-      content = generateProgressiveHTML(mod.content || '');
+      content = generateProgressiveHTML(rawContent);
       moduleExtraClass = ' module-progressive';
     }
     // 7 核心难题 → 卡片网格 (issue)
     else if (title.includes('核心难题') || title.includes('难题')) {
-      content = generateCardGridHTML(mod.content || '', 'issue');
+      content = generateCardGridHTML(rawContent, 'issue');
       moduleExtraClass = ' module-cards';
     }
     // 9 现实映射 → 卡片网格 (scenario)
     else if (title.includes('现实映射') || title.includes('现实')) {
-      content = generateCardGridHTML(mod.content || '', 'scenario');
+      content = generateCardGridHTML(rawContent, 'scenario');
       moduleExtraClass = ' module-cards';
     }
     // 11 推荐学习路径 → 卡片网格 (path)
     else if (title.includes('推荐学习路径') || title.includes('学习路径')) {
-      content = generateCardGridHTML(mod.content || '', 'path');
+      content = generateCardGridHTML(rawContent, 'path');
       moduleExtraClass = ' module-path';
     }
     // 12 工具箱 → 卡片网格 (tool)
     else if (title.includes('工具箱') || title.includes('工具')) {
-      content = generateCardGridHTML(mod.content || '', 'tool');
+      content = generateCardGridHTML(rawContent, 'tool');
       moduleExtraClass = ' module-cards';
     }
     // 10 核心概念索引 → 卡片网格（变更单-62）
     else if (title.includes('核心概念') || title.includes('术语')) {
       const terms = (data.glossary && data.glossary.length > 0)
         ? data.glossary
-        : extractGlossaryFromContent(mod.content || '');
+        : extractGlossaryFromContent(rawContent);
       if (terms.length > 0) {
         let cardsHtml = '<div class="glossary-cards">';
         for (const g of terms) {
@@ -2128,18 +2136,18 @@ function renderLayerPage(layer, idx, total, data) {
         cardsHtml += '</div>';
         content = cardsHtml;
       } else {
-        content = marked.parse(mod.content || '');
+        content = marked.parse(rawContent);
         content = content.replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
       }
     }
     // 8 跨领域连接 → 小标题胶囊化
     else if (title.includes('跨领域') || title.includes('跨域')) {
-      let html = marked.parse(mod.content || '');
+      let html = marked.parse(rawContent);
       html = html.replace(/<strong>([^<]+)<\/strong>/g, '<span class="cross-pill">$1</span><br>');
       content = html;
     }
     else {
-      content = marked.parse(mod.content || '');
+      content = marked.parse(rawContent);
       // 将 <p><strong>标签</strong>内容...</p> 转为结构化行，换行后内容对齐
       content = content.replace(/<p>(<strong>[^<]+<\/strong>)([\s\S]*?)<\/p>/g, '<div class="mod-row"><span class="mod-label">$1</span><span class="mod-val">$2</span></div>');
     }
