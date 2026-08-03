@@ -1044,7 +1044,7 @@ async function callLLM(concept, searchResults) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'glm-4-plus',
+      model: s.modelName || 'deepseek-chat',
       messages: [
         { role: 'system', content: buildSystemPrompt(concept, searchResults) },
         { role: 'user', content: '请开始生成。' }
@@ -1078,7 +1078,7 @@ async function callLLMJson(systemContent, userContent, opts) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'glm-4-plus',
+      model: s.modelName || 'deepseek-chat',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: userContent }
@@ -1125,7 +1125,7 @@ async function callLLMStream(concept, searchResults, onChunk, systemPromptOverri
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'glm-4-plus',
+      model: s.modelName || 'deepseek-chat',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: '请开始生成。' }
@@ -1755,9 +1755,11 @@ function friendlyError(err) {
   var m = msg.match(/(\b\d{3}\b)/);
   var status = m ? m[1] : null;
 
-  // API 认证失败
-  if (status === '401' || msg.indexOf('请填写正确的api key') !== -1 || msg.indexOf('api key') !== -1 ||
-      msg.indexOf('authentication_error') !== -1 || msg.indexOf('invalid') !== -1) {
+  // API 认证失败（只匹配真正的 Key/认证类错误，不用万能 "invalid"）：
+  // DeepSeek/Zhipu 典型认证错误关键词：invalid_api_key / authentication_error / InvalidAPIKey / Unauthorized / Incorrect API key
+  if (status === '401' || status === '403' ||
+      /invalid.?api.?key|authentication_error|unauthorized|incorrect\s+api\s+key/i.test(msg) ||
+      msg.indexOf('请填写正确的api key') !== -1) {
     return { text: 'API Key 无效，请检查设置', action: 'openSettings', color: '#e67e22' };
   }
   // 余额 / 配额不足
@@ -1981,12 +1983,27 @@ async function startGenerate() {
 
   } catch (err) {
     console.error(err);
+    // 立即停掉进度条动画（不会让 bar "跑完再弹窗"）
+    if (pipe && pipe._progTimer) { clearInterval(pipe._progTimer); pipe._progTimer = null; }
     try {
       var fe = friendlyError(err);
+      // 让用户看到友好提示 + 在下方灰色小字看到实际错误（方便排查）
       text.textContent = fe.text;
       text.style.color = fe.color || '#b00020';
       if (fe.action === 'openSettings') {
         setTimeout(function() { openSettings(); }, 600);
+      }
+      // 调试信息：把原始错误的第一句展示在进度文字下方
+      var rawMsg = (err && err.message) ? err.message.split(/[\n\r]/)[0] : '';
+      if (rawMsg && !rawMsg.includes(fe.text)) {
+        var debugEl = document.getElementById('progressDebug');
+        if (!debugEl) {
+          debugEl = document.createElement('div');
+          debugEl.id = 'progressDebug';
+          debugEl.style.cssText = 'font-size:12px;color:#999;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+          text.parentNode.appendChild(debugEl);
+        }
+        debugEl.textContent = '调试：' + rawMsg;
       }
     } catch(_) {}
   } finally {
