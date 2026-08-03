@@ -46,8 +46,7 @@
       "nsis": {
         "installMode": "currentUser",
         "languages": ["SimpChinese", "English"]
-      },
-      "targets": ["nsis"]
+      }
     }
   }
 }
