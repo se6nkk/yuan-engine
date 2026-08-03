@@ -3553,9 +3553,9 @@ async function syncToObsidian(concept, markdown, glossary) {
       const files = await buildObsidianFiles(concept, markdown, glossary);
       if (!files.length) { return; }
       const r = await tauriWriteObsidian(files);
-      showToast(`已同步 ${r.n} 个文件到：${r.dir}`, 'ok');
+      // 静默同步（第四层点继续时已有单独 toast，不重复弹）
+      console.log('[sync] 已写入', r.n, '个文件到', r.dir);
     } catch (e) {
-      // App 模式下静默失败，不弹 toast 打断生成流程
       console.warn('[sync] Tauri write failed:', e);
     }
     return;
