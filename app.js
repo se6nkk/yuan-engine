@@ -970,7 +970,7 @@ function parseMarkdown(md) {
   let currentLayer = null;
 
   for (const part of parts) {
-    const layerMatch = part.match(/##\s*第[一二三四五]层[:：]\s*(.+)/);
+    const layerMatch = part.match(/##\s*第[一二三四五]层[：:·\-—\s]*\s*(.+)/);
     if (layerMatch) {
       const layerNames = { '一瞥': '一瞥', '全景地图': '全景地图', '深层逻辑': '深层逻辑', '拓展应用': '拓展应用', '渐进学习': '渐进学习' };
       const rawName = layerMatch[1].trim().replace(/[（(].*?[)）]/, '');
@@ -1220,6 +1220,12 @@ async function searchWithDeepSeek(concept) {
     if (!resp.ok) {
       const err = await resp.text();
       console.warn('DeepSeek search error:', resp.status, err);
+      // 401 认证失败：抛出明确错误，不让它静默降级到 wiki 管道
+      if (resp.status === 401) {
+        var authErr = new Error('DEEPSEEK_AUTH_FAILED (401): ' + err);
+        authErr.isAuthError = true;
+        throw authErr;
+      }
       return null;
     }
 
@@ -1438,8 +1444,8 @@ function validateInput(concept) {
   const stripped = trimmed.replace(/\s/g, '');
   if (stripped.length < 1) return { pass: false, reason: '输入不能为空。' };
   if (stripped.length > 120) return { pass: false, reason: '输入过长，请精简到 120 字以内。' };
-  // 纯数字/纯标点/纯特殊字符
-  if (/^[d\W_]+$/.test(stripped)) return { pass: false, reason: '请输入有意义的中文或英文概念。' };
+  // 纯符号/纯标点/纯空白（不含任何字母或数字）才视为无效；中文等 Unicode 字母属有效概念
+  if (!/[\p{L}\p{N}]/u.test(stripped)) return { pass: false, reason: '请输入有意义的中文或英文概念。' };
   // 单英文字母拒绝
   if (/^[a-zA-Z]$/.test(stripped)) return { pass: false, reason: '请输入更具体的概念名称。' };
   // 提示词注入防护：连续 3+ 个 \n 或包含 prompt/system/instruction 等注入关键词
@@ -1733,45 +1739,63 @@ async function runV25PreGenerate(concept) {
     }
   }
 
-  // ===== 兜底：旧版四级降级管道 =====
-  if (prog) prog.textContent = '搜索中文维基百科...';
-  let wikiData = await fetchZhWikiExact(concept);
-  if (wikiData) {
-    return { abort: false, systemPrompt: buildSystemPrompt(concept, wikiData) };
-  }
-
-  if (prog) prog.textContent = '搜索英文维基百科...';
-  wikiData = await fetchEnWikiExact(concept);
-  if (wikiData) {
-    return { abort: false, systemPrompt: buildSystemPrompt(concept, wikiData) };
-  }
-
-  if (prog) prog.textContent = '搜索引擎检索中...';
-  const [searxResults, ddgResults] = await Promise.all([
-    searchWebSources(concept).catch(() => ({ snippets: [] })),
-    searchDDG(concept)
-  ]);
-  const allSnippets = [
-    ...(searxResults?.snippets || []),
-    ...(ddgResults?.snippets || [])
-  ];
-  const webQuality = assessWebQuality(allSnippets);
-  if (webQuality === 'reliable') {
-    return { abort: false, systemPrompt: buildSystemPrompt(concept, { source: 'web', webSnippets: allSnippets, webQuality }) };
-  }
-
-  const sem = checkSemanticValidity(concept);
-  if (sem.valid) {
-    return { abort: false, systemPrompt: buildSystemPrompt(concept, { source: 'semantic_decompose', semanticInfo: sem }) };
-  }
-
-  return { 
-    abort: true, 
-    state: 'NOT_FOUND', 
-    message: `关于「${concept}」，维基百科和搜索引擎均无匹配结果，且无法识别为有效词汇。请检查输入是否正确。` 
+  // ===== DeepSeek 搜索无结果或失败：不再降级到 wiki 管道 =====
+  return {
+    abort: true,
+    state: 'NO_SOURCE',
+    message: `关于「${concept}」，暂时无法获取可靠来源。\n\n请尝试：\n1. 检查 API Key 是否有效\n2. 使用更标准/通用的名称\n3. 如果是新词/小众概念，请稍后再试`
   };
 }
 
+
+// ===== 友好错误翻译（绝不让用户看到原始错误信息） =====
+function friendlyError(err) {
+  var msg = (err && err.message) ? err.message : String(err);
+  // 提取 HTTP 状态码（兼容 `API 错误 401: ...` 与 `DEEPSEEK_AUTH_FAILED (401): ...`）
+  var m = msg.match(/(\b\d{3}\b)/);
+  var status = m ? m[1] : null;
+
+  // API 认证失败
+  if (status === '401' || msg.indexOf('请填写正确的api key') !== -1 || msg.indexOf('api key') !== -1 ||
+      msg.indexOf('authentication_error') !== -1 || msg.indexOf('invalid') !== -1) {
+    return { text: 'API Key 无效，请检查设置', action: 'openSettings', color: '#e67e22' };
+  }
+  // 余额 / 配额不足
+  if (status === '402' || msg.indexOf('balance') !== -1 || msg.indexOf('quota') !== -1 || msg.indexOf('insufficient') !== -1) {
+    return { text: 'DeepSeek 余额不足，请到平台充值后重试', action: 'openSettings', color: '#e67e22' };
+  }
+  // 无权限
+  if (status === '403' || msg.indexOf('permission') !== -1 || msg.indexOf('forbidden') !== -1) {
+    return { text: 'API Key 无权限（403），请检查 Key 状态', action: 'openSettings', color: '#e67e22' };
+  }
+  // 接口地址错误
+  if (status === '404' || msg.indexOf('not found') !== -1) {
+    return { text: 'API 地址错误（404），请检查设置中的接口地址', action: null, color: '#e67e22' };
+  }
+  // API 限流 / 配额
+  if (status === '429' || msg.indexOf('rate_limit') !== -1 || msg.indexOf('too many') !== -1) {
+    return { text: 'API 调用太频繁，稍后再试', action: null, color: '#e67e22' };
+  }
+  // 服务端错误
+  if (status && status.charAt(0) === '5') {
+    return { text: 'DeepSeek 服务暂时不可用（' + status + '），请稍后重试', action: null, color: '#e67e22' };
+  }
+  // 网络问题
+  if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('网络') !== -1) {
+    return { text: '网络连接失败，请检查网络', action: null, color: '#e67e22' };
+  }
+  // 超时
+  if (msg.indexOf('timeout') !== -1 || msg.indexOf('AbortError') !== -1 || msg.indexOf('超时') !== -1) {
+    return { text: '请求超时，请重试', action: null, color: '#e67e22' };
+  }
+  // TypeError（通常是 wiki/CORS 等旧管道残留问题）
+  if (msg.indexOf('TypeError') !== -1) {
+    return { text: '生成过程遇到异常，请重试', action: null, color: '#b00020' };
+  }
+  // 兜底：带上状态码（若有），绝不让用户只看到一句莫名其妙的"生成失败"
+  var suffix = status ? '（HTTP ' + status + '）' : '';
+  return { text: '生成失败，请检查 API Key 与网络后重试' + suffix, action: null, color: '#b00020' };
+}
 
 // ===== Generate Flow =====
 let currentConcept = '';
@@ -1876,7 +1900,7 @@ async function startGenerate() {
       5: { pct: 85, label: '第五层·渐进学习' },
     };
     let lastFinalizedK = -1; // 已定界（可送核对）的最高层索引(0-based)
-    const headerRe = /##\s*第[一二三四五]层[:：]\s*(.+)/g;
+    const headerRe = /##\s*第[一二三四五]层[：:·\-—\s]*\s*(.+)/g;
 
     // 进度缓动定时器：生成+核对合并驱动（阅读器未开时驱动首页条，开后驱动阅读器内细条）
     startPipelineProgress(pipe);
@@ -1958,9 +1982,12 @@ async function startGenerate() {
   } catch (err) {
     console.error(err);
     try {
-      const msg = err && err.message ? err.message : String(err);
-      text.textContent = '出错了: ' + msg;
-      text.style.color = '#b00020';
+      var fe = friendlyError(err);
+      text.textContent = fe.text;
+      text.style.color = fe.color || '#b00020';
+      if (fe.action === 'openSettings') {
+        setTimeout(function() { openSettings(); }, 600);
+      }
     } catch(_) {}
   } finally {
     setTimeout(() => { btn.disabled = false; bar.classList.remove('active'); bar.style.display = ''; fill.style.width = '0%'; }, 800);
@@ -2516,8 +2543,9 @@ function openReaderForPipe(pipe) {
   // 交给我们下方的 scheduleReveal 从 0 揭示所有已就绪层（前两层已就绪 → 一进来看得到两页）
   pipe.revealedUpTo = -1;
   startSourceVerify(pipe.concept, pipe.urlCandidates);
-  scheduleReveal(pipe); // 揭示第 0、1 层
-  goToLayer(0);
+  // 防御：即便某层渲染抛错，也不再让阅读器整体空白（绝不让用户卡在"进不去"）
+  try { scheduleReveal(pipe); } catch (e) { console.warn('[openReaderForPipe] scheduleReveal 异常:', e); }
+  try { goToLayer(0); } catch (e) { console.warn('[openReaderForPipe] goToLayer 异常:', e); }
 }
 
 function appendLayerPageToReader(pipe, i) {
@@ -4833,6 +4861,7 @@ try { if (typeof callLLM === 'function') window.callLLM = callLLM; } catch(e) {}
 try { if (typeof callLLMJson === 'function') window.callLLMJson = callLLMJson; } catch(e) {}
 try { if (typeof callLLMStream === 'function') window.callLLMStream = callLLMStream; } catch(e) {}
 try { if (typeof startGenerate === 'function') window.startGenerate = startGenerate; } catch(e) {}
+try { if (typeof friendlyError === 'function') window.friendlyError = friendlyError; } catch(e) {}
 try { if (typeof showPage === 'function') window.showPage = showPage; } catch(e) {}
 try { if (typeof renderLayerPage === 'function') window.renderLayerPage = renderLayerPage; } catch(e) {}
 try { if (typeof appendRemainingLayers === 'function') window.appendRemainingLayers = appendRemainingLayers; } catch(e) {}
