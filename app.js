@@ -1996,8 +1996,8 @@ async function startGenerate() {
 
   } catch (err) {
     console.error(err);
-    // 立即停掉进度条动画（不会让 bar "跑完再弹窗"）
-    if (pipe && pipe._progTimer) { clearInterval(pipe._progTimer); pipe._progTimer = null; }
+    // 立即停掉进度条动画（不��让 bar "跑完再弹窗"）
+    if (pipeline && pipeline._progTimer) { clearInterval(pipeline._progTimer); pipeline._progTimer = null; }
     try {
       var fe = friendlyError(err);
       // 让用户看到友好提示 + 在下方灰色小字看到实际错误（方便排查）
