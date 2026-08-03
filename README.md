@@ -14,10 +14,11 @@
 
 | | 🌐 在线版 | 💻 桌面版 |
 |---|---|---|
-| **怎么用** | 浏览器打开，即开即用 | 下载 DMG，双击安装 |
+| **怎么用** | 浏览器打开，即开即用 | 下载 .app，双击使用 |
 | **OB 同步** | 不支持（可下载 .md） | ✅ 自动写入 Obsidian vault |
 | **API Key** | 存浏览器 localStorage | 存浏览器 localStorage |
 | **数据** | 100% 本地处理 | 100% 本地处理 |
+| **架构** | — | arm64 + x86_64 通用二进制 |
 | **地址** | [se6nkk.github.io/yuan-engine](https://se6nkk.github.io/yuan-engine) | [GitHub Releases](https://github.com/se6nkk/yuan-engine/releases) |
 
 > **在线版也能用。** 生成完点「导出」下载 .md 文件，手动拖入 Obsidian 即可。核心功能（搜索、验证、生成）两个版本完全一样。
@@ -40,11 +41,12 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 ## 功能
 
 - **智能搜索** — DeepSeek 联网搜索，实时获取最新资料
-- **来源校验** — 展示搜索返回的参考链接列表，标注搜索结果中未覆盖的内容
-- **12 模块认知框架** — 定义、核心概念、发展脉络、关键人物、底层原理、最新前沿、应用场景、常见误区、现实映射、学习方法、跨学科连接、批判思考
-- **生成防编造** — 深度事实型模块（发展脉络、底层原理等）素材不足时跳过或标注，不凭空编造
-- **Obsidian 同步** — 一键将生成的 .md 文件写入 Obsidian vault
+- **来源校验** — 展示搜索返回的参考链接（含域名），标注未覆盖内容
+- **12 模块认知框架** — 定义、领域分类、发展脉络、关键人物、底层原理、最新前沿、应用场景、常见误区、现实映射、学习方法、跨学科连接、批判思考
+- **生成防编造** — 深度事实型模块素材不足时跳过或标注，不凭空编造
+- **Obsidian 同步** — 桌面版自动将生成的 .md 文件写入 Obsidian vault
 - **中英双语** — 界面支持中英文切换，输入语言不限
+- **高级导出** — 支持 PNG 长图 / PDF / Markdown 导出
 - **100% 本地** — 所有数据存于本地，API Key 仅存浏览器 localStorage
 
 ---
@@ -55,41 +57,31 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 
 直接打开 [在线版](https://se6nkk.github.io/yuan-engine)，无需安装。
 
-> 需要 Chrome / Edge 浏览器以获得最佳体验。Safari / Firefox 也可用，但部分功能（目录选择）受限。
-
 ### 桌面版（需要 Obsidian 同步）
 
-从 [Releases](https://github.com/se6nkk/yuan-engine/releases) 下载最新 `.dmg`，打开后把 `元引擎.app` 拖入 Applications 文件夹。
+从 [Releases](https://github.com/se6nkk/yuan-engine/releases) 下载最新 `元引擎.app`。
 
-> macOS 10.15+。应用未签名，首次打开会被系统拦截，请按以下步骤操作：
->
-> 1. 双击 `元引擎.app`，如果提示「已损坏」或「无法验证开发者」，点「取消」
-> 2. 打开 **终端**（Spotlight 搜索「终端」）
-> 3. 粘贴以下命令并回车：
->    ```bash
->    xattr -cr /Applications/元引擎.app
->    ```
-> 4. 再次双击 `元引擎.app` 即可正常打开
+> macOS 10.15+，支持 Apple Silicon（M 系列）和 Intel Mac。应用未签名，首次打开会被系统拦截，请右键点击 →「打开」即可。
 
 ---
 
 ## 快速开始
 
-1. **设置 API Key** — 首次打开会弹出引导页，填入 DeepSeek API Key 即可（搜索和生成共用同一个 Key）
+1. **设置 API Key** — 首次打开会弹出引导页，填入 DeepSeek API Key 即可
 2. **输入概念** — 在首页输入框输入任意概念，如「博弈论」「熵增定律」「CRISPR」
-3. **点击生成** — 等待搜索 → 验证 → 生成完成
-4. **同步 OB** — 设置 Obsidian vault 路径，框架自动写入 vault
+3. **点击生成** — 等待搜索 → 验证 → 生成 → 阅读五层框架
+4. **同步 OB** — 桌面版：设置 Obsidian vault 路径，到最后一层自动后台同步
 
-> DeepSeek API Key 获取：https://platform.deepseek.com/api_keys — 注册后创建，新用户送 500 万 token 免费额度，搜索成本约 ¥0.001/次。
+> DeepSeek API Key 获取：https://platform.deepseek.com/api_keys — 注册后创建，新用户送 500 万 token 免费额度。
 
 ---
 
 ## 技术栈
 
 - **前端** — Vanilla JS + Vite
-- **桌面** — Tauri v2（macOS）
-- **搜索** — DeepSeek API（联网搜索 + 来源校验）
-- **生成** — DeepSeek API（deepseek-chat 模型，搜索与生成共用一个 Key）
+- **桌面** — Tauri v2（macOS arm64 + x86_64 通用二进制）
+- **搜索** — DeepSeek API（联网搜索）
+- **生成** — DeepSeek API（deepseek-v4-flash 模型）
 - **存储** — IndexedDB（缓存）+ localStorage（设置）+ 本地文件（Obsidian vault）
 
 ---
@@ -106,10 +98,13 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 - [x] 生成防编造
 - [x] Obsidian vault 自动同步
 - [x] 中英双语 UI
-- [ ] Windows 版本
-- [ ] 批量生成（多个概念一键跑）
 - [x] 高级导出（PNG / PDF / Markdown）
+- [x] macOS 通用二进制（arm64 + x86_64）
+- [ ] Windows + 32位版本（代码已就绪，待实测）
+- [ ] 建议模块：基于用户知识库的多维度决策辅助
+- [ ] 批量生成（多个概念一键跑）
 - [ ] 知识图谱可视化
+- [ ] L2 事实级校验
 
 ---
 
