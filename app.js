@@ -2483,10 +2483,10 @@ function startPipelineProgress(pipe) {
       fill.style.width = pipe._progTarget + '%';
       return;
     }
-    const step = diff * 0.12;
+    const step = diff * 0.25;
     const next = cur + step + (step >= 0 ? 0.4 : -0.4);
     fill.style.width = Math.min(Math.max(next, 10), 100) + '%';
-  }, 400);
+  }, 250);
 }
 
 function renderPipelineProgress(pipe) {
@@ -2497,7 +2497,7 @@ function renderPipelineProgress(pipe) {
   // 某一层还在生成/核对时，进度条停在上一位不动，不再提前滑向下一层，
   // 避免「第二层刚生成完、第三层刚开始生成时，进度条已往第三层位置蹭」的误判。
   const completed = verLayers;
-  let target = 10 + (completed / total) * 90;
+  let target = Math.max(15, 10 + (completed / total) * 90);
   if (pipe.streamDone && completed >= total) target = 100;
   pipe._progTarget = target;
   const text = document.getElementById('reader') ? document.getElementById('readerGenText') : document.getElementById('progressText');
