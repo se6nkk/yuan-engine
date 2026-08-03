@@ -5147,6 +5147,14 @@ window.addEventListener('DOMContentLoaded', async () => {
       const d = await window.__TAURI__.core.invoke('get_sync_dir');
       const el = document.getElementById('obsidianDirName');
       if (el) el.textContent = d || t('settings_sync_none');
+      // 同步到前端 localStorage，避免保存设置时用空值覆盖
+      if (d) {
+        try {
+          const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+          s.obsidianPath = d;
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+        } catch (e) {}
+      }
     }
   });
   await safeInit('renderQuickExamples', () => renderQuickExamples());
