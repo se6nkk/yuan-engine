@@ -2063,6 +2063,9 @@ function renderLayerPage(layer, idx, total, data) {
     rawContent = rawContent.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
     rawContent = rawContent.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
     rawContent = rawContent.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
+    // 清理旧版「来源[N]」内联引用（已被新的 <u class="fu"> 事实核对标签取代）
+    rawContent = rawContent.replace(/[（(\[「〔]\s*来源\s*\[\d+\]\s*[)）」〕]/g, '');
+    rawContent = rawContent.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
 
     // 领域分类 → 思维导图 SVG
     if (title.includes('领域分类') || title.includes('分类')) {
@@ -3128,12 +3131,16 @@ function resolveCssVars(html, exportTokens) {
 function renderModuleContentForExport(mod, data) {
   const title = (mod.title || '').toLowerCase();
   // 清理 LLM 回显的 prompt 指令
-  let c = (c).replace(/[（(]?\s*P0\s*模块[，,]\s*(仅列出来源中明确信息|仅使用来源中明确信息|极度保守)[)）]?\s*(；来源未涉及处标注「⚠️ 暂无可靠来源」)?\s*/gi, '');
+  let c = (mod.content || '');
+  c = c.replace(/[（(]?\s*P0\s*模块[，,]\s*(仅列出来源中明确信息|仅使用来源中明确信息|极度保守)[)）]?\s*(；来源未涉及处标注「⚠️ 暂无可靠来源」)?\s*/gi, '');
   c = c.replace(/[（(]\s*P0\s*模块[：:]\s*全部跳过[)）]?\s*/gi, '');
   c = c.replace(/^>\s*⚠️\s*搜索结果深度不足，该模块需要更丰富的参考资料。\s*/gmi, '');
   c = c.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
   c = c.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
   c = c.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
+  // 清理旧版「来源[N]」内联引用
+  c = c.replace(/[（(\[「〔]\s*来源\s*\[\d+\]\s*[)）」〕]/g, '');
+  c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
   let content = '';
   if (title.includes('领域分类') || title.includes('分类')) {
     const categories = parseMindmapCategories(c);
