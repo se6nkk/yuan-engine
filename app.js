@@ -2076,6 +2076,9 @@ function renderLayerPage(layer, idx, total, data) {
     // 清理旧版「来源[N]」内联引用（已被新的 <u class="fu"> 事实核对标签取代）
     rawContent = rawContent.replace(/[（(\[「〔]\s*来源\s*\[\d+\]\s*[)）」〕]/g, '');
     rawContent = rawContent.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
+    // 清理遗留的裸方括号引用：([1]） / 【[3]】 / 等
+    rawContent = rawContent.replace(/[（(【[]\s*\[\d+\]\s*[)）】]…]/g, '');
+    rawContent = rawContent.replace(/\s*\[\d+\]\s*/g, '');
 
     // 领域分类 → 思维导图 SVG
     if (title.includes('领域分类') || title.includes('分类')) {
@@ -2469,13 +2472,17 @@ function extractUrlsFromMarkdown(md) {
 function startSourceVerify(concept, urls) {
   // 不再做并行渠道验证，直接展示搜索到的参考链接
   if (urls && urls.length > 0) {
-    readerState.sources = urls.map((url, i) => ({
-      label: `来源「${i + 1}」`,
-      status: 'hit',
-      hit: true,
-      url: url,
-      title: ''
-    }));
+    readerState.sources = urls.map((url, i) => {
+      let domain = '';
+      try { domain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
+      return {
+        label: domain ? `[${i + 1}] ${domain}` : `来源「${i + 1}」`,
+        url: url,
+        status: 'hit',
+        hit: true,
+        title: ''
+      };
+    });
   } else {
     readerState.sources = [{ label: '参考链接', status: 'miss', hit: false, url: '', title: '未找到参考链接' }];
   }
@@ -3160,6 +3167,8 @@ function renderModuleContentForExport(mod, data) {
   // 清理旧版「来源[N]」内联引用
   c = c.replace(/[（(\[「〔]\s*来源\s*\[\d+\]\s*[)）」〕]/g, '');
   c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
+  c = c.replace(/[（(【[]\s*\[\d+\]\s*[)）】]…]/g, '');
+  c = c.replace(/\s*\[\d+\]\s*/g, '');
   let content = '';
   if (title.includes('领域分类') || title.includes('分类')) {
     const categories = parseMindmapCategories(c);
