@@ -97,10 +97,20 @@ fn frontend_log(msg: String) {
 
 /// 通用 HTTP 代理：从 Rust 后端发起请求，规避 WebView 的 CORS 和网络墙限制
 /// 返回 JSON：{ "status": 200, "body": "...", "content_type": "..." } 或 { "error": "..." }
+fn web_user_agent() -> &'static str {
+    if cfg!(target_os = "macos") {
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"
+    } else if cfg!(target_os = "windows") {
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    } else {
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    }
+}
+
 #[tauri::command]
 async fn proxy_fetch(url: String) -> serde_json::Value {
     let client = match reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)")
+        .user_agent(web_user_agent())
         .timeout(std::time::Duration::from_secs(10))
         .build()
     {
@@ -141,7 +151,7 @@ async fn fetch_baidu_baike(concept: String) -> Result<serde_json::Value, String>
         urlencoding(&concept)
     );
     let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
+        .user_agent(web_user_agent())
         .timeout(std::time::Duration::from_secs(5))
         .build()
         .map_err(|e| e.to_string())?;
