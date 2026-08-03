@@ -3985,10 +3985,13 @@ function generateTimelineHTML(raw) {
 
   let html = '<div class="tl">';
   for (const item of items) {
+    // 清理事实核对标注（timeline 不支持内联 HTML tooltip）
+    let evt = item.event.replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '');
+    evt = evt.replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
     html += '<div class="tl-item">';
     html += `<div class="tl-date">${escXml(item.date)}</div>`;
     html += '<div class="tl-dot" aria-hidden="true"></div>';
-    html += `<div class="tl-event">${escXml(item.event)}</div>`;
+    html += `<div class="tl-event">${escXml(evt)}</div>`;
     html += '</div>';
   }
   html += '</div>';
