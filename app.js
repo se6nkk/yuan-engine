@@ -163,6 +163,13 @@ const I18N = {
     source_suspicious: '来源存疑',
     source_no_data: '暂无可靠来源',
     module_skipped: '素材不足，已跳过此模块',
+    reader_back: '返回',
+    reader_sources: '来源',
+    reader_search: '搜索',
+    reader_regenerate: '重新生成',
+    reader_export: '导出',
+    reader_theme_light: '浅色',
+    reader_theme_dark: '暗色',
   },
   en: {
     hero_sub: 'Enter a word, build a cognitive framework',
@@ -225,6 +232,13 @@ const I18N = {
     source_suspicious: 'Source may be unreliable',
     source_no_data: 'No reliable source available',
     module_skipped: 'Insufficient material, module skipped',
+    reader_back: 'Back',
+    reader_sources: 'Sources',
+    reader_search: 'Search',
+    reader_regenerate: 'Regenerate',
+    reader_export: 'Export',
+    reader_theme_light: 'Light',
+    reader_theme_dark: 'Dark',
   }
 };
 
@@ -2307,33 +2321,33 @@ function readerShellHTML() {
       <div class="reader-row-1">
         <span class="reader-brand">framework</span>
         <div class="theme-switch-wrap">
-          <span class="theme-label">LIGHT</span>
+          <span class="theme-label" data-i18n="reader_theme_light">浅色</span>
           <label class="theme-switch">
             <input type="checkbox" onchange="toggleTheme()" aria-label="切换明暗主题">
             <span class="theme-slider"></span>
           </label>
-          <span class="theme-label">DARK</span>
+          <span class="theme-label" data-i18n="reader_theme_dark">暗色</span>
         </div>
       </div>
       <div class="reader-row-2">
         <div class="reader-left">
-          <button class="reader-back" onclick="closeReader()">BACK</button>
+          <button class="reader-back" onclick="closeReader()" data-i18n="reader_back">返回</button>
         </div>
         <div class="reader-dots">${dotsHtml}</div>
         <div class="reader-right">
           <div class="reader-capsules">
-            <button class="reader-capsule" onclick="toggleSourcePanel();" title="查看来源">SOURCES</button>
-            <button class="reader-capsule" onclick="toggleReaderSearch();" title="搜索 (Ctrl+F / Cmd+F)">SEARCH</button>
-            <button class="reader-capsule" onclick="confirmRegenerate(readerConcept())">REGENERATE</button>
-            <button class="reader-capsule" onclick="toggleExportMenu(event)" title="导出">导出</button>
+            <button class="reader-capsule" onclick="toggleSourcePanel();" title="查看来源" data-i18n="reader_sources">来源</button>
+            <button class="reader-capsule" onclick="toggleReaderSearch();" title="搜索 (Ctrl+F / Cmd+F)" data-i18n="reader_search">搜索</button>
+            <button class="reader-capsule" onclick="confirmRegenerate(readerConcept())" data-i18n="reader_regenerate">重新生成</button>
+            <button class="reader-capsule" onclick="toggleExportMenu(event)" title="导出" data-i18n="reader_export">导出</button>
           </div>
           <div class="reader-more-wrap">
             <button class="reader-more-btn" onclick="toggleReaderMore(this)" title="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;display:block"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="reader-more-menu">
-              <button class="reader-more-item" onclick="toggleSourcePanel();closeReaderMore()">SOURCES</button>
-              <button class="reader-more-item" onclick="toggleReaderSearch();closeReaderMore()">SEARCH</button>
-              <button class="reader-more-item" onclick="confirmRegenerate(readerConcept());closeReaderMore()">REGENERATE</button>
-              <button class="reader-more-item" onclick="toggleExportMenu(event);closeReaderMore()">导出</button>
+              <button class="reader-more-item" onclick="toggleSourcePanel();closeReaderMore()" data-i18n="reader_sources">来源</button>
+              <button class="reader-more-item" onclick="toggleReaderSearch();closeReaderMore()" data-i18n="reader_search">搜索</button>
+              <button class="reader-more-item" onclick="confirmRegenerate(readerConcept());closeReaderMore()" data-i18n="reader_regenerate">重新生成</button>
+              <button class="reader-more-item" onclick="toggleExportMenu(event);closeReaderMore()" data-i18n="reader_export">导出</button>
             </div>
           </div>
         </div>
@@ -2356,6 +2370,8 @@ function attachReaderShell(data) {
   reader.id = 'reader';
   reader.dataset.concept = data.concept;
   reader.innerHTML = readerShellHTML();
+  // 动态插入的 reader 按钮需要刷新 i18n
+  setLang(currentLang);
   document.body.appendChild(reader);
   // 导航按钮放在 reader 外部（body 直子），避免 reader 的 backdrop-filter 创建新包含块导致 fixed 失效
   const nav = document.createElement('div');
