@@ -2337,7 +2337,7 @@ function readerShellHTML() {
   return `
     <div class="reader-progress">
       <div class="reader-row-1">
-        <span class="reader-brand">framework</span>
+        <span class="reader-brand">frame</span>
         <div class="theme-switch-wrap">
           <span class="theme-label" data-i18n="reader_theme_light">浅色</span>
           <label class="theme-switch">
@@ -3183,7 +3183,7 @@ function buildExportCard(data, layerIdx = -1) {
   const glossary = data.glossary || [];
   const isSingle = layerIdx >= 0 && !!layers[layerIdx];
   let html = `<div class="exp-header">
-    <span class="exp-brand">framework</span>
+    <span class="exp-brand">frame</span>
     <h1 class="exp-concept">${esc(data.concept)}</h1>
     <div class="exp-meta">元框架引擎 · 五层认知框架 · ${isSingle ? `第 ${layerIdx + 1} 层 · 单页导出` : `共 ${layers.length} 层 · 内容已通过事实核对`}</div>
   </div>`;
