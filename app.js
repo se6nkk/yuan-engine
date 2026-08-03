@@ -2945,7 +2945,7 @@ function exportThemeTokens(isDark) {
   if (isDark) {
     return {
       pageBg: '#0E0F13',
-      cardBg: '#191B21', cardBorder: '#2A2C33', ink: '#DCE0E7', titleInk: '#F4F5F7',
+      cardBg: '#191B21', cardBorder: '#2A2C33', ink: '#EFF1F4', titleInk: '#FFFFFF',
       muted: '#AAB0B8', accent: '#ECE9E3', accent2: '#BBB6AC', onAccent: '#0E0F13',
       accentSoft: 'rgba(236,233,227,0.10)', glassHi: 'rgba(255,255,255,0.06)',
       cardShadow: '0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
