@@ -933,7 +933,7 @@ function getSettings() {
     const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
     return {
       apiBase: raw.apiBase || 'https://api.deepseek.com',
-      modelName: raw.modelName || 'deepseek-v4-pro',
+      modelName: raw.modelName || 'deepseek-v4-flash',
       genMode: raw.genMode || 'cache',
       lang: raw.lang || 'zh',
       themeMode: raw.themeMode || 'system',
@@ -1057,7 +1057,7 @@ async function callLLM(concept, searchResults) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-v4-pro',
+      model: s.modelName || 'deepseek-v4-flash',
       messages: [
         { role: 'system', content: buildSystemPrompt(concept, searchResults) },
         { role: 'user', content: '请开始生成。' }
@@ -1091,7 +1091,7 @@ async function callLLMJson(systemContent, userContent, opts) {
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-v4-pro',
+      model: s.modelName || 'deepseek-v4-flash',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: userContent }
@@ -1138,7 +1138,7 @@ async function callLLMStream(concept, searchResults, onChunk, systemPromptOverri
       'Authorization': `Bearer ${s.apiKey}`
     },
     body: JSON.stringify({
-      model: s.modelName || 'deepseek-v4-pro',
+      model: s.modelName || 'deepseek-v4-flash',
       messages: [
         { role: 'system', content: systemContent },
         { role: 'user', content: '请开始生成。' }
@@ -4808,7 +4808,7 @@ function showOnboarding() {
           const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
           cfg.apiKey = key;
           cfg.apiBase = cfg.apiBase || 'https://api.deepseek.com';
-          cfg.modelName = cfg.modelName || 'deepseek-v4-pro';
+          cfg.modelName = cfg.modelName || 'deepseek-v4-flash';
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
           try { loadSettings(); } catch(_) {}
         }
