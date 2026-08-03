@@ -112,7 +112,7 @@ const I18N = {
     progress_verifying: '正在交叉验证...',
     progress_generating: '正在生成认知框架...',
     progress_done: '生成完成',
-    settings_title: 'SETTINGS',
+    settings_title: '设置',
     settings_theme: '外观主题',
     settings_theme_system: '跟随系统',
     settings_theme_light: '浅色',
@@ -166,7 +166,7 @@ const I18N = {
     reader_back: '返回',
     reader_sources: '来源',
     reader_search: '搜索',
-    reader_regenerate: '重新生成',
+    reader_regenerate: '重置',
     reader_export: '导出',
     reader_theme_light: '浅色',
     reader_theme_dark: '暗色',
@@ -181,8 +181,7 @@ const I18N = {
     progress_verifying: 'Cross-verifying facts...',
     progress_generating: 'Generating cognitive framework...',
     progress_done: 'Generation complete',
-    settings_title: 'SETTINGS',
-    settings_theme: 'Appearance',
+    settings_title: 'Settings',
     settings_theme_system: 'Follow System',
     settings_theme_light: 'Light',
     settings_theme_dark: 'Dark',
@@ -235,7 +234,7 @@ const I18N = {
     reader_back: 'Back',
     reader_sources: 'Sources',
     reader_search: 'Search',
-    reader_regenerate: 'Regenerate',
+    reader_regenerate: 'Reset',
     reader_export: 'Export',
     reader_theme_light: 'Light',
     reader_theme_dark: 'Dark',
@@ -2338,7 +2337,7 @@ function readerShellHTML() {
           <div class="reader-capsules">
             <button class="reader-capsule" onclick="toggleSourcePanel();" title="查看来源" data-i18n="reader_sources">来源</button>
             <button class="reader-capsule" onclick="toggleReaderSearch();" title="搜索 (Ctrl+F / Cmd+F)" data-i18n="reader_search">搜索</button>
-            <button class="reader-capsule" onclick="confirmRegenerate(readerConcept())" data-i18n="reader_regenerate">重新生成</button>
+            <button class="reader-capsule" onclick="confirmRegenerate(readerConcept())" data-i18n="reader_regenerate">重置</button>
             <button class="reader-capsule" onclick="toggleExportMenu(event)" title="导出" data-i18n="reader_export">导出</button>
           </div>
           <div class="reader-more-wrap">
@@ -2346,7 +2345,7 @@ function readerShellHTML() {
             <div class="reader-more-menu">
               <button class="reader-more-item" onclick="toggleSourcePanel();closeReaderMore()" data-i18n="reader_sources">来源</button>
               <button class="reader-more-item" onclick="toggleReaderSearch();closeReaderMore()" data-i18n="reader_search">搜索</button>
-              <button class="reader-more-item" onclick="confirmRegenerate(readerConcept());closeReaderMore()" data-i18n="reader_regenerate">重新生成</button>
+              <button class="reader-more-item" onclick="confirmRegenerate(readerConcept());closeReaderMore()" data-i18n="reader_regenerate">重置</button>
               <button class="reader-more-item" onclick="toggleExportMenu(event);closeReaderMore()" data-i18n="reader_export">导出</button>
             </div>
           </div>
