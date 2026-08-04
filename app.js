@@ -2073,13 +2073,13 @@ function renderLayerPage(layer, idx, total, data) {
     rawContent = rawContent.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
     rawContent = rawContent.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
     rawContent = rawContent.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
-    // 清理旧版「来源[N]」内联引用（已被新的 <u class="fu"> 事实核对标签取代）
+    // 清理旧版「来源[N]」内联引用
+    // 先处理「来源[N] ；⚠️需核实」→「来源N：⚠️需核实」
+    rawContent = rawContent.replace(/（来源\[(\d+)\]\s*[；;]\s*/g, '（来源$1：');
     rawContent = rawContent.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
     rawContent = rawContent.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
     // 清理被括号包裹的裸引用标记：([3]）/ （[3]）/ 【[3]】— 但保留正文中合法的 [N] 引用
     rawContent = rawContent.replace(/[（(【［]\s*\[\d+\]\s*[)）】］]/g, '');
-    // 清理括号内残留的分号（来源[N] 被删后剩下「；⚠️」等）
-    rawContent = rawContent.replace(/（\s*[；;]\s*/g, '（');
     // 清理残留空括号
     rawContent = rawContent.replace(/[（(]\s*[)）]/g, '');
 
@@ -2703,7 +2703,7 @@ function updateReaderNav() {
   } else if (cur === revealed && revealed < total - 1) {
     html += `<button class="reader-continue" disabled style="opacity:.5;cursor:default">生成中…</button>`;
   } else {
-    html += `<button class="reader-continue" onclick="openDonate()">☕ 支持一下</button>`;
+    html += `<button class="reader-continue" onclick="openDonate()">☕ 支持</button>`;
   }
   nav.innerHTML = html;
 }
@@ -3168,6 +3168,7 @@ function renderModuleContentForExport(mod, data) {
   c = c.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
   c = c.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
   // 清理旧版「来源[N]」内联引用
+  c = c.replace(/（来源\[(\d+)\]\s*[；;]\s*/g, '（来源$1：');
   c = c.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
   c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
   c = c.replace(/[（(【［]\s*\[\d+\]\s*[)）】］]/g, '');
