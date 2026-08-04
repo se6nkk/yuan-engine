@@ -2477,7 +2477,7 @@ function startSourceVerify(concept, urls) {
       let domain = '';
       try { domain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
       return {
-        label: domain ? `来源${i + 1}：${domain}  ${url}` : `来源${i + 1}：${url}`,
+        label: domain ? `来源${i + 1}：${domain}` : `来源${i + 1}`,
         url: url,
         status: 'hit',
         hit: true,
@@ -2701,7 +2701,7 @@ function updateReaderNav() {
   } else if (cur === revealed && revealed < total - 1) {
     html += `<button class="reader-continue" disabled style="opacity:.5;cursor:default">生成中…</button>`;
   } else {
-    html += `<button class="reader-continue" onclick="openDonate()">☕ 支持元引擎</button>`;
+    html += `<button class="reader-continue" onclick="openDonate()">☕ 支持一下</button>`;
   }
   nav.innerHTML = html;
 }
