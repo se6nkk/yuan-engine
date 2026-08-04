@@ -2079,6 +2079,9 @@ function renderLayerPage(layer, idx, total, data) {
     // 清理遗留的裸方括号引用：([1]） / 【[3]】 / 等
     rawContent = rawContent.replace(/[（(【[]\s*\[\d+\]\s*[)）】]…]/g, '');
     rawContent = rawContent.replace(/\s*\[\d+\]\s*/g, '');
+    // 清理残留空括号：来源[N] 被移除后剩下（）
+    rawContent = rawContent.replace(/[（(]\s*[)）]/g, '');
+    rawContent = rawContent.replace(/[【〔「」『』\]]\s*[【〕」『』\]]/g, '');
 
     // 领域分类 → 思维导图 SVG
     if (title.includes('领域分类') || title.includes('分类')) {
@@ -2476,7 +2479,7 @@ function startSourceVerify(concept, urls) {
       let domain = '';
       try { domain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
       return {
-        label: domain ? `[${i + 1}] ${domain}` : `来源「${i + 1}」`,
+        label: domain ? `来源${i + 1}：${domain}  ${url}` : `来源${i + 1}：${url}`,
         url: url,
         status: 'hit',
         hit: true,
@@ -3169,6 +3172,8 @@ function renderModuleContentForExport(mod, data) {
   c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
   c = c.replace(/[（(【[]\s*\[\d+\]\s*[)）】]…]/g, '');
   c = c.replace(/\s*\[\d+\]\s*/g, '');
+  c = c.replace(/[（(]\s*[)）]/g, '');
+  c = c.replace(/[【〔「」『』\]]\s*[【〕」『』\]]/g, '');
   let content = '';
   if (title.includes('领域分类') || title.includes('分类')) {
     const categories = parseMindmapCategories(c);
