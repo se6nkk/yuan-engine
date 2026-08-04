@@ -2077,8 +2077,8 @@ function renderLayerPage(layer, idx, total, data) {
     // 「来源[N] ；/，⚠️需核实」→「来源N：⚠️需核实」
     rawContent = rawContent.replace(/（来源\[(\d+)\]\s*[；;，、]\s*/g, '（来源$1：');
     // 清理来源N：后面的 LLM 诊断标签（推演/推理/有待验证 等）→ 统一用 ⚠️需核实
-    rawContent = rawContent.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认)\s*）/g, '（来源$1：⚠️需核实）');
-    rawContent = rawContent.replace(/（来源(\d+)：\s*(推演|推理|推测|演绎|归纳|分析)\s*）/g, '（来源$1：⚠️AI推演，仅供参考）');
+    // 来源标注后跟各种冗余标签 → 统一去掉，有来源编号就够了
+    rawContent = rawContent.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认|需核实|需进一步确认|推演|推理|推测|演绎|归纳|分析|估算|尚待确认|暂未确认|未确认|不确定)\s*）/g, '（来源$1）');
     // 括号仅包含来源[N]（无其他内容）→ 整体删除
     rawContent = rawContent.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
     // 来源[N] 后跟剩余文本但无括号包裹 → 只删来源[N]
@@ -3175,8 +3175,7 @@ function renderModuleContentForExport(mod, data) {
   c = c.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
   // 清理旧版「来源[N]」内联引用
   c = c.replace(/（来源\[(\d+)\]\s*[；;，、]\s*/g, '（来源$1：');
-  c = c.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认)\s*）/g, '（来源$1：⚠️需核实）');
-  c = c.replace(/（来源(\d+)：\s*(推演|推理|推测|演绎|归纳|分析)\s*）/g, '（来源$1：⚠️AI推演，仅供参考）');
+  c = c.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认|需核实|需进一步确认|推演|推理|推测|演绎|归纳|分析|估算|尚待确认|暂未确认|未确认|不确定)\s*）/g, '（来源$1）');
   c = c.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
   c = c.replace(/（\s*来源\s*\[\d+\]\s*[，、；;\s]+/g, '（');
   c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
