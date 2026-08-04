@@ -2477,7 +2477,7 @@ function startSourceVerify(concept, urls) {
       let domain = '';
       try { domain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
       return {
-        label: domain ? `来源${i + 1}：${domain}` : `来源${i + 1}`,
+        label: domain ? `来源${i + 1}：${url}` : `来源${i + 1}：${url}`,
         url: url,
         status: 'hit',
         hit: true,
