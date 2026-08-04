@@ -4772,6 +4772,15 @@ function toggleSourcePanel() {
   }
 }
 
+// 在系统浏览器中打开 URL（兼容 Tauri App 和浏览器）
+function openExternal(url) {
+  if (isTauriEnv() && window.__TAURI__ && window.__TAURI__.shell) {
+    window.__TAURI__.shell.open(url);
+  } else {
+    window.open(url, '_blank', 'noopener');
+  }
+}
+
 function closeReaderPopups() {
   closeReaderSearch();
   const sp = document.getElementById('sourcePanel');
@@ -4792,7 +4801,7 @@ function renderSourcePanel() {
     html += '<div class="source-item miss"><span class="source-icon">⬜</span><span class="source-label">未找到参考链接</span></div>';
   } else {
     for (const s of hits) {
-      html += `<div class="source-item hit"><span class="source-icon">🔗</span><a href="${s.url}" target="_blank" rel="noopener" class="source-label" style="color:var(--accent);text-decoration:underline;">${esc(s.label)}</a></div>`;
+      html += `<div class="source-item hit"><span class="source-icon">🔗</span><a href="#" onclick="openExternal('${esc(s.url).replace(/'/g, "\\'")}');return false" class="source-label" style="color:var(--accent);text-decoration:underline;">${esc(s.label)}</a></div>`;
     }
   }
   html += '</div>';
