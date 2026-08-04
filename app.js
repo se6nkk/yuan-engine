@@ -2078,6 +2078,8 @@ function renderLayerPage(layer, idx, total, data) {
     rawContent = rawContent.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
     // 清理被括号包裹的裸引用标记：([3]）/ （[3]）/ 【[3]】— 但保留正文中合法的 [N] 引用
     rawContent = rawContent.replace(/[（(【［]\s*\[\d+\]\s*[)）】］]/g, '');
+    // 清理括号内残留的分号（来源[N] 被删后剩下「；⚠️」等）
+    rawContent = rawContent.replace(/（\s*[；;]\s*/g, '（');
     // 清理残留空括号
     rawContent = rawContent.replace(/[（(]\s*[)）]/g, '');
 
