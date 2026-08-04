@@ -2356,7 +2356,7 @@ function readerShellHTML() {
   return `
     <div class="reader-progress">
       <div class="reader-row-1">
-        <span class="reader-brand">frame</span>
+        <span class="reader-brand">Yuan</span>
         <div class="theme-switch-wrap">
           <span class="theme-label" data-i18n="reader_theme_light">浅色</span>
           <label class="theme-switch">
@@ -3015,7 +3015,7 @@ function injectExportStyle(t) {
   .export-root * { box-sizing: border-box; }
   .export-root .exp-header { margin-bottom: 30px; padding-bottom: 22px; border-bottom: 1px solid ${t.cardBorder}; }
   .export-root .exp-brand {
-    display: inline-block; font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: 0.04em;
+    display: inline-block; font-family: "Cinzel", "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: 0.04em;
     font-size: 0.8rem; color: ${t.onAccent}; background: ${t.accent}; padding: 4px 12px; border-radius: 999px;
   }
   .export-root .exp-concept { font-family: "Space Grotesk", sans-serif; font-size: 2.1rem; font-weight: 700; color: ${t.titleInk}; margin: 14px 0 8px; line-height: 1.2; }
@@ -3222,7 +3222,7 @@ function buildExportCard(data, layerIdx = -1) {
   const glossary = data.glossary || [];
   const isSingle = layerIdx >= 0 && !!layers[layerIdx];
   let html = `<div class="exp-header">
-    <span class="exp-brand">frame</span>
+    <span class="exp-brand">Yuan</span>
     <h1 class="exp-concept">${esc(data.concept)}</h1>
     <div class="exp-meta">元框架引擎 · 五层认知框架 · ${isSingle ? `第 ${layerIdx + 1} 层 · 单页导出` : `共 ${layers.length} 层 · 内容已通过事实核对`}</div>
   </div>`;
