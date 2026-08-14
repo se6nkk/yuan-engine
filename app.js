@@ -98,7 +98,7 @@ function watchOnclickMutations() {
 // ===== Config =====
 const DB_NAME = 'MetaEngineDB', DB_VER = 1;
 const SETTINGS_KEY = 'metaengine_settings';
-const CACHE_VERSION = 'v24.1'; // v24.1=收紧白名单(剔除UGC)+web reliable模块3强制溯源
+const CACHE_VERSION = 'v1.0.5'; // v1.0.5=来源N引用格式+12模块新版，旧缓存全部失效
 
 // ===== I18N (zh / en) =====
 const I18N = {
@@ -120,7 +120,7 @@ const I18N = {
     settings_language: '界面语言',
     settings_lang_zh: '中文',
     settings_lang_en: 'English',
-    settings_llm_key: 'LLM API Key（生成用��',
+    settings_llm_key: 'LLM API Key（生成用）',
     settings_llm_key_hint: '<svg class="icon"><use href="#i-lock"/></svg> 仅存本地浏览器，不发往任何第三方服务器',
     settings_key_title: 'API 配置',
     settings_key_desc: '选一个平台填入 Key 即可：生成框架 + 联网搜索 + 交叉验证一站式搞定。国内推荐 智谱GLM 或 硅基流动，免费额度充足。',
@@ -1506,6 +1506,8 @@ async function searchWithDeepSeek(concept, signal) {
     };
   } catch (e) {
     console.warn('searchWithDeepSeek error:', e.message);
+    // 401 认证失败必须浮出（不能 return null 吞掉），由 friendlyError 给出明确提示
+    if (e && e.isAuthError) throw e;
     return null;
   }
 }
@@ -1675,9 +1677,9 @@ P2 模块（其余）：可结合已知知识生成，但不可编造具体数�
         modules: 'core',
         instruction: `素材中等。只生成以下模块：
   P0 模块（缩减模式）：模块3（发展脉络）、模块5（底层原理）、模块6（最新前沿）、模块9（现实映射）
-    → 只写来源中明确有的内容，没有就写「⚠️ 暂无可��来源」，每个事实标注来源编号
+    → 只写来源中明确有的内容，没有就写「⚠️ 暂无可信来源」，每个事实标注来源编号
   P1 模块（缩减模式）：模块1（核心定义）、模块2（领域分类）、模块4（常见误区）、模块7（核心难题）、模块12（工具箱）
-    → 正常生成但篇幅减��，不确定处标注「有待验证」
+    → 正常生成但篇幅减短，不确定处标注「有待验证」
   P2 模块：模块8（跨领域连接）、模块10（核心概念索引）、模块11（推荐学习路径）
     → 照常生成
   其余模块标注「> ⚠️ 现有资料不足以支撑该模块。\n」
@@ -2024,7 +2026,7 @@ function friendlyError(err) {
   if (status === '401' || status === '403' ||
       /invalid.?api.?key|authentication_error|unauthorized|incorrect\s+api\s+key/i.test(msg) ||
       msg.indexOf('请填写正确的api key') !== -1) {
-    return { text: 'API Key 无效，请检查设置', action: 'openSettings', color: '#e67e22' };
+    return { text: 'API Key 无效或已过期（401），请到设置检查 Key', action: 'openSettings', color: '#e67e22' };
   }
   // 余额 / 配额不足
   if (status === '402' || msg.indexOf('balance') !== -1 || msg.indexOf('quota') !== -1 || msg.indexOf('insufficient') !== -1) {
@@ -5393,7 +5395,11 @@ async function trySearXNG(instance, query, engine) {
     if (!resp.ok) throw new Error('bad status');
     return await resp.json();
   } catch (_) {
-    SEARXNG_DOWN.set(instance, Date.now() + 60000);
+    // 实例全灭短路：任一实例首次失败即把全部实例一次性标记 down，
+    // 后续所有时间轴条目/引擎直接命中上方 down 检查，0 网络请求、立即返回失败
+    for (const inst of SEARXNG_INSTANCES) {
+      SEARXNG_DOWN.set(inst, Date.now() + 60000);
+    }
     return null;
   }
 }
@@ -5718,13 +5724,18 @@ function toggleSourcePanel() {
 // 用法：<a href=url target=_blank onclick="return openExternal(event,'url')">
 // Tauri 环境：preventDefault + 系统 shell 打开；浏览器环境：放行，走 href 原生跳转（最可靠）
 function openExternal(event, url) {
-  if (isTauriEnv() && window.__TAURI__ && window.__TAURI__.shell) {
+  // Tauri 环境：仅当 shell.open 可用时才 preventDefault；调用失败（插件未注册/拒绝）降级浏览器打开
+  if (isTauriEnv() && window.__TAURI__ && window.__TAURI__.shell &&
+      typeof window.__TAURI__.shell.open === 'function') {
     if (event && event.preventDefault) event.preventDefault();
-    window.__TAURI__.shell.open(url);
+    window.__TAURI__.shell.open(url).catch(function (err) {
+      console.warn('[openExternal] Tauri shell.open 失败，降级 window.open:', err);
+      window.open(url, '_blank', 'noopener');
+    });
     return false;
   }
   if (!event) { window.open(url, '_blank', 'noopener'); return false; }
-  return true;
+  return true; // 网页版（含 shell 不可用的 Tauri）：不 preventDefault，走原生 href 跳转
 }
 
 function closeReaderPopups() {

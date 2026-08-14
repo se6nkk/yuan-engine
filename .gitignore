@@ -17,3 +17,8 @@ prompts/
 screenshot_*.png
 fullscreen_check.png
 output/
+# 工具残留/子项目（不入库）
+advisory/
+workers/
+image-cards/
+.baoyu-skills/

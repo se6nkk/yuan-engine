@@ -9,7 +9,7 @@ on:
       tag:
         description: '用于发布 Release 的 tag（无需真实存在，将作为产物版本号）'
         required: true
-        default: 'v1.0.3'
+        default: 'v1.0.5'
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
         include:
           - platform: macos-latest
             args: '--target aarch64-apple-darwin'
-          - platform: macos-13
+          - platform: macos-15-intel
             args: '--target x86_64-apple-darwin'
           - platform: ubuntu-22.04
             args: ''
@@ -46,7 +46,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || matrix.platform == 'macos-13' && 'x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || matrix.platform == 'macos-15-intel' && 'x86_64-apple-darwin' || '' }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
