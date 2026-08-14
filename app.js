@@ -121,11 +121,27 @@ const I18N = {
     settings_lang_zh: '中文',
     settings_lang_en: 'English',
     settings_llm_key: 'LLM API Key（生成用��',
-    settings_llm_key_hint: '🔒 仅存本地浏览器，不发往任何第三方服务器',
-    settings_key_title: 'API Key',
-    settings_key_desc: '一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。',
+    settings_llm_key_hint: '<svg class="icon"><use href="#i-lock"/></svg> 仅存本地浏览器，不发往任何第三方服务器',
+    settings_key_title: 'API 配置',
+    settings_key_desc: '选一个平台填入 Key 即可：生成框架 + 联网搜索 + 交叉验证一站式搞定。国内推荐 智谱GLM 或 硅基流动，免费额度充足。',
+    tab_api: '<svg class="icon"><use href="#i-key"/></svg> API 配置',
+    tab_general: '<svg class="icon"><use href="#i-gear"/></svg> 常规设置',
     settings_key_save: '保存并关闭',
-    settings_key_howto: '如何获取 Key？→ <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a> 注册后创建，新用户送 500 万 token 免费额度。',
+    settings_key_howto: '',
+    settings_key_input: 'API Key',
+    settings_model_platform: '模型平台',
+    settings_nokey_intro: '<b>还没有 Key？</b>下面三个平台都支持国内访问，注册即送免费额度，任选其一：',
+    btn_getkey_default: '去当前平台申请 Key →',
+    btn_verify: '验证 Key',
+    nokey_tag_free: '永久免费',
+    nokey_tag_agg: '模型聚合',
+    nokey_tag_lowcost: '高性价比',
+    nokey_glm_title: '智谱 GLM',
+    nokey_glm_desc: 'GLM-4.7-Flash 等 Flash 模型长期免费；新用户注册再送 2000 万 token 永久额度。',
+    nokey_sf_title: '硅基流动',
+    nokey_sf_desc: '9B 及以下模型永久免费；新用户赠 2000 万 token；DeepSeek / GLM / Qwen 一个 Key 全搞定。',
+    nokey_ds_title: 'DeepSeek',
+    nokey_ds_desc: '搜索与推理能力强；新用户送 500 万 token 额度，单次生成约 1 分钱。',
     settings_more: '更多设置',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key（搜索用）',
@@ -189,11 +205,27 @@ const I18N = {
     settings_lang_zh: '中文',
     settings_lang_en: 'English',
     settings_llm_key: 'LLM API Key (for generation)',
-    settings_llm_key_hint: '🔒 Stored locally, never sent to third parties',
-    settings_key_title: 'API Key',
-    settings_key_desc: 'One key for everything: generation + web search + cross-verification. We recommend DeepSeek (free credits on signup, ~$0.001/search).',
+    settings_llm_key_hint: '<svg class="icon"><use href="#i-lock"/></svg> Stored locally, never sent to third parties',
+    settings_key_title: 'API Config',
+    settings_key_desc: 'Pick one provider and paste your key — covers generation + web search + cross-verification. For China users we recommend 智谱 GLM or SiliconFlow (generous free tier).',
+    tab_api: '<svg class="icon"><use href="#i-key"/></svg> API Config',
+    tab_general: '<svg class="icon"><use href="#i-gear"/></svg> General',
     settings_key_save: 'Save & Close',
-    settings_key_howto: 'How to get a key? → <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a> Sign up and create one. New users get 5M free tokens.',
+    settings_key_howto: '',
+    settings_key_input: 'API Key',
+    settings_model_platform: 'Model Provider',
+    settings_nokey_intro: '<b>No key yet?</b> Pick any provider below — all accessible from China, free credits on signup:',
+    btn_getkey_default: 'Get a key →',
+    btn_verify: 'Verify Key',
+    nokey_tag_free: 'Permanent Free Tier',
+    nokey_tag_agg: 'Multi-Model Hub',
+    nokey_tag_lowcost: 'Best Value',
+    nokey_glm_title: '智谱 GLM',
+    nokey_glm_desc: 'GLM-4.7-Flash and other Flash models are permanently free. New users also get 20M tokens forever.',
+    nokey_sf_title: 'SiliconFlow',
+    nokey_sf_desc: 'Models ≤9B are permanently free. New users get 20M tokens. One key for DeepSeek/GLM/Qwen and more.',
+    nokey_ds_title: 'DeepSeek',
+    nokey_ds_desc: 'Great for reasoning + search. New users get 5M free tokens (~$0.001 per generation).',
     settings_more: 'More Settings',
     settings_api_base: 'API Base URL',
     settings_ds_key: 'DeepSeek API Key (for search)',
@@ -313,12 +345,12 @@ ${wikiData.extract || '(无正文)'}
 - 如果搜索结果之间存在矛盾，说明该概念的真实性存疑，优先指出不确定性而非编造。
 - 当无法确认某个事实时，写「暂无可靠来源」而非猜测。` : ''}
 
-${(wikiData.webSnippets || []).map((s, i) => `[${i + 1}] ${typeof s === 'string' ? s : s.text} | 来源:${s.engine || 'web'} | ${s.url || ''}`).join('\n')}
+${(wikiData.webSnippets || []).map((s, i) => `「来源${i + 1}」${typeof s === 'string' ? s : s.text} | 来源:${s.engine || 'web'} | ${s.url || ''}`).join('\n')}
 
 ${isLowQuality ? `
 重申：上述搜索结果可能不可靠。**发展脉络如果没有带年份的明确事件→直接写「暂无可靠时间线来源」，严禁编造。**` : `
 
-**模块3（发展脉络）硬性规则**：仅基于上方搜索片段中明确列出的、带具体年份的事件编写时间线。每个事件必须在描述末尾标注引用来源编号，格式为「（来源[N]）」。若某年的事件无法精确追溯到某个搜索片段，则**禁止**写入。如果搜索片段中没有任何带年份的事件，输出「暂无可靠来源验证该概念的发展脉络。」`}`;
+**模块3（发展脉络）硬性规则**：仅基于上方搜索片段中明确列出的、带具体年份的事件编写时间线。每个事件必须在描述末尾标注引用来源编号，格式为「来源N」（如「来源1」）。若某年的事件无法精确追溯到某个搜索片段，则**禁止**写入。如果搜索片段中没有任何带年份的事件，输出「暂无可靠来源验证该概念的发展脉络。」`}`;
     } else if (wikiData.source === 'semantic_decompose') {
       const s = wikiData.semanticInfo || {};
       sourceCtx = `
@@ -335,7 +367,7 @@ ${s.decomposition || ''}
     } else if (wikiData.source === 'deepseek_search') {
       const mc = wikiData.moduleConfig || {};
       const urls = (wikiData.urlCandidates || []).length > 0
-        ? '\n\n检索到的参考链接：\n' + wikiData.urlCandidates.map((u, i) => `[${i + 1}] ${u}`).join('\n')
+        ? '\n\n检索到的参考链接：\n' + wikiData.urlCandidates.map((u, i) => `「来源${i + 1}」：${u}`).join('\n')
         : '';
 
       // 按素材质量 × 模块防编造等级，构建差异化约束
@@ -345,7 +377,7 @@ ${s.decomposition || ''}
 
       if (quality === 'rich') {
         moduleRules = `
-5. 【P0 模块：模块3/5/6/9】每个事实断言末尾标注来源编号（如「来源[1]」）。若来源中无对应信息→写「暂无可靠来源」。
+5. 【P0 模块：模块3/5/6/9】每个事实断言末尾标注来源编号「来源N」（如「来源1」）。若来源中无对应信息→写「暂无可靠来源」。
 6. 【P1 模块：模块1/2/4/7/12】优先使用来源信息，推演部分标注「（推演）」。不确定处标注「（有待验证）」。
 7. 【P2 模块：其余】可结合已知知识，但不可编造具体数据。`;
       } else if (quality === 'medium') {
@@ -435,7 +467,18 @@ ${moduleRules}`;
 用时间线方式简述该概念的历史演进（关键人物、里程碑事件）。日期无法确定时给出大概区间并标注「未证实」，严禁杜撰。
 格式要求：
 - 每个事件独占一行
-- 格式：年份年：事件描述（年份后必须加"年"，如"1987年"而非"1987"）
+- **时间必须用「」包裹并放在行首**，例如：「1987年」事件描述。
+- 支持的时间写法（任选其一，必须放入「」内）：
+  - 年份：1987年
+  - 年份区间：1987-1990年
+  - 年代（英文 s）：1980s、1990s
+  - 年代（中文）：1980年代
+  - 年代区间：1980s-1990s
+  - 世纪：20世纪
+  - 世纪分期：20世纪前半叶 / 20世纪后半叶 / 20世纪早期 / 20世纪晚期 / 20世纪中叶
+  - 年代至今：2010s至今、1980年代至今
+  - 英文写法同样支持：1987、1987-1990、1980s、late 1980s、early 1990s、20th century、20th century (latter half)、present
+- 时间标记「」只用于标注时间，**不要**在「」内写事件描述
 - 按时间正序排列
 - 不要使用 markdown 列表标记（- 或 *）
 - ${module3Rule}
@@ -565,7 +608,8 @@ ${moduleRules}`;
 - 轻量模块（1 核心定义、11 推荐学习路径、12 工具箱）追求精准而非堆字数
 - 模块 10 中的术语要准确，方便后续生成独立词条
 - 禁止在任何模块中使用空洞套话（如"具有重要意义""值得深入研究""发挥着关键作用"等无信息量的表述）
-- 每个模块的输出质量优先于字数要求，如果概念本身高度专业，允许超出上限${sourceCtx}`;
+- 每个模块的输出质量优先于字数要求，如果概念本身高度专业，允许超出上限
+- **引用格式（全局硬规则，所有模块统一遵守）**：正文中标注引用来源时，一律使用「来源N」这一种格式，其中 N 对应下方「检索到的参考链接」的编号，例如「来源1」「来源2」。多个来源并列时写成「来源1」「来源2」。严格禁止其他任何格式——带括号的（来源[N]）、（来源N）、来源[N]、裸编号 [N]、【来源N】、【来源[N]】、「来源：XXX」（用文字描述来源）、「来源 - XXX」等全部违规；也禁止在来源编号后附加任何说明文字（"有待验证""推演""需核实"等不属于引用格式）。${sourceCtx}`;
 }
 
 // ===== IndexedDB =====
@@ -635,6 +679,120 @@ function dbClear(store) {
   });
 }
 
+// ===== API 平台预设（下拉切换时自动填充 Base URL + 推荐模型名 + 注册链接 + 验证用小模型）=====
+const PLATFORM_PRESETS = {
+  deepseek: {
+    apiBase: 'https://api.deepseek.com',
+    defaultModel: 'deepseek-chat',
+    verifyModel: 'deepseek-chat',
+    getKeyUrl: 'https://platform.deepseek.com/api_keys',
+    hint: {
+      zh: '推荐用 <b>deepseek-chat</b>（通用生成）；若需联网搜索请选带搜索能力的模型。',
+      en: 'Recommended model: <b>deepseek-chat</b> (general purpose).'
+    },
+    modelHint: {
+      zh: '常用：deepseek-chat（通用）、deepseek-reasoner（推理）',
+      en: 'Popular: deepseek-chat (general), deepseek-reasoner (reasoning)'
+    },
+    getKeyText: { zh: '去 DeepSeek 申请 Key →', en: 'Get DeepSeek Key →' }
+  },
+  glm: {
+    apiBase: 'https://open.bigmodel.cn/api/paas/v4',
+    defaultModel: 'glm-4.7-flash',
+    verifyModel: 'glm-4.7-flash',
+    getKeyUrl: 'https://open.bigmodel.cn/',
+    hint: {
+      zh: '<b>GLM-4.7-Flash 永久免费</b>，先跑通链路不花一分钱。付费模型新用户送 2000 万 token 永久额度。',
+      en: '<b>GLM-4.7-Flash is permanently free</b> for unlimited usage. Paid models get 20M tokens forever for new users.'
+    },
+    modelHint: {
+      zh: '免费推荐：glm-4.7-flash / glm-4-flash-250414；付费：glm-4.7、glm-5.2',
+      en: 'Free: glm-4.7-flash / glm-4-flash-250414; Paid: glm-4.7, glm-5.2'
+    },
+    getKeyText: { zh: '去智谱申请 Key →', en: 'Get 智谱 GLM Key →' }
+  },
+  siliconflow: {
+    apiBase: 'https://api.siliconflow.cn/v1',
+    defaultModel: 'deepseek-ai/DeepSeek-R1',
+    verifyModel: 'Qwen/Qwen2.5-7B-Instruct',
+    getKeyUrl: 'https://cloud.siliconflow.cn/',
+    hint: {
+      zh: '<b>9B 及以下模型永久免费</b>（如 Qwen2.5-7B-Instruct）；一个 Key 可调用 DeepSeek / GLM / Qwen 等 200+ 开源模型。',
+      en: '<b>Models ≤9B are permanently free</b> (e.g. Qwen2.5-7B-Instruct). One key for 200+ open models: DeepSeek/GLM/Qwen etc.'
+    },
+    modelHint: {
+      zh: '免费：Qwen/Qwen2.5-7B-Instruct；付费：deepseek-ai/DeepSeek-R1、meta-llama/Llama-3.3-70B-Instruct',
+      en: 'Free: Qwen/Qwen2.5-7B-Instruct; Paid: deepseek-ai/DeepSeek-R1, meta-llama/Llama-3.3-70B-Instruct'
+    },
+    getKeyText: { zh: '去硅基流动申请 Key →', en: 'Get SiliconFlow Key →' }
+  },
+  custom: {
+    apiBase: '',
+    defaultModel: '',
+    verifyModel: '',
+    getKeyUrl: '',
+    hint: {
+      zh: '兼容任意 OpenAI 格式的接口（如阿里云百炼、百度千帆、Kimi 开放平台、本地 Ollama 等）。请手动填 URL 和模型名。',
+      en: 'Any OpenAI-compatible endpoint (DashScope, Qianfan, Kimi, local Ollama, etc). Fill URL and model name manually.'
+    },
+    modelHint: {
+      zh: '查阅对应平台的模型文档填入正确的 model id',
+      en: 'Check your provider docs for the correct model id'
+    },
+    getKeyText: null
+  }
+};
+
+/** 根据用户已保存的 apiBase 反推属于哪个平台预设；匹配不上则 custom */
+function detectPlatformFromSettings(apiBase, modelName) {
+  const b = (apiBase || '').replace(/\/+$/, '').toLowerCase();
+  if (b.includes('api.deepseek.com')) return 'deepseek';
+  if (b.includes('bigmodel.cn')) return 'glm';
+  if (b.includes('siliconflow.cn') || b.includes('siliconflow.com')) return 'siliconflow';
+  return 'custom';
+}
+
+/** 切换模型平台：自动填默认 Base URL + 默认模型名 + 动态提示 + 申请链接
+ * @param {string} value - 平台 id
+ * @param {object} [opts]
+ * @param {boolean} [opts.force=false] - true=用户手动切换下拉，强制用预设值覆盖 URL 与模型名；false=加载回填场景，只更新提示不覆盖用户值
+ */
+function onPlatformChanged(value, opts = {}) {
+  const preset = PLATFORM_PRESETS[value] || PLATFORM_PRESETS.custom;
+  const baseEl = document.getElementById('apiBase');
+  const modelEl = document.getElementById('modelName');
+  const platHintEl = document.getElementById('platformHint');
+  const modelHintEl = document.getElementById('modelHint');
+  const getKeyLink = document.getElementById('getKeyLink');
+  const lang = currentLang;
+
+  // 用户手动切平台（force=true）→ 强制替换；custom 平台则清空让用户自己填
+  if (opts.force) {
+    if (value === 'custom') {
+      // custom：清空预设引导用户填，但保留已有值（避免误删）
+      // 什么也不做，让用户手动编辑
+    } else {
+      if (preset.apiBase) baseEl.value = preset.apiBase;
+      if (preset.defaultModel) modelEl.value = preset.defaultModel;
+    }
+  }
+
+  // 动态提示（无论加载还是切换，都刷新）
+  if (platHintEl) platHintEl.innerHTML = preset.hint[lang] || preset.hint.zh || '';
+  if (modelHintEl) modelHintEl.innerHTML = preset.modelHint[lang] || preset.modelHint.zh || '';
+  // 申请 Key 链接
+  if (getKeyLink) {
+    if (preset.getKeyUrl) {
+      getKeyLink.href = preset.getKeyUrl;
+      getKeyLink.style.display = '';
+      const txt = preset.getKeyText && preset.getKeyText[lang];
+      if (txt) getKeyLink.textContent = txt;
+    } else {
+      getKeyLink.style.display = 'none';
+    }
+  }
+}
+
 // ===== Settings =====
 function loadSettings() {
   try {
@@ -642,6 +800,12 @@ function loadSettings() {
     document.getElementById('apiKey').value = s.apiKey || '';
     document.getElementById('apiBase').value = s.apiBase || 'https://api.deepseek.com';
     document.getElementById('modelName').value = s.modelName || 'deepseek-chat';
+    // 根据已保存的 base/model 反推平台下拉，回填显示
+    const plat = detectPlatformFromSettings(s.apiBase, s.modelName);
+    const platEl = document.getElementById('modelPlatform');
+    if (platEl) platEl.value = plat;
+    // 触发一次平台切换以更新提示/链接（但保留用户已有值不覆盖）
+    onPlatformChanged(plat);
     document.querySelector(`input[name="genMode"][value="${s.genMode || 'cache'}"]`).checked = true;
     // Theme mode: system / light / dark
     const themeMode = s.themeMode || 'system';
@@ -937,7 +1101,7 @@ function getSettings() {
     const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
     return {
       apiBase: raw.apiBase || 'https://api.deepseek.com',
-      modelName: raw.modelName || 'deepseek-v4-flash',
+      modelName: raw.modelName || 'deepseek-chat',
       genMode: raw.genMode || 'cache',
       lang: raw.lang || 'zh',
       themeMode: raw.themeMode || 'system',
@@ -977,7 +1141,77 @@ function syncThemeSwitch(isDark) {
 }
 
 // ===== Settings Panel =====
-function openSettings() { document.getElementById('settingsPanel').classList.add('open'); document.getElementById('settingsOverlay').classList.add('open'); }
+function switchSettingsTab(tab) {
+  document.querySelectorAll('.settings-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const ap = document.getElementById('tab-pane-api');
+  const gp = document.getElementById('tab-pane-general');
+  if (ap) ap.classList.toggle('active', tab === 'api');
+  if (gp) gp.classList.toggle('active', tab === 'general');
+  // 记住用户上次切的 Tab
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    s.settingsTab = tab;
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  } catch (_) {}
+}
+function openSettings() {
+  document.getElementById('settingsPanel').classList.add('open');
+  document.getElementById('settingsOverlay').classList.add('open');
+  // 恢复上次的 Tab
+  let tab = 'api';
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    if (s.settingsTab) tab = s.settingsTab;
+  } catch (_) {}
+  switchSettingsTab(tab);
+}
+
+// ===== API Key 验证（强化配 Key：配完即时探测是否有效）=====
+// 仅发一个 max_tokens=1 的极简请求，不消耗真实生成额度。
+async function verifyApiKey(key, base, opts = {}) {
+  const apiBase = (base || 'https://api.deepseek.com').replace(/\/+$/, '');
+  const k = (key || '').trim();
+  if (!k) return { ok: false, reason: 'empty', msg: '请先粘贴 Key' };
+  // 根据平台预设挑一个最小模型做验证；custom 场景就用用户填的 modelName（或传进来的 model）
+  let verifyModel = opts.verifyModel;
+  if (!verifyModel) {
+    const plat = detectPlatformFromSettings(base, '');
+    const preset = PLATFORM_PRESETS && PLATFORM_PRESETS[plat];
+    verifyModel = (preset && preset.verifyModel) || opts.model || 'deepseek-chat';
+  }
+  try {
+    const resp = await fetch(`${apiBase}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${k}` },
+      body: JSON.stringify({ model: verifyModel, messages: [{ role: 'user', content: 'hi' }], max_tokens: 1, stream: false })
+    });
+    if (resp.status === 200) return { ok: true };
+    if (resp.status === 401 || resp.status === 403) return { ok: false, reason: 'invalid', msg: 'Key 无效或无权限（403）' };
+    if (resp.status === 404) return { ok: false, reason: 'notfound', msg: `请求地址 404，请检查 Base URL 或模型名是否正确（当前模型：${verifyModel}）` };
+    const txt = await resp.text().catch(() => '');
+    if (/insufficient|余额|balance/i.test(txt)) return { ok: false, reason: 'balance', msg: '余额不足，请到对应平台充值' };
+    return { ok: false, reason: 'other', status: resp.status, msg: `返回状态 ${resp.status}（可能是模型名 "${verifyModel}" 不正确，或 Base URL 不对）` };
+  } catch (e) {
+    return { ok: false, reason: 'network', msg: '网络错误，请检查网络或 API Base' };
+  }
+}
+
+// 设置面板里的「验证 Key」按钮
+async function verifyCurrentKey() {
+  const keyEl = document.getElementById('apiKey');
+  const baseEl = document.getElementById('apiBase');
+  const modelEl = document.getElementById('modelName');
+  const resEl = document.getElementById('settingsVerifyResult');
+  if (!resEl) return;
+  const key = keyEl ? keyEl.value.trim() : '';
+  const base = baseEl ? baseEl.value.trim() : 'https://api.deepseek.com';
+  const model = modelEl ? modelEl.value.trim() : '';
+  if (!key) { resEl.textContent = '请先粘贴 Key'; resEl.className = 'verify-result bad'; return; }
+  resEl.textContent = '验证中…'; resEl.className = 'verify-result';
+  const r = await verifyApiKey(key, base, { model: model });
+  if (r.ok) { resEl.textContent = '✓ Key 有效，可以开始生成'; resEl.className = 'verify-result good'; }
+  else { resEl.textContent = '✗ ' + (r.msg || '验证失败'); resEl.className = 'verify-result bad'; }
+}
 function closeSettings() { document.getElementById('settingsPanel').classList.remove('open'); document.getElementById('settingsOverlay').classList.remove('open'); }
 
 // ===== Markdown Parse =====
@@ -1133,7 +1367,7 @@ async function callLLMJson(systemContent, userContent, opts) {
 
 // ===== 流式 LLM 调用（变更单-43） =====
 // systemPromptOverride: v20 直接传入已注入事实的 system prompt；缺省则按传统方式构建
-async function callLLMStream(concept, searchResults, onChunk, systemPromptOverride) {
+async function callLLMStream(concept, searchResults, onChunk, systemPromptOverride, signal) {
   const s = getSettings();
   if (!s.apiKey) throw new Error('请先设置 API Key');
 
@@ -1156,7 +1390,8 @@ async function callLLMStream(concept, searchResults, onChunk, systemPromptOverri
       temperature: 0.7,
       max_tokens: 16000,
       stream: true
-    })
+    }),
+    signal: signal  // 支持 AbortController 取消
   });
 
   if (!resp.ok) {
@@ -1170,6 +1405,7 @@ async function callLLMStream(concept, searchResults, onChunk, systemPromptOverri
   let buffer = '';
 
   while (true) {
+    if (signal && signal.aborted) break;
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
@@ -1203,7 +1439,7 @@ const DEEPSEEK_API_BASE = 'https://api.deepseek.com';
  * 用 DeepSeek 联网搜索获取概念资料。
  * 返回 { content: 搜索结果文本, urlCandidates: 来源URL列表, totalTokens: token用量 } 或 null
  */
-async function searchWithDeepSeek(concept) {
+async function searchWithDeepSeek(concept, signal) {
   const s = getSettings();
   const dsKey = s.deepseekApiKey || s.apiKey;
   if (!dsKey) return null;
@@ -1228,6 +1464,7 @@ async function searchWithDeepSeek(concept) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${dsKey}`
       },
+      signal,
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
@@ -1255,9 +1492,12 @@ async function searchWithDeepSeek(concept) {
     const data = await resp.json();
     const content = data.choices[0].message.content || '';
     
-    // 提取 URL
-    const urlRegex = /https?:\/\/[^\s\)\]>]+/g;
-    const urls = [...new Set(content.match(urlRegex) || [])].slice(0, 5);
+    // 提取 URL（兼容裸 URL 与 Markdown 链接 [text](url)）
+    const rawUrls = [
+      ...(content.match(/https?:\/\/[^\s\)\]>]+/g) || []),
+      ...((content.match(/\]\((https?:\/\/[^\s)]+)\)/g) || []).map(m => m.slice(2, -1)))
+    ];
+    const urls = [...new Set(rawUrls.map(u => u.replace(/[).,;]+$/, '')))].slice(0, 8);
 
     return {
       content,
@@ -1275,7 +1515,7 @@ async function searchWithDeepSeek(concept) {
  * 不依赖搜索功能，只用模型知识交叉比对搜索结果中的事实断言
  * @returns {{ confidence: number, summary: string, verified: number, plausible: number, unverifiable: number, suspicious: number }}
  */
-async function crossVerify(searchContent, concept) {
+async function crossVerify(searchContent, concept, signal) {
   const s = getSettings();
   const dsKey = s.deepseekApiKey || s.apiKey;
   if (!dsKey) return { confidence: 0.5, summary: 'API未配置，跳过验证' };
@@ -1303,6 +1543,7 @@ ${searchContent.slice(0, 2500)}
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${dsKey}`
       },
+      signal,
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
@@ -1720,7 +1961,7 @@ function assessWebQuality(snippets) {
 }
 
 // ===== v25 预生成管道（DeepSeek 优先 + 旧管道兜底） =====
-async function runV25PreGenerate(concept) {
+async function runV25PreGenerate(concept, signal) {
   // 第〇层
   const v = validateInput(concept);
   if (!v.pass) return { abort: true, state: 'REJECT', message: v.reason };
@@ -1729,12 +1970,12 @@ async function runV25PreGenerate(concept) {
 
   // ===== 优先：DeepSeek 联网搜索 =====
   if (prog) prog.textContent = 'DeepSeek 联网检索中...';
-  const dsResult = await searchWithDeepSeek(concept);
+  const dsResult = await searchWithDeepSeek(concept, signal);
   
   if (dsResult && dsResult.content) {
     // 交叉验证：不要只看搜索结果有多少，要看有多可信
     if (prog) prog.textContent = '事实核查中...';
-    const verification = await crossVerify(dsResult.content, concept);
+    const verification = await crossVerify(dsResult.content, concept, signal);
 
     const quality = assessMaterialQuality(dsResult, verification);
     const modConfig = getModuleConfig(quality);
@@ -1833,6 +2074,26 @@ let currentConcept = '';
 let readerState = { currentLayer: 0, totalLayers: 0 };
 // 渐进管道状态（生成一层即并行核对下一层，逐层揭示）
 let pipeline = null;
+// 当前生成任务的 AbortController（供取消按钮调用）
+let currentAbortController = null;
+
+// 取消当前生成任务（由输入框内的胶囊"取消"按钮触发）
+function cancelGenerate() {
+  if (!currentAbortController) return;
+  if (!confirm('确定取消当前生成？已生成的内容不会保存。')) return;
+  try {
+    currentAbortController.abort();
+    // 立即更新 UI：隐藏取消按钮、显示已取消、重置进度
+    const cancelBtn = document.getElementById('cancelGenBtn');
+    const wrap = document.querySelector('.search-input-wrap');
+    const bar = document.getElementById('progressBar');
+    const text = document.getElementById('progressText');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+    if (wrap) wrap.classList.remove('generating');
+    if (bar) bar.classList.remove('active');
+    if (text) { text.textContent = '已取消生成'; text.style.color = ''; }
+  } catch (_) {}
+}
 
 async function startGenerate() {
   const input = document.getElementById('conceptInput');
@@ -1849,14 +2110,32 @@ async function startGenerate() {
   const fill = document.getElementById('progressFill');
   const text = document.getElementById('progressText');
 
+  // ===== AbortController：支持中途取消 =====
+  const abortCtrl = new AbortController();
+  currentAbortController = abortCtrl;
+  // 显示胶囊取消按钮，禁用生成按钮
+  const cancelBtn = document.getElementById('cancelGenBtn');
+  const searchWrap = document.querySelector('.search-input-wrap');
+  if (cancelBtn) cancelBtn.hidden = false;
+  if (searchWrap) searchWrap.classList.add('generating');
   btn.disabled = true;
   bar.classList.add('active');
 
   try {
+    // 取消检查函数
+    const checkAborted = () => { if (abortCtrl.signal.aborted) throw new DOMException('Aborted', 'AbortError'); };
+
+    // 重置按钮反馈：regenerate 模式立刻告知用户已跳过缓存（避免"重置无效"误判）
+    if ((s.genMode || 'cache') === 'regenerate') {
+      text.textContent = '正在重新生成（已跳过缓存）...';
+      fill.style.width = '5%';
+    }
+
     // Check cache — TC-05: 缓存命中跳过进度条 active
     if ((s.genMode || 'cache') === 'cache') {
       text.textContent = '检查缓存...';
       fill.style.width = '10%';
+      checkAborted();
       const cached = await dbGet('frameworks', concept);
       if (cached) {
         if (cached._cacheVersion !== CACHE_VERSION) {
@@ -1875,6 +2154,7 @@ async function startGenerate() {
     if ((s.genMode || 'cache') === 'cache') {
       text.textContent = '检查本地知识库...';
       fill.style.width = '15%';
+      checkAborted();
       const obsMd = await readFromObsidian(concept);
       if (obsMd) {
         const structure = parseMarkdown(obsMd);
@@ -1888,16 +2168,23 @@ async function startGenerate() {
     }
 
     // ===== v24 防幻觉管道：四级降级 =====
-    const pre = await runV25PreGenerate(concept);
+    const pre = await runV25PreGenerate(concept, abortCtrl.signal);
     bootStep('[生成] preGenerate 完成：abort=' + pre.abort + ' state=' + pre.state);
     if (pre.abort) {
+      // 如果是用户取消，不再显示 abort 消息
+      if (abortCtrl.signal.aborted) {
+        fill.style.width = '100%';
+        text.textContent = '已取消生成';
+        text.style.color = '';
+        bar.classList.remove('active');
+        return;
+      }
       fill.style.width = '100%';
       // NO_SOURCE 也用更温和的颜色（橙色），NOT_FOUND 用红色
       text.style.color = (pre.state === 'NOT_FOUND') ? '#b00020' : '#b8860b';
       text.textContent = pre.message;
       text.style.whiteSpace = 'pre-line';
       bar.classList.remove('active');
-      btn.disabled = false;
       return;
     }
     text.style.whiteSpace = '';
@@ -1905,6 +2192,8 @@ async function startGenerate() {
     fill.style.width = '15%';
     text.style.color = '';
     text.textContent = 'AI 正在生成...';
+
+    checkAborted();
 
     const pipe = {
       concept: currentConcept,
@@ -1953,7 +2242,7 @@ async function startGenerate() {
         pipe._progTarget = Math.max(pipe._progTarget, lp.pct);
         text.textContent = '正在生成：' + lp.label + '...';
       }
-    }, systemPrompt);
+    }, systemPrompt, abortCtrl.signal);
 
     // 流结束：定界剩余层（最后一层没有后继边界）
     pipe.streamDone = true;
@@ -1983,7 +2272,7 @@ async function startGenerate() {
     // 在末尾追加参考链接（如存在）
     const urls = pipe.urlCandidates || [];
     if (urls.length > 0) {
-      const refBlock = '\n\n---\n\n**参考链接**\n\n' + urls.map((u, i) => `来源「${i + 1}」：${u}`).join('\n');
+      const refBlock = '\n\n---\n\n**参考链接**\n\n> 来源为 DeepSeek 联网搜索结果，不保证链接可用。点击链接在新窗口打开。\n\n' + urls.map((u, i) => `「来源${i + 1}」：${u}`).join('\n');
       finalMd += refBlock;
     }
     const finalStructure = parseMarkdown(finalMd);
@@ -2015,33 +2304,52 @@ async function startGenerate() {
     bar.classList.remove('active');
 
   } catch (err) {
-    console.error(err);
-    bootStep('[生成] 出错：' + ((err && err.message) || String(err)));
-    // 立即停掉进度条动画（不��让 bar "跑完再弹窗"）
-    if (pipeline && pipeline._progTimer) { clearInterval(pipeline._progTimer); pipeline._progTimer = null; }
-    try {
-      var fe = friendlyError(err);
-      // 让用户看到友好提示 + 在下方灰色小字看到实际错误（方便排查）
-      text.textContent = fe.text;
-      text.style.color = fe.color || '#b00020';
-      if (fe.action === 'openSettings') {
-        setTimeout(function() { openSettings(); }, 600);
-      }
-      // 调试信息：把原始错误的第一句展示在进度文字下方
-      var rawMsg = (err && err.message) ? err.message.split(/[\n\r]/)[0] : '';
-      if (rawMsg && !rawMsg.includes(fe.text)) {
-        var debugEl = document.getElementById('progressDebug');
-        if (!debugEl) {
-          debugEl = document.createElement('div');
-          debugEl.id = 'progressDebug';
-          debugEl.style.cssText = 'font-size:12px;color:#999;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-          text.parentNode.appendChild(debugEl);
+    // 如果是用户主动取消（AbortError），给出友好提示
+    const isAbort = (err && err.name === 'AbortError') || (abortCtrl && abortCtrl.signal && abortCtrl.signal.aborted);
+    if (isAbort) {
+      text.style.color = '';
+      text.textContent = '已取消生成';
+      bootStep('[生成] 用户取消');
+    } else {
+      console.error(err);
+      bootStep('[生成] 出错：' + ((err && err.message) || String(err)));
+      // 立即停掉进度条动画（不会让 bar "跑完再弹窗"）
+      if (pipeline && pipeline._progTimer) { clearInterval(pipeline._progTimer); pipeline._progTimer = null; }
+      try {
+        var fe = friendlyError(err);
+        // 让用户看到友好提示 + 在下方灰色小字看到实际错误（方便排查）
+        text.textContent = fe.text;
+        text.style.color = fe.color || '#b00020';
+        if (fe.action === 'openSettings') {
+          setTimeout(function() { openSettings(); }, 600);
         }
-        debugEl.textContent = '调试：' + rawMsg;
-      }
-    } catch(_) {}
+        // 调试信息：把原始错误的第一句展示在进度文字下方
+        var rawMsg = (err && err.message) ? err.message.split(/[\n\r]/)[0] : '';
+        if (rawMsg && !rawMsg.includes(fe.text)) {
+          var debugEl = document.getElementById('progressDebug');
+          if (!debugEl) {
+            debugEl = document.createElement('div');
+            debugEl.id = 'progressDebug';
+            debugEl.style.cssText = 'font-size:12px;color:#999;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+            text.parentNode.appendChild(debugEl);
+          }
+          debugEl.textContent = '调试：' + rawMsg;
+        }
+      } catch(_) {}
+    }
   } finally {
-    setTimeout(() => { btn.disabled = false; bar.classList.remove('active'); bar.style.display = ''; fill.style.width = '0%'; }, 800);
+    // ===== 恢复按钮状态 =====
+    currentAbortController = null;
+    const wasAborted = abortCtrl && abortCtrl.signal && abortCtrl.signal.aborted;
+    setTimeout(() => {
+      btn.disabled = false;
+      if (cancelBtn) cancelBtn.hidden = true;
+      if (searchWrap) searchWrap.classList.remove('generating');
+      // 如果用户已取消，进度文字和文案由 cancelGenerate() 保持
+      if (!wasAborted) {
+        bar.classList.remove('active'); bar.style.display = ''; fill.style.width = '0%';
+      }
+    }, 600);
   }
 }
 
@@ -2067,27 +2375,63 @@ function renderLayerPage(layer, idx, total, data) {
     const title = (mod.title || '').toLowerCase();
     // 清理 LLM 回显的 prompt 指令（不应暴露给用户）
     let rawContent = mod.content || '';
+    // 清理 P0 模块相关标签（所有带括号的 P0 模块格式，包括 P0模块，仅... / P0模块，[N][M] / P0模块：全部跳过 等）
+    rawContent = rawContent.replace(/[（(]\s*P0\s*模块[：:，,][^）)]*[)）]/gi, '');
     rawContent = rawContent.replace(/[（(]?\s*P0\s*模块[，,]\s*(仅列出来源中明确信息|仅使用来源中明确信息|极度保守)[)）]?\s*(；来源未涉及处标注「⚠️ 暂无可靠来源」)?\s*/gi, '');
     rawContent = rawContent.replace(/[（(]\s*P0\s*模块[：:]\s*全部跳过[)）]?\s*/gi, '');
+    // 清理整行的 P0 模块标注（可能带引用）
+    rawContent = rawContent.replace(/^\s*\([^)]*P0[^)]*\)\s*$/gmi, '');
     rawContent = rawContent.replace(/^>\s*⚠️\s*搜索结果深度不足，该模块需要更丰富的参考资料。\s*/gmi, '');
     rawContent = rawContent.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
     rawContent = rawContent.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
     rawContent = rawContent.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
-    // 清理旧版「来源[N]」内联引用
-    // 「来源[N] ；/，⚠️需核实」→「来源N：⚠️需核实」
-    rawContent = rawContent.replace(/（来源\[(\d+)\]\s*[；;，、]\s*/g, '（来源$1：');
-    // 清理来源N：后面的 LLM 诊断标签（推演/推理/有待验证 等）→ 统一用 ⚠️需核实
-    // 来源标注后跟各种冗余标签 → 统一去掉，有来源编号就够了
-    rawContent = rawContent.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认|需核实|需进一步确认|推演|推理|推测|演绎|归纳|分析|估算|尚待确认|暂未确认|未确认|不确定)\s*）/g, '（来源$1）');
-    // 括号仅包含来源[N]（无其他内容）→ 整体删除
-    rawContent = rawContent.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
-    // 来源[N] 后跟剩余文本但无括号包裹 → 只删来源[N]
-    rawContent = rawContent.replace(/（\s*来源\s*\[\d+\]\s*[，、；;\s]+/g, '（');
-    rawContent = rawContent.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
-    // 清理被括号包裹的裸引用标记：([3]）/ （[3]）/ 【[3]】
-    rawContent = rawContent.replace(/[（(【［]\s*\[\d+\]\s*[)）】］]/g, '');
-    // 清理残留空括号
-    rawContent = rawContent.replace(/[（(]\s*[)）]/g, '');
+    // ===== 引用格式统一（2026-08-14 老板收紧规范）：只接受「来源N」，其他全部删除 =====
+    const maxSrc = (data && data.urlCandidates || []).length;
+
+    // Step 1: 带括号的有效引用 → 「来源N」（说明文字全部丢弃）
+    rawContent = rawContent.replace(/[（(\[【［{]\s*来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?\s*[）)\]】］}]/g, '「来源$1」');
+
+    // Step 2: 括号里只有来源标记（可多个）：（来源[1]）/（来源[1][2]）→ 展开为「来源1」「来源2」并去掉外层括号
+    rawContent = rawContent.replace(/[（(\[【［{]\s*(?:来源\s*[\[【]?\s*\d{1,2}\s*[\]】]?\s*)+[）)\]】］}]/g, function (m) {
+      return m.replace(/来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?/g, '「来源$1」').replace(/[（(\[【［{}\]】］})]/g, '');
+    });
+
+    // Step 3: 裸「来源[N]」/「来源N」（限 1-2 位编号）
+    rawContent = rawContent.replace(/来源\s*[\[【]\s*(\d{1,2})\s*[\]】]/g, '「来源$1」');
+    rawContent = rawContent.replace(/来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?(?!\d)/g, '「来源$1」');
+
+    // Step 4: 残留裸引用 [N] → 「来源N」（排除 markdown 链接）
+    rawContent = rawContent.replace(/[\[【]\s*(\d{1,2})\s*[\]】](?!\s*\()/g, '「来源$1」');
+
+    // Step 5: 删除「来源：XXX」/（来源：XXX）/[来源：XXX] 等"用文字描述当来源"的垃圾格式
+    rawContent = rawContent.replace(/「来源[：:][^」]*」/g, '');
+    rawContent = rawContent.replace(/[（(]来源[：:][^）)]*[）)]/g, '');
+    rawContent = rawContent.replace(/[\[【]来源[：:][^\]】]*[\]】]/g, '');
+
+    // Step 6: N 值校验——超过 urlCandidates 范围的引用一律删除（避免引用编号对不上）
+    if (maxSrc > 0) {
+      rawContent = rawContent.replace(/「来源(\d+)」/g, function (m, n) {
+        return parseInt(n, 10) <= maxSrc ? m : '';
+      });
+    }
+
+    // Step 7: 去掉引用标记外层多余括号（迭代：纯「来源N」组合的括号层全部剥除）
+    let prevMd;
+    do {
+      prevMd = rawContent;
+      rawContent = rawContent.replace(/[（(\[【［「{]\s*(「来源\d+」(?:\s*「来源\d+」)*)\s*[)）\]】］」}]/g, '$1');
+    } while (rawContent !== prevMd);
+
+    rawContent = rawContent.replace(/[（(][^）)]*(⚠️|「来源\d+」|需注意|需说明|需指出|需澄清|关于|此处|需要核实|需要进一步|不符|最初由|主要由|由.{0,3}发展)[^）)]*[)）]/g, '');
+
+    // Step 8: 清理含「不确定标签」的整段括号注释
+    rawContent = rawContent.replace(/[（(][^）)]*?(有待验证|需核实|待确认|需进一步确认|尚待确认|暂未确认|未确认|不确定|未找到出处|AI\s*生成|推演|推理|推测)[^）)]*?[)）]/g, '');
+
+    // Step 9: 半清洗产物兜底：、] ，] 与空括号
+    rawContent = rawContent.replace(/[、，,;；]\s*[ \t]*[\]】］]/g, '');
+    rawContent = rawContent.replace(/[（(\[【［「{]\s*[)）\]】］」}]/g, '');
+    // 清理 <u class="fu"> 标签和 <sup class="fu-note"> 标注（AI生成，未找到权威出处 的旧版本标注）
+    rawContent = cleanFuAnnotations(rawContent);
 
     // 领域分类 → 思维导图 SVG
     if (title.includes('领域分类') || title.includes('分类')) {
@@ -2485,7 +2829,7 @@ function startSourceVerify(concept, urls) {
       let domain = '';
       try { domain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
       return {
-        label: domain ? `来源${i + 1}：${url}` : `来源${i + 1}：${url}`,
+        label: `「来源${i + 1}」 · ${domain || url}`,
         url: url,
         status: 'hit',
         hit: true,
@@ -2493,7 +2837,7 @@ function startSourceVerify(concept, urls) {
       };
     });
   } else {
-    readerState.sources = [{ label: '参考链接', status: 'miss', hit: false, url: '', title: '未找到参考链接' }];
+    readerState.sources = [{ label: '本篇搜索结果未提取到独立链接，正文中「来源N」为不可验证引用', status: 'miss', hit: false, url: '', title: '' }];
   }
   renderSourcePanel();
 }
@@ -2942,11 +3286,15 @@ function downloadFile(content, filename, mime) {
   URL.revokeObjectURL(a.href);
 }
 
-// 导出时清理事实核对标注的 HTML 标签，避免 <u class="fu"> 等原样出现在 md 文件中
+// 导出时清理事实核对标注：用户原则「绝不让用户看到错误信息」
+// 含 <u class="fu"> 标记的内容整条删除，不仅是剥标签
 function cleanMarkdownForExport(md) {
   return md
+    .split('\n')
+    .filter(line => !/<u\s+class\s*=\s*["']fu["']/.test(line))
+    .join('\n')
     .replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
-    .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
+    .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '');
 }
 
 async function exportAll() {
@@ -2979,7 +3327,24 @@ function currentIsDark() {
     const cs = getComputedStyle(document.documentElement);
     const bg = cs.getPropertyValue('--bg').trim();
     if (bg) {
-      // 解析 rgb/rgba 或 hex，暗色背景通常亮度 < 128
+      // 解析 hex (#RRGGBB / #RGB)
+      if (bg.startsWith('#')) {
+        const hex = bg.replace('#', '');
+        let r, g, b;
+        if (hex.length === 6) {
+          r = parseInt(hex.substring(0, 2), 16);
+          g = parseInt(hex.substring(2, 4), 16);
+          b = parseInt(hex.substring(4, 6), 16);
+        } else if (hex.length === 3) {
+          r = parseInt(hex[0] + hex[0], 16);
+          g = parseInt(hex[1] + hex[1], 16);
+          b = parseInt(hex[2] + hex[2], 16);
+        } else {
+          return false;
+        }
+        return (r + g + b) / 3 < 128;
+      }
+      // 解析 rgb/rgba
       const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
       if (m) return (parseInt(m[1]) + parseInt(m[2]) + parseInt(m[3])) / 3 < 128;
     }
@@ -2991,12 +3356,12 @@ function exportThemeTokens(isDark) {
   if (isDark) {
     return {
       pageBg: '#0E0F13',
-      cardBg: '#191B21', cardBorder: '#2A2C33', ink: '#EFF1F4', titleInk: '#FFFFFF',
-      muted: '#AAB0B8', accent: '#ECE9E3', accent2: '#BBB6AC', onAccent: '#0E0F13',
+      cardBg: '#191B21', cardBorder: '#2A2C33', ink: '#E8EAED', titleInk: '#FFFFFF',
+      muted: '#B8BEC8', accent: '#ECE9E3', accent2: '#BBB6AC', onAccent: '#0E0F13',
       accentSoft: 'rgba(236,233,227,0.10)', glassHi: 'rgba(255,255,255,0.06)',
       cardShadow: '0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
       menuBg: 'rgba(30,33,40,0.88)', menuBorder: 'rgba(255,255,255,0.14)',
-      fuColor: '#AAB0B8', bar: '#BBB6AC'
+      fuColor: '#B8BEC8', bar: '#BBB6AC'
     };
   }
   return {
@@ -3012,11 +3377,21 @@ function exportThemeTokens(isDark) {
 
 function injectExportStyle(t) {
   const css = `
+  /* 只移除影响渲染的全局属性，绝对不动 position/display 等布局属性 */
+  .export-root, .export-root * {
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
   .export-root {
     box-sizing: border-box; width: 820px; margin: 0 auto; padding: 44px 40px 36px;
     background: ${t.pageBg}; color: ${t.ink};
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 15px; line-height: 1.75;
+    isolation: isolate;
+    z-index: 999999;
+    opacity: 1;
   }
   .export-root * { box-sizing: border-box; }
   .export-root .exp-header { margin-bottom: 30px; padding-bottom: 22px; border-bottom: 1px solid ${t.cardBorder}; }
@@ -3039,17 +3414,23 @@ function injectExportStyle(t) {
   .export-root .module {
     background: ${t.cardBg}; border: 1px solid ${t.cardBorder}; border-radius: 14px; padding: 18px 20px;
     /* 导出完全不用阴影，html2canvas 会把任何 shadow 渲染成半透明层蒙在文字上 */
-    box-shadow: none;
+    /* 强制 stacking context：确保文字渲染在卡片背景之上 */
+    box-shadow: none; position: relative; z-index: 0; overflow: visible;
   }
-  .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.titleInk} !important; margin-bottom: 10px; }
-  .export-root .module-content { font-size: 0.92rem; color: ${t.ink} !important; }
-  .export-root .module-content * { color: ${t.ink} !important; }
+  .export-root .module-title { font-size: 1rem; font-weight: 700; color: ${t.titleInk}; margin-bottom: 10px; position: relative; z-index: 1; font-family: "Space Grotesk", -apple-system, sans-serif; }
+  .export-root .module-content { font-size: 0.94rem; color: ${t.ink}; line-height: 1.85; font-weight: 700; position: relative; z-index: 1; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; -webkit-font-smoothing: subpixel-antialiased; }
+  .export-root .module-content * { color: ${t.ink}; font-weight: 700; position: relative; z-index: 1; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; -webkit-font-smoothing: subpixel-antialiased; }
+  /* 强制 viz-card、glossary-card 等卡片内的文字全部为导出主题色 */
+  .export-root .viz-card *, .export-root .glossary-card *, .export-root .acc-body-inner *, .export-root .card-phase-item * { color: ${t.ink}; }
+  .export-root .card-desc, .export-root .card-phase-text, .export-root .miscon-insight-content, .export-root .prog-body { color: ${t.ink}; }
+  .export-root .card-term, .export-root .acc-title { color: ${t.titleInk}; }
+  .export-root .module-content p, .export-root .module-content span, .export-root .module-content div, .export-root .module-content li, .export-root .module-content ul, .export-root .module-content ol { color: ${t.ink}; }
   /* SVG 文字/线条统一使用导出 token（html2canvas 不支持 fill:currentColor 跟随，强制覆盖） */
-  .export-root svg text, .export-root svg tspan { fill: ${t.ink} !important; }
-  .export-root svg path[stroke="var(--ink)"], .export-root svg line[stroke="var(--ink)"] { stroke: ${t.ink} !important; }
-  .export-root svg [fill^="var(--title-ink)"] { fill: ${t.titleInk} !important; }
-  .export-root svg [fill^="var(--muted)"] { fill: ${t.muted} !important; }
-  .export-root .module-content strong, .export-root .module-content b, .export-root .module-content h1, .export-root .module-content h2, .export-root .module-content h3, .export-root .module-content h4 { color: ${t.titleInk} !important; }
+  .export-root svg text, .export-root svg tspan { fill: ${t.ink}; }
+  .export-root svg path[stroke="var(--ink)"], .export-root svg line[stroke="var(--ink)"] { stroke: ${t.ink}; }
+  .export-root svg [fill^="var(--title-ink)"] { fill: ${t.titleInk}; }
+  .export-root svg [fill^="var(--muted)"] { fill: ${t.muted}; }
+  .export-root .module-content strong, .export-root .module-content b, .export-root .module-content h1, .export-root .module-content h2, .export-root .module-content h3, .export-root .module-content h4 { color: ${t.titleInk}; }
   .export-root .module-content p { margin: 0 0 0.6rem; }
   .export-root .module-content h1,.export-root .module-content h2,.export-root .module-content h3,.export-root .module-content h4 { color: ${t.titleInk}; margin: 0.8rem 0 0.4rem; font-weight: 700; }
   .export-root .module-content ul,.export-root .module-content ol { margin: 0 0 0.6rem 1.3rem; padding: 0; }
@@ -3063,13 +3444,13 @@ function injectExportStyle(t) {
   .export-root .mod-label strong { font-weight: 700; }
   .export-root .mod-val { flex: 1; min-width: 0; }
   .export-root .card-phase-item { margin-bottom: 0.55rem; }
-  .export-root .card-phase-label { display: block; font-weight: 700; color: ${t.titleInk} !important; margin-bottom: 0.15rem; }
-  .export-root .card-phase-text { display: block; color: ${t.ink} !important; }
+  .export-root .card-phase-label { display: block; font-weight: 700; color: ${t.titleInk}; margin-bottom: 0.15rem; }
+  .export-root .card-phase-text { display: block; color: ${t.ink}; }
   .export-root .viz-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: ${t.cardBg}; }
   .export-root .viz-card-pro { border-left: 3px solid ${t.accent}; background: ${t.cardBg}; }
   .export-root .card-pill { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-bottom: 8px; background: ${t.accentSoft}; color: ${t.accent2}; }
   .export-root .card-pill.unsolved { background: rgba(128,128,128,0.18); color: ${t.muted}; }
-  .export-root .card-title { font-size: 0.98rem; font-weight: 700; color: ${t.titleInk}; margin-bottom: 4px; }
+  .export-root .card-title { font-size: 0.98rem; font-weight: 700; color: ${t.titleInk}; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .export-root .card-desc { font-size: 0.88rem; color: ${t.ink}; line-height: 1.6; }
   .export-root .glossary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .export-root .glossary-card { border: 1px solid ${t.cardBorder}; border-radius: 12px; padding: 12px 14px; background: ${t.cardBg}; }
@@ -3089,8 +3470,8 @@ function injectExportStyle(t) {
   .export-root .progressive .prog-item { max-height: none !important; overflow: visible !important; opacity: 1 !important; display: block !important; margin-bottom: 0.8rem; }
   .export-root .prog-body { color: ${t.ink}; }
   .export-root .prog-more-btn { display: none !important; }
-  .export-root .fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: ${t.fuColor}; text-underline-offset: 3px; }
-  .export-root .fu-note { font-size: 0.7em; color: ${t.fuColor}; margin-left: 1px; vertical-align: super; }
+  .export-root .fu { text-decoration: none !important; cursor: default !important; border-bottom: none !important; }
+  .export-root .fu-note { display: none !important; }
   .export-root svg { max-width: 100%; height: auto; display: block; }
   .export-root .exp-footer { margin-top: 34px; padding-top: 20px; border-top: 1px solid ${t.cardBorder}; text-align: center; }
   .export-root .exp-foot-brand { font-family: "Space Grotesk", sans-serif; font-weight: 700; color: ${t.titleInk}; font-size: 0.95rem; letter-spacing: 0.03em; }
@@ -3162,25 +3543,271 @@ function resolveCssVars(html, exportTokens) {
   return html.replace(/var\(--([\w-]+)\)/g, (m, t) => (map[t] !== undefined ? map[t] : (fb[t] || '#999')));
 }
 
+// 将 LaTeX 公式转为可读的 Unicode 字符（简单版本）
+function renderLatexToUnicode(text) {
+  if (!text) return text;
+  let result = text;
+
+  // 希腊字母（优先处理）
+  const greekMap = {
+    '\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ',
+    '\\epsilon': 'ε', '\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ',
+    '\\iota': 'ι', '\\kappa': 'κ', '\\lambda': 'λ', '\\mu': 'μ',
+    '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π', '\\rho': 'ρ',
+    '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
+    '\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
+    '\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ',
+    '\\Xi': 'Ξ', '\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ',
+    '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
+  };
+  for (const [k, v] of Object.entries(greekMap)) {
+    result = result.replace(new RegExp(k.replace('\\', '\\\\'), 'g'), v);
+  }
+
+  // 运算符
+  const opMap = {
+    '\\sum': '∑', '\\prod': '∏', '\\int': '∫', '\\iint': '∬', '\\iiint': '∭',
+    '\\partial': '∂', '\\infty': '∞', '\\nabla': '∇',
+    '\\pm': '±', '\\mp': '∓', '\\times': '×', '\\cdot': '·', '\\div': '÷',
+    '\\oplus': '⊕', '\\otimes': '⊗', '\\oslash': '⊘',
+    '\\odot': '⊙', '\\circ': '∘', '\\bullet': '•',
+    '\\sqrt': '√',
+  };
+  for (const [k, v] of Object.entries(opMap)) {
+    result = result.replace(new RegExp(k.replace('\\', '\\\\'), 'g'), v);
+  }
+
+  // 关系符
+  const relMap = {
+    '\\leq': '≤', '\\geq': '≥', '\\neq': '≠', '\\ne': '≠',
+    '\\approx': '≈', '\\sim': '∼', '\\simeq': '≃', '\\cong': '≅',
+    '\\propto': '∝', '\\ll': '≪', '\\gg': '≫',
+    '\\prec': '≺', '\\succ': '≻',
+    '\\perp': '⊥', '\\parallel': '∥',
+  };
+  for (const [k, v] of Object.entries(relMap)) {
+    result = result.replace(new RegExp(k.replace('\\', '\\\\'), 'g'), v);
+  }
+
+  // 集合/逻辑
+  const logicMap = {
+    '\\forall': '∀', '\\exists': '∃', '\\nexists': '∄',
+    '\\in': '∈', '\\notin': '∉', '\\ni': '∋',
+    '\\subset': '⊂', '\\subseteq': '⊆', '\\supset': '⊃', '\\supseteq': '⊇',
+    '\\cup': '∪', '\\cap': '∩', '\\emptyset': '∅', '\\varnothing': '∅',
+    '\\varnothing': '∅', '\\emptyset': '∅',
+    '\\to': '→', '\\leftarrow': '←', '\\rightarrow': '→',
+    '\\Leftarrow': '⇐', '\\Rightarrow': '⇒',
+    '\\Leftrightarrow': '⇔', '\\iff': '⟺', '\\implies': '⟹',
+    '\\therefore': '∴', '\\because': '∵',
+    '\\not': '¬', '\\land': '∧', '\\lor': '∨',
+    '\\neg': '¬', '\\bot': '⊥', '\\top': '⊤',
+  };
+  for (const [k, v] of Object.entries(logicMap)) {
+    result = result.replace(new RegExp(k.replace('\\', '\\\\'), 'g'), v);
+  }
+
+  // 箭头
+  const arrowMap = {
+    '\\uparrow': '↑', '\\downarrow': '↓',
+    '\\mapsto': '↦', '\\longmapsto': '⟼',
+    '\\hookrightarrow': '↪', '\\hookleftarrow': '↩',
+  };
+  for (const [k, v] of Object.entries(arrowMap)) {
+    result = result.replace(new RegExp(k.replace('\\', '\\\\'), 'g'), v);
+  }
+
+  // 括号和标点
+  result = result.replace(/\\langle/g, '⟨');
+  result = result.replace(/\\rangle/g, '⟩');
+  result = result.replace(/\\lfloor/g, '⌊');
+  result = result.replace(/\\rfloor/g, '⌋');
+  result = result.replace(/\\lceil/g, '⌈');
+  result = result.replace(/\\rceil/g, '⌉');
+  result = result.replace(/\\ldots/g, '…');
+  result = result.replace(/\\cdots/g, '⋯');
+  result = result.replace(/\\dots/g, '…');
+  result = result.replace(/\\ddots/g, '⋱');
+  result = result.replace(/\\vdots/g, '⋮');
+  result = result.replace(/\\prime/g, '′');
+  result = result.replace(/\\Prime/g, '″');
+
+  // 函数名（保留原名字）
+  result = result.replace(/\\min/g, 'min');
+  result = result.replace(/\\max/g, 'max');
+  result = result.replace(/\\sup/g, 'sup');
+  result = result.replace(/\\inf/g, 'inf');
+  result = result.replace(/\\lim/g, 'lim');
+  result = result.replace(/\\log/g, 'log');
+  result = result.replace(/\\ln/g, 'ln');
+  result = result.replace(/\\exp/g, 'exp');
+  result = result.replace(/\\sin/g, 'sin');
+  result = result.replace(/\\cos/g, 'cos');
+  result = result.replace(/\\tan/g, 'tan');
+  result = result.replace(/\\cot/g, 'cot');
+  result = result.replace(/\\sec/g, 'sec');
+  result = result.replace(/\\csc/g, 'csc');
+  result = result.replace(/\\arcsin/g, 'arcsin');
+  result = result.replace(/\\arccos/g, 'arccos');
+  result = result.replace(/\\arctan/g, 'arctan');
+  result = result.replace(/\\sinh/g, 'sinh');
+  result = result.replace(/\\cosh/g, 'cosh');
+  result = result.replace(/\\tanh/g, 'tanh');
+
+  // 分数 \frac{num}{den}
+  result = result.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)');
+
+  // 平方根 \sqrt[n]{...} 或 \sqrt{...}
+  result = result.replace(/\\sqrt\[([^]]+)\]\{([^}]+)\}/g, '$1√($2)');
+  result = result.replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
+
+  // 上标 x^{...} 或 x^...
+  result = result.replace(/\^{([^}]+)}/g, '^($1)');
+  result = result.replace(/\^([a-zA-Z0-9]+)/g, '^$1');
+
+  // 下标 x_{...} 或 x_...
+  result = result.replace(/_{([^}]+)}/g, '($1)');
+  result = result.replace(/_([a-zA-Z0-9]+)/g, '_$1');
+
+  // 同时有上下标 x^{...}_{...}
+  result = result.replace(/\^\{([^}]+)\}_\{([^}]+)\}/g, '^($1)_($2)');
+
+  // 堆叠符号
+  result = result.replace(/\\overset\{([^}]+)\}\{([^}]+)\}/g, '$2^$1');
+  result = result.replace(/\\underset\{([^}]+)\}\{([^}]+)\}/g, '$2_$1');
+  result = result.replace(/\\stackrel\{([^}]+)\}\{([^}]+)\}/g, '$2^$1');
+
+  // 文本命令
+  result = result.replace(/\\text\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\textbf\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\textit\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\mathrm\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\mathit\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\mathsf\{([^}]*)\}/g, '$1');
+  result = result.replace(/\\mathtt\{([^}]*)\}/g, '$1');
+
+  // 常见字符命令
+  result = result.replace(/\\tilde\{([^}]+)\}/g, '$1~');
+  result = result.replace(/\\hat\{([^}]+)\}/g, '^$1');
+  result = result.replace(/\\bar\{([^}]+)\}/g, '̄$1');
+  result = result.replace(/\\vec\{([^}]+)\}/g, '→$1');
+  result = result.replace(/\\overline\{([^}]+)\}/g, '̄($1)');
+  result = result.replace(/\\underline\{([^}]+)\}/g, '_($1)');
+  result = result.replace(/\\widehat\{([^}]+)\}/g, '^($1)');
+  result = result.replace(/\\widetilde\{([^}]+)\}/g, '~($1)');
+
+  // 矩阵/数组环境（简单处理）
+  result = result.replace(/\\begin\{[a-z*]+\}/g, '');
+  result = result.replace(/\\end\{[a-z*]+\}/g, '');
+  result = result.replace(/\\left/g, '');
+  result = result.replace(/\\right/g, '');
+  result = result.replace(/\\big/g, '');
+  result = result.replace(/\\Big/g, '');
+  result = result.replace(/\\bigg/g, '');
+  result = result.replace(/\\Bigg/g, '');
+
+  // 清理空格和换行
+  result = result.replace(/\\quad/g, ' ');
+  result = result.replace(/\\qquad/g, '  ');
+  result = result.replace(/\\!/g, '');
+  result = result.replace(/\\,/g, ' ');
+  result = result.replace(/\\;/g, '  ');
+  result = result.replace(/\\ /g, ' ');
+
+  // 清理剩余的反斜杠命令
+  result = result.replace(/\\[a-zA-Z]+/g, '');
+
+  // 清理空的花括号和多余空格
+  result = result.replace(/\{\}/g, '');
+  result = result.replace(/\s+/g, ' ').trim();
+
+  return result;
+}
+
+// 处理 markdown 中的公式块（$...$ 和 $$...$$）
+function processMathInMarkdown(text) {
+  if (!text) return text;
+  // 处理块级公式 $$...$$
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+    const rendered = renderLatexToUnicode(formula.trim());
+    return `<div style="text-align:center; font-size:1.1em; padding: 8px 0; letter-spacing: 0.05em;">${rendered}</div>`;
+  });
+  // 处理行内公式 $...$
+  text = text.replace(/\$([^\n$]+?)\$/g, (match, formula) => {
+    return `<span style="font-size:1.05em; letter-spacing: 0.03em;">${renderLatexToUnicode(formula.trim())}</span>`;
+  });
+  return text;
+}
+
+// 清理所有 "fu" 相关标签（AI生成/未找到权威出处的标注）
+function cleanFuAnnotations(text) {
+  if (!text) return text;
+  // 清理 <u class="fu" ...>...</u>（包括 data-tip 等属性）
+  text = text.replace(/<u[^>]*class\s*=\s*["'][^"']*\bfu\b[^"']*["'][^>]*>([\s\S]*?)<\/u>/gi, '$1');
+  // 清理 <u> 标签（兜底，所有 <u> 标签都清理）
+  text = text.replace(/<u\b[^>]*>([\s\S]*?)<\/u>/gi, '$1');
+  // 清理 <sup class="fu-note" ...>...</sup>
+  text = text.replace(/<sup[^>]*class\s*=\s*["'][^"']*\bfu-note\b[^"']*["'][^>]*>[\s\S]*?<\/sup>/gi, '');
+  // 清理剩余的 fu-note sup 标签
+  text = text.replace(/<sup\s+class\s*=\s*["']fu-note["'][^>]*>[\s\S]*?<\/sup>/gi, '');
+  return text;
+}
+
 // 复用阅读器模块分支逻辑，产出与界面一致的模块内容 HTML（去掉交互 id）
 function renderModuleContentForExport(mod, data) {
   const title = (mod.title || '').toLowerCase();
   // 清理 LLM 回显的 prompt 指令
   let c = (mod.content || '');
+  // 清理 P0 模块相关标签（所有带括号的 P0 模块格式，包括 P0模块，仅... / P0模块，[N][M] / P0模块：全部跳过 等）
+  c = c.replace(/[（(]\s*P0\s*模块[：:，,][^）)]*[)）]/gi, '');
   c = c.replace(/[（(]?\s*P0\s*模块[，,]\s*(仅列出来源中明确信息|仅使用来源中明确信息|极度保守)[)）]?\s*(；来源未涉及处标注「⚠️ 暂无可靠来源」)?\s*/gi, '');
   c = c.replace(/[（(]\s*P0\s*模块[：:]\s*全部跳过[)）]?\s*/gi, '');
+  // 清理整行的 P0 模块标注（可能带引用）
+  c = c.replace(/^\s*\([^)]*P0[^)]*\)\s*$/gmi, '');
   c = c.replace(/^>\s*⚠️\s*搜索结果深度不足，该模块需要更丰富的参考资料。\s*/gmi, '');
   c = c.replace(/[（(]\s*缩减模式\s*[)）]\s*/gi, '');
   c = c.replace(/\n\s*P0\s*模块.*?\n/g, '\n');
   c = c.replace(/^⚠️\s*暂无可靠来源\s*$/gmi, '').trim();
-  // 清理旧版「来源[N]」内联引用
-  c = c.replace(/（来源\[(\d+)\]\s*[；;，、]\s*/g, '（来源$1：');
-  c = c.replace(/（来源(\d+)：\s*(有待验证|待核实|待确认|需核实|需进一步确认|推演|推理|推测|演绎|归纳|分析|估算|尚待确认|暂未确认|未确认|不确定)\s*）/g, '（来源$1）');
-  c = c.replace(/[（(]\s*来源\s*\[\d+\]\s*[)）]/g, '');
-  c = c.replace(/（\s*来源\s*\[\d+\]\s*[，、；;\s]+/g, '（');
-  c = c.replace(/\s*来源\s*\[\d+\]\s*/g, ' ');
-  c = c.replace(/[（(【［]\s*\[\d+\]\s*[)）】］]/g, '');
-  c = c.replace(/[（(]\s*[)）]/g, '');
+  // ===== 引用格式统一（2026-08-14 老板收紧规范）：只接受「来源N」，其他全部删除 =====
+  const maxSrcEx = (data && data.urlCandidates || []).length;
+  // Step 1: 带括号的有效引用 → 「来源N」
+  c = c.replace(/[（(\[【［{]\s*来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?\s*[）)\]】］}]/g, '「来源$1」');
+  // Step 2: 括号里只有来源标记（可多个）→ 展开并去外层括号
+  c = c.replace(/[（(\[【［{]\s*(?:来源\s*[\[【]?\s*\d{1,2}\s*[\]】]?\s*)+[）)\]】］}]/g, function (m) {
+    return m.replace(/来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?/g, '「来源$1」').replace(/[（(\[【［{}\]】］})]/g, '');
+  });
+  // Step 3: 裸「来源[N]」/「来源N」
+  c = c.replace(/来源\s*[\[【]\s*(\d{1,2})\s*[\]】]/g, '「来源$1」');
+  c = c.replace(/来源\s*[\[【]?\s*(\d{1,2})\s*[\]】]?(?!\d)/g, '「来源$1」');
+  // Step 4: 残留裸引用 [N] → 「来源N」
+  c = c.replace(/[\[【]\s*(\d{1,2})\s*[\]】](?!\s*\()/g, '「来源$1」');
+  // Step 5: 删除「来源：XXX」/（来源：XXX）/[来源：XXX] 垃圾格式
+  c = c.replace(/「来源[：:][^」]*」/g, '');
+  c = c.replace(/[（(]来源[：:][^）)]*[）)]/g, '');
+  c = c.replace(/[\[【]来源[：:][^\]】]*[\]】]/g, '');
+  // Step 6: N 值校验
+  if (maxSrcEx > 0) {
+    c = c.replace(/「来源(\d+)」/g, function (m, n) {
+      return parseInt(n, 10) <= maxSrcEx ? m : '';
+    });
+  }
+  // Step 7: 去掉引用标记外层多余括号（迭代）
+  let prevMd;
+  do {
+    prevMd = c;
+    c = c.replace(/[（(\[【［「{]\s*(「来源\d+」(?:\s*「来源\d+」)*)\s*[)）\]】］」}]/g, '$1');
+  } while (c !== prevMd);
+  // 清理所有 fu 相关标签
+  c = cleanFuAnnotations(c);
+  // Step 7.5: 删除包含 ⚠️/「来源N」/解释性元描述的整段括号注释（捕获 LLM 自释/自留痕迹）（2026-08-14 老板反馈）
+  c = c.replace(/[（(][^）)]*(⚠️|「来源\d+」|需注意|需说明|需指出|需澄清|关于|此处|需要核实|需要进一步|不符|最初由|主要由|由.{0,3}发展)[^）)]*[)）]/g, '');
+  // Step 8: 清理含「不确定标签」的整段括号注释（导出）
+  c = c.replace(/[（(][^）)]*?(有待验证|需核实|待确认|需进一步确认|尚待确认|暂未确认|未确认|不确定|未找到出处|AI\s*生成|推演|推理|推测)[^）)]*?[)）]/g, '');
+  // Step 9: 半清洗产物兜底：、] ，] 与空括号
+  c = c.replace(/[、，,;；]\s*[ \t]*[\]】］]/g, '');
+  c = c.replace(/[（(\[【［「{]\s*[)）\]】］」}]/g, '');
+  // 处理 LaTeX 公式
+  c = processMathInMarkdown(c);
   let content = '';
   if (title.includes('领域分类') || title.includes('分类')) {
     const categories = parseMindmapCategories(c);
@@ -3256,38 +3883,73 @@ function buildExportCard(data, layerIdx = -1) {
   });
   html += `<div class="exp-footer">
     <div class="exp-foot-brand">由元引擎生成</div>
-    <div class="exp-foot-note">内容已通过事实核对 · <span class="exp-mark">‡</span> 标记为 AI 生成、未找到权威出处，仅供参考</div>
+    <div class="exp-foot-note">内容已通过事实核对 · 未找到权威出处的内容已自动过滤</div>
   </div>`;
+  // DEBUG 区块已移除（导出文字变暗排查用临时代码，2026-08-11 清理）
   html = resolveCssVars(html, t);
-  // 清理事实核对标注的 HTML 标签，避免 <u class="fu" data-tip="..."> 原样出现在导出图片中
-  html = html.replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
-             .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
+  // 清理事实核对标注：含 <u class="fu"> 的整行删除（用户原则：绝不让用户看到错误信息）
+  html = html.split('\n').filter(l => !/<u\s+class\s*=\s*["']fu["']/.test(l)).join('\n')
+             .replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '')
+             .replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '');
   const root = document.createElement('div');
   root.className = 'export-root';
   root.innerHTML = html;
-  Object.assign(root.style, { position: 'fixed', left: '-10000px', top: '0', width: '820px' });
+  // KEY FIX: 先将卡片放入可视区域（opacity:0 用户不可见），让浏览器完整计算样式后再烤色。
+  // 离屏元素（left:-10000px）可能导致 getComputedStyle 返回不正确的颜色。
+  Object.assign(root.style, {
+    position: 'fixed',
+    left: '0',
+    top: '0',
+    width: '820px',
+    height: 'auto',
+    opacity: '0',
+    pointerEvents: 'none',
+    isolation: 'isolate',
+    zIndex: '-1',
+    mixBlendMode: 'normal',
+    filter: 'none',
+    backdropFilter: 'none',
+    webkitBackdropFilter: 'none',
+    transform: 'none',
+    visibility: 'visible'
+  });
   document.body.appendChild(root);
-  // 用内联 !important 把文字颜色强制写死为当前主题 token，彻底压过主阅读器样式表
-  // （如 .viz-card .card-desc 等同特异性规则）与任何残留内联色，保证导出文字跟随主题
-  applyExportColors(root, t);
+  // 强制布局计算，确保 export-style CSS 完全生效
+  void root.offsetHeight;
+  // 清理滤镜干扰
+  root.querySelectorAll('*').forEach(el => {
+    el.style.filter = 'none';
+    el.style.backdropFilter = 'none';
+    el.style.webkitBackdropFilter = 'none';
+    el.style.mixBlendMode = 'normal';
+  });
+  // 烤死 computed colors：从浏览器已解析的最终颜色读取，写成纯内联，html2canvas 零依赖
+  bakeExportColors(root);
+  // 烤色完成后移出屏幕，供 html2canvas 截图
+  root.style.left = '-10000px';
+  root.style.top = '0';
+  root.style.opacity = '1';
+  root.style.zIndex = '999999';
+  root.style.pointerEvents = 'auto';
   return root;
 }
 
-// 把导出容器内所有文字颜色按当前主题 token 写成内联 !important（独立于 CSS 级联，保证主题跟随）
-function applyExportColors(root, t) {
-  const set = (sel, val) => root.querySelectorAll(sel).forEach(el => el.style.setProperty('color', val, 'important'));
-  // 正文：覆盖模块内容内所有元素（包括 card-desc / card-term / miscon-insight-content 等）
-  set('.module-content, .module-content *', t.ink);
-  // 标题与强调
-  set('.module-title, .exp-layer-name, .exp-concept, .card-phase-label, .card-phase-text, .acc-title, .card-title, .card-term, .module-content strong, .module-content b, .module-content h1, .module-content h2, .module-content h3, .module-content h4', t.titleInk);
-  // 弱化说明文字
-  set('.exp-meta, .exp-foot-note, .exp-layer-time, .card-pill.unsolved, .module-content blockquote, .module-content .muted-text', t.muted);
-  // 正文卡片描述、误区内容、手风琴内容等 — 使用正文色保证可读性
-  set('.card-desc, .miscon-insight-content, .acc-body-inner, .prog-body', t.ink);
-  // 强调色文字（状态胶囊、跨域标签）
-  set('.card-pill:not(.unsolved), .cross-pill, .module-content a', t.accent2);
-  // 品牌/层号胶囊：保持高对比（accent 底 + onAccent 字），不被上面的规则覆盖
-  set('.exp-brand, .exp-layer-num', t.onAccent);
+// 烤死导出颜色：遍历导出容器内所有元素，用 getComputedStyle 读出浏览器已解析的最终颜色，
+// 写成纯内联 style.color / style.backgroundColor（无 !important）。
+// html2canvas 从克隆 DOM 读取内联样式，绕开 CSS 级联/变量/样式表复制等一切不确定因素。
+function bakeExportColors(root) {
+  const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'BR', 'HR', 'META', 'LINK']);
+  root.querySelectorAll('*').forEach(el => {
+    if (SKIP.has(el.tagName)) return;
+    const cs = getComputedStyle(el);
+    el.style.color = cs.color;
+    const bg = cs.backgroundColor;
+    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+      el.style.backgroundColor = bg;
+    }
+  });
+  // 确保 root 的背景也在内联里（html2canvas 的 backgroundColor 参数不一定覆盖所有情况）
+  root.style.backgroundColor = getComputedStyle(root).backgroundColor;
 }
 
 function showExportLoading(text) {
@@ -3315,6 +3977,57 @@ function checkExportLibs() {
   return true;
 }
 
+// 生成 html2canvas 选项，统一排除全局干扰元素
+function getHtml2CanvasOpts(themeTokens) {
+  const isDark = currentIsDark();
+  const t = themeTokens || exportThemeTokens(isDark);
+  return {
+    backgroundColor: t.pageBg,
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    ignoreElements: (el) => {
+      const tag = el.tagName;
+      if (tag === 'SCRIPT' || tag === 'NOSCRIPT') return true;
+      if (el.classList && (
+        el.classList.contains('blob-wrap') ||
+        el.classList.contains('blob') ||
+        el.classList.contains('reader') ||
+        el.classList.contains('reader-nav') ||
+        el.classList.contains('source-panel') ||
+        el.classList.contains('reader-search-panel') ||
+        el.classList.contains('reader-search-overlay') ||
+        el.classList.contains('export-loading')
+      )) return true;
+      return false;
+    },
+    // onclone：把 injectExportStyle 的 CSS 注入到克隆 DOM 里，html2canvas 才能看到
+    // 同时清理 filter/blur/mix-blend-mode 等全局干扰属性
+    // 注意：bakeExportColors 已将颜色写入内联 style，cloneNode 会自动保留，无需手动复制
+    onclone: (clonedDoc, clonedEl) => {
+      clonedEl.querySelectorAll('*').forEach(el => {
+        el.style.filter = 'none';
+        el.style.mixBlendMode = 'normal';
+        el.style.backdropFilter = 'none';
+        el.style.webkitBackdropFilter = 'none';
+      });
+      clonedEl.style.filter = 'none';
+      clonedEl.style.mixBlendMode = 'normal';
+      clonedEl.style.backdropFilter = 'none';
+      clonedEl.style.webkitBackdropFilter = 'none';
+      clonedEl.style.isolation = 'isolate';
+
+      // 找到 injectExportStyle 注入的 style 标签，复制到克隆 DOM 里
+      const exportStyle = document.getElementById('export-style');
+      if (exportStyle) {
+        const clonedStyle = clonedDoc.createElement('style');
+        clonedStyle.textContent = exportStyle.textContent;
+        clonedEl.prepend(clonedStyle);
+      }
+    }
+  };
+}
+
 async function exportPng(concept) {
   if (!checkExportLibs()) return;
   const data = await dbGet('frameworks', concept);
@@ -3322,9 +4035,11 @@ async function exportPng(concept) {
   showExportLoading('正在生成 PNG 长图…');
   // 等一帧，确保容器布局完成
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const isDark = currentIsDark();
+  const tokens = exportThemeTokens(isDark);
   const root = buildExportCard(data);
   try {
-    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    const canvas = await html2canvas(root, getHtml2CanvasOpts(tokens));
     canvas.toBlob((blob) => {
       if (blob) downloadFile(blob, `${concept}-认知框架.png`, 'image/png');
       root.remove();
@@ -3344,9 +4059,11 @@ async function exportPdf(concept) {
   if (!data) return;
   showExportLoading('正在生成 PDF 文档…');
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const isDark = currentIsDark();
+  const tokens = exportThemeTokens(isDark);
   const root = buildExportCard(data);
   try {
-    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    const canvas = await html2canvas(root, getHtml2CanvasOpts(tokens));
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -3388,9 +4105,11 @@ async function exportSingleLayer(li, e) {
   }
   showExportLoading(`正在导出第 ${li + 1} 层…`);
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const isDark = currentIsDark();
+  const tokens = exportThemeTokens(isDark);
   const root = buildExportCard(data, li);
   try {
-    const canvas = await html2canvas(root, { backgroundColor: currentIsDark() ? '#0E0F13' : '#F1EFEA', scale: 2, useCORS: true, logging: false });
+    const canvas = await html2canvas(root, getHtml2CanvasOpts(tokens));
     canvas.toBlob((blob) => {
       if (blob) downloadFile(blob, `${concept}-第${li + 1}层.png`, 'image/png');
       root.remove();
@@ -3697,6 +4416,20 @@ function esc(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+/** HTML 属性转义：防止 input value / select selected 等属性出现 XSS 或破引号 */
+function escAttr(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+/** Render an inline SVG icon from the sprite by id */
+function svgIcon(name, size) {
+  const s = size ? ` width="${size}" height="${size}"` : '';
+  return `<svg class="icon${size === '2x' ? ' icon-2x' : ''}"${s}><use href="#i-${name}"/></svg>`;
 }
 function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
@@ -4022,18 +4755,182 @@ function escXml(s) {
 }
 
 // ===== 时间轴条目解析（共享） =====
-function parseTimelineItems(raw) {
-  const lines = raw.split('\n').filter(l => l.trim());
-  if (lines.length === 0) return [];
-  const items = [];
-  for (const line of lines) {
-    let plain = line.replace(/^[\s]*[-*]\s+/, '').replace(/^\d+\.\s+/, '').trim();
-    const match = plain.match(/^(.+?)(：|:)\s*(.+)/);
-    if (match) {
-      items.push({ date: match[1].trim(), event: match[3].trim() });
-    } else {
-      items.push({ date: '', event: plain });
+// 两轨解析：
+//   主轨 —— 「」标记解析：prompt 要求 LLM 把时间用「」包裹放在行首（如「2010s至今」事件），
+//           解析时直接按「」切分，不依赖猜格式，中英文全覆盖，100% 准确。
+//   兜底 —— 正则解析：兼容未遵守「」格式的历史/旧输出，按年份边界切分。
+//   Phase 4 —— 段落兜底：整段无任何带年份的行时按句子切分。
+// 设计原则：先统一 prompt 输出约定（时间必须「」包裹），解析器只做切分不做格式猜测，
+//           避免"发现一种新格式就打一次补丁"的无限循环。
+var DATE_LIKE = /(\d|世纪|年代|s\b|至今|早期|晚期|中叶|前半叶|后半叶|early|late|mid|present|century|\bth\b)/i;
+var YR_RE_SRC = '(\\d{3,4}s?\\s*年?|\\d{1,2}\\s*世纪(?:\\s*(?:前|后)?(?:半叶|期))?)';
+var SEP_RE_SRC = '[：:—\\-\\–，。、]';
+
+/**
+ * 严格时间内容验证（防 LLM 滥用「」标记把任意内容塞成时间）：
+ *   字符白名单 —— 只允许 时间相关字符（数字/英文时间词字母/中文时间字/连接标点）
+ *   + 必须至少含一个时间锚点（数字/世纪/至今/early/late/century 等）
+ *   + 长度 ≤18
+ * 案例验证（2026-08-12 老板截图：显眼包发展脉络）：
+ *   "2023年"                       → true
+ *   "2024年至今"                   → true
+ *   "1980s-1990s"                  → true
+ *   "20世纪后半叶"                 → true
+ *   "2023年度十大网络流行语"        → false（被拒，回退到正则）
+ *   "early 1980s" / "20th century" → true
+ *   "2010s至今" / "present"        → true
+ */
+function isStrictDate(s) {
+  if (!s) return false;
+  var t = s.trim();
+  if (t.length > 18) return false;
+  if (!/^[0-9a-zA-Z\s\-–—~～:：至世纪年代前半叶中终初晚今早期后期末间古近代现未当]+$/.test(t)) return false;
+  return /(\d|至|今|世|纪|early|late|mid|present|century|th\b|st\b|nd\b|rd\b|早期|晚期|中叶|前期|后期|初期|末期|古代|近代|现代|当代|远古|未来)/i.test(t);
+}
+
+/**
+ * 按「」标记拆分一行内的多个事件。
+ * 仅当存在 ≥2 个"像时间"的「」标记时才拆分；单个标记作为该行 date/event。
+ */
+function _splitByMarkers(text, defaultDate) {
+  var markerRe = /「([^」]*?)」/g;
+  var bounds = [];
+  var m;
+  while ((m = markerRe.exec(text)) !== null) {
+    bounds.push({ index: m.index, date: m[1].trim(), end: m.index + m[0].length });
+  }
+  if (bounds.length === 0) return null;
+  // 用严格验证过滤（防 LLM 把"2023年度十大网络流行语"塞进「」当成时间）
+  var dateBounds = bounds.filter(function(b) { return isStrictDate(b.date); });
+  if (dateBounds.length < 2) return null;
+
+  var result = [];
+  var prevIdx = 0;
+  var curDate = defaultDate;
+  for (var i = 0; i < dateBounds.length; i++) {
+    var b = dateBounds[i];
+    var slice = text.substring(prevIdx, b.index).trim();
+    if (slice) result.push({ date: curDate, event: slice });
+    curDate = b.date;
+    prevIdx = b.end;
+  }
+  var tail = text.substring(prevIdx).trim();
+  if (tail) result.push({ date: curDate, event: tail });
+  return result.length > 1 ? result : null;
+}
+
+/** 正则兜底：从一行中提取行首年份/世纪/时期词作为 date */
+function _regexExtract(line) {
+  var plain = line.replace(/^[\s]*[-*+]\s+/, '').replace(/^\d+[.、)]\s+/, '').trim();
+  plain = plain.replace(/[*_]{1,3}/g, '').replace(/#/g, '').trim();
+  var date = '', event = plain;
+
+  // 1) 时期词优先（早期/晚期/中叶/古代/近代/现代/当代/前期/后期/初期/末期/上半叶/下半叶）
+  var eraRe = /^(早期|晚期|中叶|古代|近代|现代|当代|前期|后期|初期|末期|上半叶|下半叶|远古|未来)[：:]\s*(.+)$/;
+  var eraM = plain.match(eraRe);
+  if (eraM) {
+    return { date: eraM[1], event: eraM[2] };
+  }
+
+  var lead = plain.match(/^((?:\d{3,4}s?\s*年?(?:\s*[-–—]\s*\d{3,4}s?\s*年?)?(?:\s*\d{1,2}\s*月)?|\d{1,2}\s*世纪(?:\s*(?:前|后)?(?:半叶|期))?)\s*)/);
+  if (lead && lead[1]) {
+    date = lead[1].trim();
+    // 向后吸收时间后缀：「2024年至今」「1990s以来」「20世纪初/末/前期/后期/前半叶/后半叶」
+    var suffixRe = /^(?:\s*(?:至今|以来|初期|末期|前期|后期|前半叶|后半叶))/;
+    var after = plain.substring(lead[0].length);
+    var sm = after.match(suffixRe);
+    if (sm) {
+      date = (date + sm[0]).replace(/\s+/g, '');
+      after = after.substring(sm[0].length);
     }
+    event = after.replace(/^[：:—–\-，。、\s]+/, '').trim() || plain;
+  } else {
+    var mp = plain.match(/^([^：:]{1,30}?)[:：]\s*(.+)$/);
+    if (mp && new RegExp(YR_RE_SRC).test(mp[1])) { date = mp[1].trim(); event = mp[2].trim(); }
+  }
+  return { date: date, event: event };
+}
+
+/** 段内正则二次拆分（兜底：无「」时，按年份+分隔符边界切分） */
+function _splitInnerByYears(text, defaultDate) {
+  var finder = new RegExp(YR_RE_SRC + '[\\s]*' + SEP_RE_SRC, 'g');
+  var bounds = [];
+  var match;
+  while ((match = finder.exec(text)) !== null) {
+    if (match.index > 0) bounds.push({ index: match.index, date: match[1].trim(), end: match.index + match[0].length });
+  }
+  if (bounds.length < 2) return null;
+  var result = [];
+  var prevIdx = 0;
+  var curDate = defaultDate;
+  for (var bi = 0; bi < bounds.length; bi++) {
+    var b = bounds[bi];
+    var slice = text.substring(prevIdx, b.index).trim();
+    if (slice) result.push({ date: curDate, event: slice });
+    curDate = b.date;
+    prevIdx = b.end;
+  }
+  var tail = text.substring(prevIdx).trim();
+  if (tail) result.push({ date: curDate, event: tail });
+  return result.length > 1 ? result : null;
+}
+
+function parseTimelineItems(raw) {
+  var lines = (raw || '').split('\n').filter(function(l) { return l.trim(); });
+  if (lines.length === 0) return [];
+  var items = [];
+  var anyDated = false;
+
+  for (var li = 0; li < lines.length; li++) {
+    var line = lines[li].replace(/^[\s]*[-*+]\s+/, '').replace(/^\d+[.、)]\s+/, '').trim();
+    line = line.replace(/[*_]{1,3}/g, '').replace(/#/g, '').trim();
+
+    // ===== 主轨：「」标记解析 =====
+    var markerSplit = _splitByMarkers(line, '');
+    if (markerSplit && markerSplit.length > 1) {
+      for (var mi = 0; mi < markerSplit.length; mi++) {
+        if (markerSplit[mi].date) anyDated = true;
+        items.push(markerSplit[mi]);
+      }
+      continue;
+    }
+    // 单行内仅一个「」时间标记 → 作为该行 date/event
+    if (/「[^」]*?」/.test(line)) {
+      var mm = line.match(/「([^」]*?)」\s*([\s\S]*)/);
+      if (mm && isStrictDate(mm[1])) {
+        var ev0 = mm[2].replace(/^[：:—–\-，。、\s]+/, '').trim();
+        if (mm[1].trim()) anyDated = true;
+        items.push({ date: mm[1].trim(), event: ev0 || line });
+        continue;
+      }
+    }
+
+    // ===== 兜底：正则解析 =====
+    var re = _regexExtract(line);
+    if (re.date) anyDated = true;
+    items.push(re);
+
+    // 段内二次拆分（兜底）
+    if (items.length <= 2) {
+      var expanded = [];
+      for (var ei = 0; ei < items.length; ei++) {
+        var sub = _splitInnerByYears(items[ei].event, items[ei].date);
+        if (sub && sub.length > 1) { expanded.push.apply(expanded, sub); continue; }
+        expanded.push(items[ei]);
+      }
+      if (expanded.length > items.length) { items = expanded; }
+    }
+  }
+
+  // ===== Phase 4: 段落兜底 =====
+  if (!anyDated) {
+    var sents = raw.split(/[。！？\n;；]/).map(function(s) { return s.replace(/[*_]{1,3}/g, '').trim(); }).filter(Boolean);
+    var out = [];
+    for (var si = 0; si < sents.length; si++) {
+      var ym = sents[si].match(new RegExp(YR_RE_SRC));
+      if (ym) out.push({ date: ym[0].trim(), event: sents[si] });
+    }
+    if (out.length > 0) return out;
   }
   return items;
 }
@@ -4045,17 +4942,34 @@ function generateTimelineHTML(raw) {
   if (items.length === 0) return '<p class="tl-empty">暂无时间轴数据</p>';
 
   let html = '<div class="tl">';
+  let rendered = 0;
   for (const item of items) {
-    // 清理事实核对标注（timeline 不支持内联 HTML tooltip）
-    let evt = item.event.replace(/<sup class="fu-note"[^>]*>‡<\/sup>/g, '');
-    evt = evt.replace(/<u class="fu"[^>]*>([\s\S]*?)<\/u>/g, '$1');
+    // 校验原则：绝不让用户看到「待验证」「未找到出处」的内容
+    // 含不确定标记（fu / 待验证 / 需核实 等）整条删除
+    const uncertaintyRe = /(有待验证|需核实|待确认|需进一步确认|尚待确认|暂未确认|未确认|<u[^>]*class\s*=\s*["'][^"']*\bfu\b|AI\s*生成|未找到权威出处|推演|推理|推测|⚠️|需注意|需说明|需指出|此处|关于|最初由|主要由|由.{0,3}发展)/;
+    if (uncertaintyRe.test(item.event) || uncertaintyRe.test(item.date)) {
+      continue;
+    }
+    // 防御性清理：去掉残留 markdown 标记，区间统一用 en dash
+    let date = (item.date || '').replace(/[*_]/g, '').replace(/\s*[-–—]\s*/g, '–').trim();
+    let evt = (item.event || '')
+      .replace(/<sup[^>]*class\s*=\s*["'][^"']*\bfu-note\b[^"']*["'][^>]*>[\s\S]*?<\/sup>/gi, '')
+      .replace(/<u[^>]*class\s*=\s*["'][^"']*\bfu\b[^"']*["'][^>]*>([\s\S]*?)<\/u>/gi, '$1')
+      .replace(/<u\b[^>]*>([\s\S]*?)<\/u>/gi, '$1')  // 兜底：清理所有 <u> 标签
+      .replace(/\[\d+\]/g, '')                           // 清理残留裸引用编号 [N]
+      .replace(/[、，,;；]\s*[ \t]*[\]】］]/g, '');    // 清理 、] 等半清洗产物
+    // 产品原则：date 空 = 信息不完整（LLM 没标时间/滥用「」标记）→ 整条不显示
+    if (!date) continue;
+    if (!date && !evt.trim()) continue;
     html += '<div class="tl-item">';
-    html += `<div class="tl-date">${escXml(item.date)}</div>`;
+    html += `<div class="tl-date">${escXml(date)}</div>`;
     html += '<div class="tl-dot" aria-hidden="true"></div>';
     html += `<div class="tl-event">${escXml(evt)}</div>`;
     html += '</div>';
+    rendered++;
   }
   html += '</div>';
+  if (rendered === 0) return '<p class="tl-empty">暂无时间轴数据</p>';
   return html;
 }
 
@@ -4183,13 +5097,13 @@ function generateMisconHTML(raw) {
 
 // ===== 底层原理 / 长内容 → 可折叠手风琴 =====
 function generateAccordionHTML(raw) {
-  // 按「维度X：」开头拆分段落
+  // 按「维度X：」开头拆分段落（兼容 LLM 输出的 **加粗** 等格式前缀）
   const items = [];
-  const parts = raw.split(/\n(?=维度\s*[一二三四五六七八九十\d]+[：:])/);
+  const parts = raw.split(/\n(?=\s*\*{0,2}\s*维度\s*[一二三四五六七八九十\d]+[：:])/);
   for (const part of parts) {
     const trimmed = part.trim();
     if (!trimmed) continue;
-    const m = trimmed.match(/^(维度\s*[一二三四五六七八九十\d]+)[：:]\s*(.+)$/s);
+    const m = trimmed.match(/^\s*\*{0,2}\s*(维度\s*[一二三四五六七八九十\d]+)[：:]\s*(.+)$/s);
     if (m) {
       const prefix = m[1].trim();
       const rest = m[2].trim();
@@ -4653,7 +5567,7 @@ async function verifySources(concept, onProgress) {
 // ===================================================================
 
 // Obsidian 反写时追加的来源标记（兜底：区分系统写入 vs 用户批注）
-const OBSIDIAN_SOURCE_MARK = '\n\n---\n> 📌 本文由「元引擎」自动生成并经过事实核对。带 ⚠️ 标记的内容为 AI 自行生成、未找到权威出处，仅供参考；其余内容已尽量核对，请以原始来源为准。';
+const OBSIDIAN_SOURCE_MARK = '\n\n---\n> 📌 本文由「元引擎」自动生成并经过事实核对。未找到权威出处的内容已自动过滤，请以剩余链接的原始来源为准。';
 
 // 不确定事实的标注（轻量：首处带符号‡+虚线下划线，后续仅虚线下划线）
 // 用原生 HTML <u> 标签，markdown 渲染器通常透传；Obsidian 也支持
@@ -4666,7 +5580,8 @@ const EXTRACT_SYSTEM = `你是一名严谨的事实核查助手。下面是一�
 只输出 JSON 数组本身，不要任何解释或代码围栏。`;
 
 const VERIFY_SYSTEM = `你是一名事实核查裁判。判断下列事实断言是否正确。
-若正确 verdict="correct"；若错误 verdict="wrong" 并在 correctedText 给出修正后的原文短语（保持原句式，仅替换错误部分）；若搜索摘要不足以判断 verdict="unknown"。
+若正确 verdict="correct"；若错误 verdict="wrong"，并在 correctedText 给出**干净的修正短语**——严格限制：≤30字，直接替换错误短语本身，**严禁**带括号注释、解释说明、警示符号（⚠️）、来源引用（"来源N"）、元描述词（"关于""不符""需要核实""此处""实际由""最初由"）。
+若搜索摘要不足以判断 verdict="unknown"。
 只输出 JSON 对象：{"verdict":"correct|wrong|unknown","correctedText":"","note":""}，不要解释。`;
 
 // 轻量搜索：DDG + 中文维基并行，各 5s 超时，返回拼接摘要
@@ -4707,6 +5622,17 @@ function safeReplace(text, from, to) {
   const idx = text.toLowerCase().indexOf(from.toLowerCase());
   if (idx === -1) return { changed: false, text };
   return { changed: true, text: text.slice(0, idx) + to + text.slice(idx + from.length) };
+}
+
+// 修正文本必须简洁（≤30字），无元描述/引用/警示，否则视为不可信（删该事实而不是注入垃圾）
+function isCleanCorrection(text) {
+  if (!text || typeof text !== 'string') return false;
+  if (text.length > 30) return false;
+  if (!/[\u4e00-\u9fff]/.test(text)) return false;  // 必须含中文
+  if (/「来源\d+」/.test(text)) return false;        // 禁止嵌入引用
+  if (/⚠️|需要核实|需要进一步|未找到|不符|此处|参考来源|最初由|关于/.test(text)) return false;  // 禁止元描述
+  if (/[（(].{2,}[)）]/.test(text)) return false;   // 禁止括号注释
+  return true;
 }
 
 // 并发受限的 map
@@ -4752,9 +5678,14 @@ async function factCheckAndPatch(markdown, concept, onProgress, maxFacts = 12, c
       const snippets = await factSearch(`${concept} ${f.claim || f.originalText || ''}`);
       const judge = await callLLMJson(VERIFY_SYSTEM,
         `类型：${f.type || 'fact'}\n原文短语：${f.originalText || ''}\n客观陈述：${f.claim || ''}\n\n搜索摘要：\n${snippets}`);
-      if (judge.verdict === 'wrong' && judge.correctedText) {
+      if (judge.verdict === 'wrong' && judge.correctedText && isCleanCorrection(judge.correctedText)) {
+        // 干净修正 → 替换原短语
         const r = safeReplace(result, f.originalText, judge.correctedText);
         if (r.changed) { result = r.text; corrected++; }
+      } else if (judge.verdict === 'wrong') {
+        // 修正不干净（带解释/过长/有引用）→ 删除该事实，避免自释污染正文
+        const r = safeReplace(result, f.originalText, '');
+        if (r.changed) { result = r.text; unknown++; }
       } else if (judge.verdict === 'unknown') {
         const marked = firstUnknown ? FACT_WARN_FULL(f.originalText) : FACT_WARN_SHORT(f.originalText);
         const r = safeReplace(result, f.originalText, marked);
@@ -4784,12 +5715,16 @@ function toggleSourcePanel() {
 }
 
 // 在系统浏览器中打开 URL（兼容 Tauri App 和浏览器）
-function openExternal(url) {
+// 用法：<a href=url target=_blank onclick="return openExternal(event,'url')">
+// Tauri 环境：preventDefault + 系统 shell 打开；浏览器环境：放行，走 href 原生跳转（最可靠）
+function openExternal(event, url) {
   if (isTauriEnv() && window.__TAURI__ && window.__TAURI__.shell) {
+    if (event && event.preventDefault) event.preventDefault();
     window.__TAURI__.shell.open(url);
-  } else {
-    window.open(url, '_blank', 'noopener');
+    return false;
   }
+  if (!event) { window.open(url, '_blank', 'noopener'); return false; }
+  return true;
 }
 
 function closeReaderPopups() {
@@ -4807,12 +5742,13 @@ function renderSourcePanel() {
   const concept = readerState ? readerState.concept : '';
   let html = '<div class="source-panel-inner">';
   html += `<div class="source-panel-title">参考链接 · ${esc(concept)}</div>`;
+  html += `<div style="font-size:0.7rem;color:var(--text-3);margin:0.15rem 0 0.55rem;line-height:1.5">点击链接在新窗口打开 · 来源为 DeepSeek 联网搜索结果，不保证链接可用</div>`;
   const hits = sources.filter(s => s.hit && s.url);
   if (hits.length === 0) {
-    html += '<div class="source-item miss"><span class="source-icon">⬜</span><span class="source-label">未找到参考链接</span></div>';
+    html += '<div class="source-item miss"><span class="source-icon"><svg class="icon"><use href="#i-book"/></svg></span><span class="source-label">本篇搜索结果未提取到独立链接，正文中「来源N」为不可验证引用</span></div>';
   } else {
     for (const s of hits) {
-      html += `<div class="source-item hit"><span class="source-icon">🔗</span><a href="#" onclick="openExternal('${esc(s.url).replace(/'/g, "\\'")}');return false" class="source-label" style="color:var(--accent);text-decoration:underline;">${esc(s.label)}</a></div>`;
+      html += `<div class="source-item hit"><span class="source-icon"><svg class="icon"><use href="#i-link"/></svg></span><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" onclick="return openExternal(event,'${esc(s.url).replace(/'/g, "\\'")}')" class="source-label" style="color:var(--accent);text-decoration:underline;">${esc(s.label)}<span style="margin-left:0.25rem;opacity:0.7">↗</span></a></div>`;
     }
   }
   html += '</div>';
@@ -4892,12 +5828,39 @@ const QUICK_EXAMPLES = ['博弈论', '熵增定律', 'CRISPR', '机器学习', '
 // ===== Onboarding Guide (first-time users) =====
 const ONBOARDING_KEY = 'metaengine_onboarded';
 const ONBOARDING_STEPS = [
-  { icon: '🔑', zh: '设置 API Key', en: 'Set API Key', desc_zh: '一个 Key 搞定所有功能。推荐 DeepSeek（<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">注册即送额度</a>）。', desc_en: 'One key for everything. DeepSeek recommended (<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">free credits on signup</a>).', keyInput: true },
-  { icon: '🔍', zh: '输入任意概念', en: 'Enter any concept', desc_zh: '从博弈论到显眼包，学术或流行都行', desc_en: 'From Game Theory to trending memes' },
-  { icon: '🌐', zh: 'AI 联网搜索', en: 'AI web search', desc_zh: '实时搜索 + 交叉验证，杜绝编造', desc_en: 'Real-time search with cross-verification' },
-  { icon: '🧠', zh: '生成认知框架', en: 'Generate framework', desc_zh: '12 模块深度拆解，每条认知都有出处', desc_en: '12-module deep breakdown, every claim sourced' },
-  { icon: '📂', zh: '同步到 Obsidian', en: 'Sync to Obsidian', desc_zh: '一键存入你的知识库，随时回顾', desc_en: 'One click into your vault, review anytime' },
+  { icon: 'key', zh: '设置 API Key', en: 'Set API Key', desc_zh: '选一个平台填入 Key 即可，国内推荐 智谱GLM 或 硅基流动，免费额度充足。', desc_en: 'Pick one provider. For China users we recommend 智谱 GLM or SiliconFlow (generous free tier).', keyInput: true },
+  { icon: 'search', zh: '输入任意概念', en: 'Enter any concept', desc_zh: '从博弈论到显眼包，学术或流行都行', desc_en: 'From Game Theory to trending memes' },
+  { icon: 'globe', zh: 'AI 联网搜索', en: 'AI web search', desc_zh: '实时搜索 + 交叉验证，杜绝编造', desc_en: 'Real-time search with cross-verification' },
+  { icon: 'brain', zh: '生成认知框架', en: 'Generate framework', desc_zh: '12 模块深度拆解，每条认知都有出处', desc_en: '12-module deep breakdown, every claim sourced' },
+  { icon: 'folder', zh: '同步到 Obsidian', en: 'Sync to Obsidian', desc_zh: '一键存入你的知识库，随时回顾', desc_en: 'One click into your vault, review anytime' },
 ];
+
+/** onboarding 内部的平台切换（临时 DOM，直接用 id 取元素），force=true 强制填充 URL/模型 */
+function _onboardPlatformChange(value, opts) {
+  const preset = PLATFORM_PRESETS[value] || PLATFORM_PRESETS.custom;
+  const baseEl = document.getElementById('onboardApiBase');
+  const modelEl = document.getElementById('onboardModelName');
+  const platHintEl = document.getElementById('onboardPlatformHint');
+  const modelHintEl = document.getElementById('onboardModelHint');
+  const getKeyLink = document.getElementById('onboardGetKey');
+  const lang = currentLang;
+  if (opts && opts.force && value !== 'custom') {
+    if (preset.apiBase && baseEl) baseEl.value = preset.apiBase;
+    if (preset.defaultModel && modelEl) modelEl.value = preset.defaultModel;
+  }
+  if (platHintEl) platHintEl.innerHTML = preset.hint[lang] || preset.hint.zh || '';
+  if (modelHintEl) modelHintEl.innerHTML = preset.modelHint[lang] || preset.modelHint.zh || '';
+  if (getKeyLink) {
+    if (preset.getKeyUrl) {
+      getKeyLink.href = preset.getKeyUrl;
+      getKeyLink.style.display = '';
+      const txt = preset.getKeyText && preset.getKeyText[lang];
+      if (txt) getKeyLink.textContent = txt;
+    } else {
+      getKeyLink.style.display = 'none';
+    }
+  }
+}
 
 function showOnboarding() {
   if (localStorage.getItem(ONBOARDING_KEY) === '1') return;
@@ -4910,34 +5873,132 @@ function showOnboarding() {
     const s = ONBOARDING_STEPS[step];
     const title = currentLang === 'en' ? s.en : s.zh;
     const desc = currentLang === 'en' ? s.desc_en : s.desc_zh;
-    const keyExtra = s.keyInput ? `
-      <div style="margin:1rem 0;text-align:left">
-        <input type="password" id="onboardKey" class="onboard-key-input" placeholder="sk-..." autocomplete="off"
-               value="${(JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')).apiKey || ''}">
-        <div style="font-size:0.7rem;color:var(--text-3);margin-top:0.3rem">
-          ${currentLang === 'en' ? '🔒 Stored locally only' : '🔒 仅存本地浏览器'}
+    const lang = currentLang;
+    let keyExtra = '';
+    if (s.keyInput) {
+      const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      const platform = detectPlatformFromSettings(cfg.apiBase, cfg.modelName);
+      const preset = PLATFORM_PRESETS[platform] || PLATFORM_PRESETS.deepseek;
+      const savedKey = cfg.apiKey || '';
+      const savedBase = cfg.apiBase || preset.apiBase || '';
+      const savedModel = cfg.modelName || preset.defaultModel || '';
+      const platHint = preset.hint[lang] || preset.hint.zh || '';
+      const modelHint = preset.modelHint[lang] || preset.modelHint.zh || '';
+      const getKeyText = (preset.getKeyText && preset.getKeyText[lang]) || (lang === 'en' ? 'Get a key →' : '去当前平台申请 Key →');
+      const nokeyIntro = lang === 'en'
+        ? '<b>No key yet?</b> Pick any provider below — all accessible from China, free credits on signup:'
+        : '<b>还没有 Key？</b>下面三个平台都支持国内访问，注册即送免费额度，任选其一：';
+      const nokeyTitle = (k, zh, en) => lang === 'en' ? en : zh;
+      const nokeyDesc = (k, zh, en) => lang === 'en' ? en : zh;
+      const tagFree = lang === 'en' ? 'Permanent Free Tier' : '永久免费';
+      const tagAgg = lang === 'en' ? 'Multi-Model Hub' : '模型聚合';
+      const tagLow = lang === 'en' ? 'Best Value' : '高性价比';
+
+      keyExtra = `
+      <div class="onboard-key-card">
+        <div class="onboard-form-group">
+          <label class="onboard-form-label">${lang === 'en' ? 'Model Provider' : '模型平台'}</label>
+          <select id="onboardPlatform" class="onboard-form-select">
+            <option value="deepseek" ${platform==='deepseek'?'selected':''}>DeepSeek</option>
+            <option value="glm" ${platform==='glm'?'selected':''}>智谱 GLM（国内 / 永久免费模型可选）</option>
+            <option value="siliconflow" ${platform==='siliconflow'?'selected':''}>${lang === 'en' ? 'SiliconFlow' : '硅基流动（多模型聚合）'}</option>
+            <option value="custom" ${platform==='custom'?'selected':''}>${lang === 'en' ? 'Custom (OpenAI-compatible)' : '自定义（兼容 OpenAI 格式）'}</option>
+          </select>
+          <div id="onboardPlatformHint" class="onboard-subhint">${platHint}</div>
         </div>
-      </div>` : '';
+        <div class="onboard-form-group">
+          <label class="onboard-form-label">${lang === 'en' ? 'API Key' : 'API Key'}</label>
+          <input type="password" id="onboardKey" class="onboard-key-input" placeholder="sk-..." autocomplete="off" value="${escAttr(savedKey)}">
+          <div style="font-size:0.7rem;color:var(--text-3);margin-top:0.35rem">
+            ${lang === 'en' ? '<svg class="icon"><use href="#i-lock"/></svg> Stored locally only, never sent to third parties' : '<svg class="icon"><use href="#i-lock"/></svg> 仅存本地浏览器 · 不发给任何第三方'}
+          </div>
+        </div>
+        <div class="onboard-form-group">
+          <label class="onboard-form-label">${lang === 'en' ? 'API Base URL' : 'API Base URL'}</label>
+          <input type="text" id="onboardApiBase" class="onboard-form-input" value="${escAttr(savedBase)}">
+        </div>
+        <div class="onboard-form-group">
+          <label class="onboard-form-label">${lang === 'en' ? 'Model Name' : '模型名称'}</label>
+          <input type="text" id="onboardModelName" class="onboard-form-input" value="${escAttr(savedModel)}" placeholder="${lang === 'en' ? 'e.g. deepseek-chat / glm-4.7-flash' : '如 deepseek-chat / glm-4.7-flash'}">
+          <div id="onboardModelHint" class="onboard-subhint">${modelHint}</div>
+        </div>
+        <div class="onboard-verify-row">
+          <a id="onboardGetKey" href="${preset.getKeyUrl || '#'}" target="_blank" rel="noopener" class="onboard-getkey-btn" ${preset.getKeyUrl ? '' : 'style="display:none"'}>${getKeyText}</a>
+          <button type="button" class="onboard-verify-btn" id="onboardVerify">${lang === 'en' ? 'Verify Key' : '验证 Key'}</button>
+          <span id="onboardVerifyResult" class="onboard-verify-result"></span>
+        </div>
+        <div class="onboard-nokey-intro">${nokeyIntro}</div>
+        <div class="onboard-nokey-list">
+          <a class="onboard-nokey-card" href="https://open.bigmodel.cn/" target="_blank" rel="noopener">
+            <div class="onboard-nokey-left">
+              <span class="onboard-nokey-tag free">${tagFree}</span>
+              <b>${nokeyTitle('glm','智谱 GLM','GLM (BigModel)')}</b>
+            </div>
+            <p>${nokeyDesc('glm','GLM-4.7-Flash 等 Flash 模型长期免费；新用户注册再送 2000 万 token 永久额度。','GLM-4.7-Flash and other Flash models are permanently free. New users also get 20M tokens forever.')}</p>
+          </a>
+          <a class="onboard-nokey-card" href="https://cloud.siliconflow.cn/" target="_blank" rel="noopener">
+            <div class="onboard-nokey-left">
+              <span class="onboard-nokey-tag free">${tagAgg}</span>
+              <b>${nokeyTitle('sf','硅基流动','SiliconFlow')}</b>
+            </div>
+            <p>${nokeyDesc('sf','9B 及以下模型永久免费；新用户赠 2000 万 token；DeepSeek / GLM / Qwen 一个 Key 全搞定。','Models ≤9B are permanently free. New users get 20M tokens. One key for DeepSeek/GLM/Qwen etc.')}</p>
+          </a>
+          <a class="onboard-nokey-card" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">
+            <div class="onboard-nokey-left">
+              <span class="onboard-nokey-tag">${tagLow}</span>
+              <b>${nokeyTitle('ds','DeepSeek','DeepSeek')}</b>
+            </div>
+            <p>${nokeyDesc('ds','搜索与推理能力强；新用户送 500 万 token 额度，单次生成约 1 分钱。','Great for reasoning + search. New users get 5M free tokens (~$0.001/generation).')}</p>
+          </a>
+        </div>
+      </div>`;
+    }
     box.innerHTML = `
-      <div class="onboard-icon">${s.icon}</div>
+      <div class="onboard-icon">${svgIcon(s.icon, '2x')}</div>
       <h2 class="onboard-title">${title}</h2>
       <p class="onboard-desc">${desc}</p>
       ${keyExtra}
       <div class="onboard-dots">${ONBOARDING_STEPS.map((_, i) => `<span class="onboard-dot ${i === step ? 'active' : ''}"></span>`).join('')}</div>
       <div class="onboard-actions">
         <button class="onboard-skip">${t('confirm_skip') || '跳过'}</button>
-        <button class="onboard-next">${step < ONBOARDING_STEPS.length - 1 ? (currentLang === 'en' ? 'Next' : '下一步') : (currentLang === 'en' ? 'Got it' : '开始使用')}</button>
+        <button class="onboard-next">${step < ONBOARDING_STEPS.length - 1 ? (lang === 'en' ? 'Next' : '下一步') : (lang === 'en' ? 'Got it' : '开始使用')}</button>
       </div>`;
     box.querySelector('.onboard-skip').onclick = () => { overlay.remove(); localStorage.setItem(ONBOARDING_KEY, '1'); };
+    // 平台下拉联动 URL + 模型名 + 申请链接 + 提示
+    const platSel = box.querySelector('#onboardPlatform');
+    if (platSel) {
+      platSel.onchange = (e) => _onboardPlatformChange(e.target.value, { force: true });
+    }
+    // 验证 Key 按钮（仅配 Key 步骤存在）
+    const verifyBtn = box.querySelector('#onboardVerify');
+    if (verifyBtn) {
+      verifyBtn.onclick = async () => {
+        const keyVal = (document.getElementById('onboardKey') || {}).value || '';
+        const baseVal = (document.getElementById('onboardApiBase') || {}).value || 'https://api.deepseek.com';
+        const modelVal = (document.getElementById('onboardModelName') || {}).value || '';
+        const resEl = document.getElementById('onboardVerifyResult');
+        if (!keyVal.trim()) { resEl.textContent = lang === 'en' ? 'Paste your key first' : '请先粘贴 Key'; resEl.className = 'onboard-verify-result bad'; return; }
+        verifyBtn.disabled = true; verifyBtn.textContent = lang === 'en' ? 'Verifying…' : '验证中…';
+        const r = await verifyApiKey(keyVal, baseVal, { model: modelVal });
+        verifyBtn.disabled = false; verifyBtn.textContent = lang === 'en' ? 'Verify Key' : '验证 Key';
+        if (r.ok) { resEl.textContent = '✓ ' + (lang === 'en' ? 'Key is valid' : 'Key 有效'); resEl.className = 'onboard-verify-result good'; }
+        else { resEl.textContent = '✗ ' + (r.msg || (lang === 'en' ? 'Failed' : '验证失败')); resEl.className = 'onboard-verify-result bad'; }
+      };
+    }
     box.querySelector('.onboard-next').onclick = () => {
       if (s.keyInput) {
         const keyEl = document.getElementById('onboardKey');
+        const baseEl = document.getElementById('onboardApiBase');
+        const modelEl = document.getElementById('onboardModelName');
         const key = keyEl ? keyEl.value.trim() : '';
-        if (key) {
+        const base = baseEl ? baseEl.value.trim() : '';
+        const model = modelEl ? modelEl.value.trim() : '';
+        if (key || base || model) {
           const cfg = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-          cfg.apiKey = key;
-          cfg.apiBase = cfg.apiBase || 'https://api.deepseek.com';
-          cfg.modelName = cfg.modelName || 'deepseek-v4-flash';
+          if (key) cfg.apiKey = key;
+          if (base) cfg.apiBase = base;
+          if (model) cfg.modelName = model;
+          else cfg.modelName = cfg.modelName || 'deepseek-chat';
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
           try { loadSettings(); } catch(_) {}
         }
@@ -5019,12 +6080,16 @@ try { if (typeof selectSyncDir === 'function') window.selectSyncDir = selectSync
 try { if (typeof clearSyncDir === 'function') window.clearSyncDir = clearSyncDir; } catch(e) {}
 try { if (typeof writeFileToDir === 'function') window.writeFileToDir = writeFileToDir; } catch(e) {}
 try { if (typeof isTauriEnv === 'function') window.isTauriEnv = isTauriEnv; } catch(e) {}
+try { if (typeof openExternal === 'function') window.openExternal = openExternal; } catch(e) {}
 try { if (typeof buildObsidianFiles === 'function') window.buildObsidianFiles = buildObsidianFiles; } catch(e) {}
 try { if (typeof tauriWriteObsidian === 'function') window.tauriWriteObsidian = tauriWriteObsidian; } catch(e) {}
 try { if (typeof getSettings === 'function') window.getSettings = getSettings; } catch(e) {}
 try { if (typeof toggleTheme === 'function') window.toggleTheme = toggleTheme; } catch(e) {}
 try { if (typeof syncThemeSwitch === 'function') window.syncThemeSwitch = syncThemeSwitch; } catch(e) {}
 try { if (typeof openSettings === 'function') window.openSettings = openSettings; } catch(e) {}
+try { if (typeof switchSettingsTab === 'function') window.switchSettingsTab = switchSettingsTab; } catch(e) {}
+try { if (typeof onPlatformChanged === 'function') window.onPlatformChanged = onPlatformChanged; } catch(e) {}
+try { if (typeof verifyCurrentKey === 'function') window.verifyCurrentKey = verifyCurrentKey; } catch(e) {}
 try { if (typeof closeSettings === 'function') window.closeSettings = closeSettings; } catch(e) {}
 try { if (typeof parseMarkdown === 'function') window.parseMarkdown = parseMarkdown; } catch(e) {}
 try { if (typeof extractGlossary === 'function') window.extractGlossary = extractGlossary; } catch(e) {}
@@ -5076,13 +6141,17 @@ try { if (typeof exportAll === 'function') window.exportAll = exportAll; } catch
 try { if (typeof currentIsDark === 'function') window.currentIsDark = currentIsDark; } catch(e) {}
 try { if (typeof exportThemeTokens === 'function') window.exportThemeTokens = exportThemeTokens; } catch(e) {}
 try { if (typeof injectExportStyle === 'function') window.injectExportStyle = injectExportStyle; } catch(e) {}
+try { if (typeof renderLatexToUnicode === 'function') window.renderLatexToUnicode = renderLatexToUnicode; } catch(e) {}
+try { if (typeof processMathInMarkdown === 'function') window.processMathInMarkdown = processMathInMarkdown; } catch(e) {}
+try { if (typeof cleanFuAnnotations === 'function') window.cleanFuAnnotations = cleanFuAnnotations; } catch(e) {}
 try { if (typeof resolveCssVars === 'function') window.resolveCssVars = resolveCssVars; } catch(e) {}
 try { if (typeof renderModuleContentForExport === 'function') window.renderModuleContentForExport = renderModuleContentForExport; } catch(e) {}
 try { if (typeof buildExportCard === 'function') window.buildExportCard = buildExportCard; } catch(e) {}
-try { if (typeof applyExportColors === 'function') window.applyExportColors = applyExportColors; } catch(e) {}
+try { if (typeof bakeExportColors === 'function') window.bakeExportColors = bakeExportColors; } catch(e) {}
 try { if (typeof showExportLoading === 'function') window.showExportLoading = showExportLoading; } catch(e) {}
 try { if (typeof hideExportLoading === 'function') window.hideExportLoading = hideExportLoading; } catch(e) {}
 try { if (typeof checkExportLibs === 'function') window.checkExportLibs = checkExportLibs; } catch(e) {}
+try { if (typeof getHtml2CanvasOpts === 'function') window.getHtml2CanvasOpts = getHtml2CanvasOpts; } catch(e) {}
 try { if (typeof exportPng === 'function') window.exportPng = exportPng; } catch(e) {}
 try { if (typeof exportPdf === 'function') window.exportPdf = exportPdf; } catch(e) {}
 try { if (typeof exportSingleLayer === 'function') window.exportSingleLayer = exportSingleLayer; } catch(e) {}
@@ -5103,6 +6172,8 @@ try { if (typeof clearHistory === 'function') window.clearHistory = clearHistory
 try { if (typeof startWithConcept === 'function') window.startWithConcept = startWithConcept; } catch(e) {}
 try { if (typeof renderHistory === 'function') window.renderHistory = renderHistory; } catch(e) {}
 try { if (typeof esc === 'function') window.esc = esc; } catch(e) {}
+try { if (typeof escAttr === 'function') window.escAttr = escAttr; } catch(e) {}
+try { if (typeof svgIcon === 'function') window.svgIcon = svgIcon; } catch(e) {}
 try { if (typeof escRegex === 'function') window.escRegex = escRegex; } catch(e) {}
 try { if (typeof splitText === 'function') window.splitText = splitText; } catch(e) {}
 try { if (typeof parseMindmapCategories === 'function') window.parseMindmapCategories = parseMindmapCategories; } catch(e) {}

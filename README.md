@@ -18,7 +18,7 @@
 | **OB 同步** | 不支持（可下载 .md） | ✅ 自动写入 Obsidian vault |
 | **API Key** | 存浏览器 localStorage | 存浏览器 localStorage |
 | **数据** | 100% 本地处理 | 100% 本地处理 |
-| **架构** | — | arm64 + x86_64 通用二进制 |
+| **架构** | — | arm64 + x86_64 双版本 |
 | **地址** | [se6nkk.github.io/yuan-engine](https://se6nkk.github.io/yuan-engine) | [GitHub Releases](https://github.com/se6nkk/yuan-engine/releases) |
 
 > **在线版也能用。** 生成完点「导出」下载 .md 文件，手动拖入 Obsidian 即可。核心功能（搜索、验证、生成）两个版本完全一样。
@@ -79,9 +79,9 @@ AI 很擅长"编造"——当它不知道答案时，它会虚构研究机构、
 ## 技术栈
 
 - **前端** — Vanilla JS + Vite
-- **桌面** — Tauri v2（macOS arm64 + x86_64 通用二进制）
+- **桌面** — Tauri v2（macOS arm64 + x86_64 双版本）
 - **搜索** — DeepSeek API（联网搜索）
-- **生成** — DeepSeek API（deepseek-v4-flash 模型）
+- **生成** — DeepSeek API（deepseek-chat 模型）
 - **存储** — IndexedDB（缓存）+ localStorage（设置）+ 本地文件（Obsidian vault）
 
 ---

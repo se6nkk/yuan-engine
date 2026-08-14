@@ -13,6 +13,7 @@ prompts/
 *.log
 *.app
 *.app.old
+*.dmg
 screenshot_*.png
 fullscreen_check.png
 output/

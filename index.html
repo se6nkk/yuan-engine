@@ -524,6 +524,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   --surface-solid: #FBFAF8;            /* 实体表面，需不透明时（如输入框）用 */
   --shadow: rgba(0,0,0,0.06); --shadow-lg: rgba(0,0,0,0.12);
   --green: #10b981; --red-soft: rgba(239,68,68,0.1);
+  /* 兼容旧组件体系：背景/文本/边框/卡片 层级变量 */
+  --bg-1: #FBFAF8;          /* 顶层卡片背景（最不透明的奶油） */
+  --bg-2: #E3DFD7;          /* 二级面板背景 */
+  --text-1: #1A1A1C;        /* 一级文字（标题/强调） */
+  --text-2: #373A40;        /* 二级文字（正文） */
+  --text-3: #807D78;        /* 三级文字（弱化/说明） */
+  --border-1: #DBD8D2;      /* 一级边框（明显分隔） */
+  --border-2: rgba(219,216,210,0.5); /* 二级边框（柔分隔） */
+  --card-2: #F3F0EB;        /* 次级卡片背景（按钮等） */
   /* Nav / Panel */
   --nav-bg: rgba(236,233,227,0.72);
   --panel-line: rgba(0,0,0,0.05);
@@ -539,14 +548,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 /* ===== 系统暗色跟随（无手动 data-theme 覆盖时生效） ===== */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0E0F13; --bg2: #16181D; --ink: #C9CDD6; --title-ink: #F2F3F5; --muted: #9AA0A8;
+    --bg: #0E0F13; --bg2: #16181D; --ink: #E8EAED; --title-ink: #FFFFFF; --muted: #B8BEC8;
     --rule: #26282E; --hairline: #26282E;
     --accent: #ECE9E3; --accent2: #A8A39A;
     --on-accent: #1A1A1C;
     --accent-soft: rgba(236,233,227,0.14); --accent2-soft: rgba(168,163,154,0.14);
-    --surface: rgba(255,255,255,0.06); --surface-solid: #1A1C22;
+    --surface: rgba(255,255,255,0.08); --surface-solid: #1A1C22;
     --shadow: rgba(0,0,0,0.3); --shadow-lg: rgba(0,0,0,0.4);
     --green: #34d399; --red-soft: rgba(248,113,113,0.12);
+    /* 兼容旧组件体系：背景/文本/边框/卡片 层级变量（暗色） */
+    --bg-1: #1A1C22; --bg-2: #16181D;
+    --text-1: #FFFFFF; --text-2: #E8EAED; --text-3: #B8BEC8;
+    --border-1: #26282E; --border-2: rgba(255,255,255,0.07);
+    --card-2: #24262C;
     --nav-bg: rgba(14,15,19,0.66); --panel-line: rgba(255,255,255,0.07);
     --blob-pink: rgba(255,150,130,0.55); --blob-blue: rgba(120,170,255,0.55);
     --blob-green: rgba(120,230,190,0.55);
@@ -556,7 +570,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 }
 /* ===== 手动暗色覆盖（toggleTheme 设置 data-theme=dark） ===== */
 :root[data-theme="dark"] {
-  --bg: #0E0F13; --bg2: #16181D; --ink: #C9CDD6; --title-ink: #F2F3F5; --muted: #9AA0A8;
+  --bg: #0E0F13; --bg2: #16181D; --ink: #E8EAED; --title-ink: #FFFFFF; --muted: #B8BEC8;
   --rule: #26282E; --hairline: #26282E;
   --accent: #ECE9E3; --accent2: #A8A39A;
   --on-accent: #1A1A1C;
@@ -564,6 +578,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   --surface: rgba(255,255,255,0.06); --surface-solid: #1A1C22;
   --shadow: rgba(0,0,0,0.3); --shadow-lg: rgba(0,0,0,0.4);
   --green: #34d399; --red-soft: rgba(248,113,113,0.12);
+  /* 兼容旧组件体系：背景/文本/边框/卡片 层级变量（手动暗色） */
+  --bg-1: #1A1C22; --bg-2: #16181D;
+  --text-1: #FFFFFF; --text-2: #E8EAED; --text-3: #B8BEC8;
+  --border-1: #26282E; --border-2: rgba(255,255,255,0.07);
+  --card-2: #24262C;
   --nav-bg: rgba(14,15,19,0.66); --panel-line: rgba(255,255,255,0.07);
   --blob-pink: rgba(255,150,130,0.55); --blob-blue: rgba(120,170,255,0.55);
   --blob-green: rgba(120,230,190,0.55);
@@ -579,6 +598,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   --surface: rgba(255,253,250,0.62); --surface-solid: #FBFAF8;
   --shadow: rgba(0,0,0,0.06); --shadow-lg: rgba(0,0,0,0.12);
   --green: #10b981; --red-soft: rgba(239,68,68,0.1);
+  /* 兼容旧组件体系：背景/文本/边框/卡片 层级变量（手动亮色） */
+  --bg-1: #FBFAF8; --bg-2: #E3DFD7;
+  --text-1: #1A1A1C; --text-2: #373A40; --text-3: #807D78;
+  --border-1: #DBD8D2; --border-2: rgba(219,216,210,0.5);
+  --card-2: #F3F0EB;
   --nav-bg: rgba(236,233,227,0.72); --panel-line: rgba(0,0,0,0.05);
   --blob-pink: rgba(255,158,132,0.70); --blob-blue: rgba(128,186,255,0.64);
   --blob-green: rgba(126,226,188,0.62);
@@ -714,6 +738,33 @@ body.reader-open #app { display: none; }
 }
 .search-box input::placeholder { color: var(--muted); text-align: center; }
 .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: color-mix(in srgb, var(--bg) 70%, transparent); }
+/* search-input-wrap 作为取消按钮的定位上下文，宽度跟 input 一致 */
+.search-input-wrap { position: relative; width: 100%; max-width: 28rem; }
+
+/* 取消按钮：胶囊形，绝对定位在 input 内右侧 */
+.cancel-gen-btn {
+  position: absolute;
+  top: 50%; right: 0.5rem;
+  transform: translateY(-50%);
+  height: 2rem; padding: 0 0.9rem;
+  border-radius: 999px;            /* 胶囊形 */
+  border: 1px solid color-mix(in srgb, #d96a6a 50%, transparent);
+  background: color-mix(in srgb, #d96a6a 12%, transparent);
+  color: #d96a6a;
+  font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; user-select: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  z-index: 10; /* 确保按钮在输入框之上 */
+}
+.cancel-gen-btn:hover {
+  background: color-mix(in srgb, #d96a6a 22%, transparent);
+  border-color: #d96a6a;
+  transform: translateY(-50%) translateY(-1px);
+}
+.cancel-gen-btn:active { transform: translateY(-50%) scale(0.96); }
+.cancel-gen-btn[hidden] { display: none; }
 
 /* 生成按钮：独立居中，在输入框下方 */
 .btn-generate {
@@ -770,8 +821,8 @@ body.reader-open #app { display: none; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* Progress */
-.progress-bar { width: 100%; margin: 1.5rem auto 0; display: none; }
-.progress-bar.active { display: block; }
+.progress-bar { width: 100%; margin: 0.8rem auto 1rem; height: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
+.progress-bar.active { opacity: 1; visibility: visible; }
 .progress-track { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.3s; }
 .progress-text { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; text-align: center; }
@@ -1238,10 +1289,10 @@ body.reader-open #app { display: none; }
 @media (max-width: 720px) {
   .module-cards { grid-template-columns: repeat(2, 1fr); }
 }
-.viz-card { break-inside: avoid; margin-bottom: 0.75rem; border-radius: 12px; padding: 1rem; background: var(--panel-bg, rgba(128,128,128,0.06)); transition: background 0.2s; position: relative; }
+.viz-card { break-inside: avoid; margin-bottom: 0.75rem; border-radius: 12px; padding: 1rem; background: var(--panel-bg, rgba(128,128,128,0.06)); transition: background 0.2s; position: relative; box-sizing: border-box; width: 100%; min-width: 0; overflow: hidden; }
 .viz-card:hover { background: var(--panel-bg-hover, rgba(128,128,128,0.1)); }
-.viz-card .card-title { font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; line-height: 1.5; padding-right: 2rem; }
-.viz-card .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-top: 0.3rem; }
+.viz-card .card-title { font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; line-height: 1.5; padding-right: 2rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; overflow-wrap: break-word; }
+.viz-card .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-top: 0.3rem; word-break: break-word; overflow-wrap: break-word; }
 .viz-card .card-pill { display: inline-block; font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px; margin-bottom: 0.35rem; }
 .viz-card .card-pill.unsolved { background: rgba(128,128,128,0.2); color: var(--muted); border: 1px solid rgba(128,128,128,0.25); }
 .viz-card .card-pill.active { background: rgba(245,158,11,0.15); color: #92400e; }
@@ -1316,9 +1367,9 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 
 /* 事实核对进度：复用首页 #progressBar（见 JS showFactProgress / updateFactProgress），不再使用独立弹窗 */
 
-/* 不确定事实标注：虚线下划线 + 首处‡符号（轻量，不抢视觉） */
-.fu { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: var(--muted); text-underline-offset: 3px; cursor: help; }
-.fu-note { font-size: 0.65em; color: var(--muted); margin-left: 2px; vertical-align: super; font-weight: 400; padding: 0 2px; }
+/* 不确定事实标注：已废弃（老版本残留样式，保留仅为兼容，显示效果禁用） */
+.fu { text-decoration: none !important; cursor: default !important; border-bottom: none !important; }
+.fu-note { display: none !important; }
 /* JS 动态 tooltip（fixed 定位，避免被 .layer-body 的 overflow:hidden 裁切） */
 .fu-tooltip {
   position: fixed; z-index: 9999; pointer-events: none;
@@ -1393,22 +1444,29 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   display: flex; align-items: center; justify-content: center; padding: 1rem;
 }
 .onboard-box {
-  width: min(22rem, 100%); text-align: center;
+  width: min(44rem, 100%); text-align: center;
+  max-height: 90vh; overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background: color-mix(in srgb, var(--bg) 62%, transparent);
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   border-radius: var(--r-panel);
   box-shadow: 0 20px 60px color-mix(in srgb, var(--ink) 22%, transparent), inset 0 1px 0 rgba(255,255,255,0.4);
-  padding: 2rem 1.6rem 1.6rem;
+  padding: 2rem 1.8rem 1.6rem;
   font-family: "Space Grotesk", -apple-system, "PingFang SC", system-ui, sans-serif;
   animation: onboardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.onboard-box::-webkit-scrollbar { display: none; width: 0; height: 0; }
+@media (max-width: 420px) {
+  .onboard-box { padding: 1.6rem 1.1rem 1.2rem; }
 }
 @keyframes onboardIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: none; } }
 .onboard-icon { font-size: 3rem; margin-bottom: 0.8rem; }
 .onboard-title { font-size: 1.25rem; font-weight: 700; color: var(--ink); margin-bottom: 0.4rem; }
 .onboard-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.2rem; }
-.onboard-dots { display: flex; gap: 0.4rem; justify-content: center; margin-bottom: 1.2rem; }
+.onboard-dots { display: flex; gap: 0.4rem; justify-content: center; margin: 1.4rem 0 1rem; }
 .onboard-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rule); transition: all 0.3s; }
 .onboard-dot.active { background: var(--accent); width: 18px; border-radius: 999px; }
 .onboard-actions { display: flex; gap: 0.6rem; justify-content: center; }
@@ -1420,15 +1478,145 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 .onboard-skip:hover { border-color: var(--accent); color: var(--accent); }
 .onboard-next { border: none; background: var(--accent); color: var(--on-accent); }
 .onboard-next:hover { opacity: 0.9; }
-.onboard-key-input {
+.onboard-key-input, .onboard-form-input, .onboard-form-select {
   width: 100%; padding: 0.55rem 0.8rem; border-radius: 10px;
   border: 1.5px solid var(--rule); background: var(--bg);
-  font-size: 0.85rem; font-family: "SF Mono","Fira Code","JetBrains Mono",monospace;
+  font-size: 0.85rem; font-family: inherit;
   color: var(--ink); outline: none; transition: border-color 0.2s;
   box-sizing: border-box;
 }
-.onboard-key-input:focus { border-color: var(--accent); }
-.onboard-key-input::placeholder { color: var(--text-3); }
+.onboard-key-input { font-family: "SF Mono","Fira Code","JetBrains Mono",monospace; }
+.onboard-key-input:focus, .onboard-form-input:focus, .onboard-form-select:focus { border-color: var(--accent); }
+.onboard-key-input::placeholder, .onboard-form-input::placeholder { color: var(--text-3); }
+.onboard-form-group { margin-bottom: 0.75rem; text-align: left; }
+.onboard-form-label {
+  display: block; font-size: 0.78rem; color: var(--text-3);
+  margin-bottom: 0.28rem; font-weight: 500;
+}
+.onboard-subhint { font-size: 0.72rem; color: var(--text-3); margin-top: 0.3rem; line-height: 1.45; }
+.onboard-key-card {
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: 14px; padding: 1rem 1.1rem; margin-top: 0.3rem;
+  box-sizing: border-box;
+}
+/* 强化配 Key：onboarding 内一键获取 + 验证 */
+.onboard-getkey-btn {
+  display: inline-block; width: auto; box-sizing: border-box; text-align: center; text-decoration: none;
+  padding: 0.5rem 0.95rem; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+  font-size: 0.78rem; font-weight: 700; transition: opacity 0.2s;
+}
+.onboard-getkey-btn:hover { opacity: 0.9; }
+.onboard-verify-row { display: flex; gap: 0.55rem; margin-top: 0.1rem; align-items: center; flex-wrap: wrap; }
+.onboard-verify-btn {
+  padding: 0.42rem 0.95rem; border-radius: 999px; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+  font-family: inherit; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); transition: all 0.2s;
+}
+.onboard-verify-btn:hover:not(:disabled) { background: var(--accent-soft); }
+.onboard-verify-btn:disabled { opacity: 0.5; cursor: default; }
+.onboard-verify-result { font-size: 0.78rem; font-weight: 600; }
+.onboard-verify-result.good { color: #2e9e5b; }
+.onboard-verify-result.bad { color: #e0552e; }
+/* onboarding 内的免费平台卡片（横排单列） */
+.onboard-nokey-intro {
+  margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-2);
+  font-size: 0.76rem; color: var(--text-3); margin-bottom: 0.45rem; line-height: 1.5; text-align: left;
+}
+.onboard-nokey-list { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
+.onboard-nokey-card {
+  display: flex; align-items: center; gap: 0.8rem; padding: 0.65rem 0.85rem;
+  background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px;
+  color: var(--text-2); text-decoration: none; transition: all 0.2s;
+  box-sizing: border-box; min-width: 0;
+}
+.onboard-nokey-card:hover {
+  border-color: var(--accent); transform: translateY(-1px); background: var(--accent-soft);
+}
+.onboard-nokey-left {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
+  flex-shrink: 0; min-width: 0; width: 7.5rem; max-width: 7.5rem;
+}
+.onboard-nokey-left b {
+  font-size: 0.82rem; color: var(--text-1); font-weight: 700; line-height: 1.3;
+  word-break: normal; overflow-wrap: normal; margin: 0; padding: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.onboard-nokey-card p {
+  margin: 0; flex: 1; min-width: 0; font-size: 0.72rem; color: var(--text-3);
+  line-height: 1.5; word-break: break-word; overflow-wrap: break-word;
+  text-align: left;
+}
+.onboard-nokey-tag {
+  display: inline-block; font-size: 0.63rem; padding: 0.1rem 0.45rem; border-radius: 999px;
+  background: var(--panel-bg, rgba(128,128,128,0.15)); color: var(--text-3);
+  letter-spacing: 0.03em; flex-shrink: 0; white-space: nowrap;
+}
+.onboard-nokey-tag.free {
+  background: rgba(16,185,129,0.12); color: #065f46; font-weight: 600;
+}
+[data-theme="dark"] .onboard-nokey-tag.free {
+  background: rgba(16,185,129,0.2); color: #34d399;
+}
+@media (max-width: 420px) {
+  .onboard-nokey-card { flex-direction: column; align-items: flex-start; gap: 0.45rem; }
+  .onboard-nokey-left {
+    width: 100%; max-width: 100%; flex-direction: row; align-items: center; gap: 0.5rem;
+  }
+}
+/* 强化配 Key：设置面板内一键获取 + 验证 */
+/* 设置面板 Tab */
+.settings-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.1rem;
+  padding: 4px;
+  background: var(--bg-2);
+  border-radius: 12px;
+  border: 1px solid var(--border-2);
+}
+.settings-tab {
+  flex: 1;
+  padding: 0.55rem 0.6rem;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  color: var(--text-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.settings-tab:hover {
+  color: var(--text-2);
+}
+.settings-tab.active {
+  background: var(--bg);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.settings-tab-pane { display: none; }
+.settings-tab-pane.active { display: block; }
+.settings-footer {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-2);
+}
+.btn-getkey {
+  display: inline-block; text-decoration: none; padding: 0.45rem 0.95rem; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent); font-size: 0.78rem; font-weight: 700; transition: opacity 0.2s;
+}
+.btn-getkey:hover { opacity: 0.9; }
+.btn-verify {
+  padding: 0.45rem 0.95rem; border-radius: 999px; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+  font-family: inherit; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); transition: all 0.2s;
+}
+.btn-verify:hover { background: var(--accent-soft); }
+.verify-result { font-size: 0.78rem; font-weight: 600; margin-top: 0.45rem; }
+.verify-result.good { color: #2e9e5b; }
+.verify-result.bad { color: #e0552e; }
 .confirm-btn.primary:hover { opacity: 0.88; color: var(--on-accent); }
 .settings-panel h3 { font-size: 1.1rem; margin-bottom: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
 /* Theme mode radio group (system/light/dark) */
@@ -1486,14 +1674,17 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 @media (max-width: 45rem) {
   #app { padding: 1rem 0.8rem 3rem; }
   .settings-panel { width: 100%; right: -100%; }
-  .reader-pages { padding: 1rem 0.8rem 5rem; }
-  .reader-nav { padding: 0.6rem 0.8rem; }
+  .reader-pages { padding: 1rem 1.5rem 5rem; }
+  .reader-nav { padding: 0.6rem 1rem; }
   .glossary-cards { grid-template-columns: repeat(3, 1fr); }
   .reader-dot { width: 18px; height: 3px; }
   .reader-row-1 .theme-label { font-size: 0.55rem; }
   .reader-row-2 { gap: 0.4rem; }
   .reader-capsules { display: none; }
   .reader-more-wrap { display: block; }
+  .layer-body { padding: 0 1.2rem 1.2rem; }
+  .layer-header { padding: 0.8rem 1rem; }
+  .module-content { font-size: 0.88rem; line-height: 1.7; }
 }
 
 .donate-settings-group {
@@ -1547,9 +1738,144 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
   margin-bottom: 0.5rem;
 }
 .form-group.compact label {
+  display: block;
   font-size: 0.8rem;
   color: var(--text-3);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
+}
+.form-group.compact select,
+.form-group.compact input[type="text"],
+.form-group.compact input[type="password"] {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-1);
+  background: var(--bg);
+  border: 1.5px solid var(--border-2);
+  border-radius: 8px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.form-group.compact select:focus,
+.form-group.compact input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.key-block { margin-bottom: 0.85rem !important; }
+.key-subhint {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin-top: 0.3rem;
+  line-height: 1.45;
+}
+.key-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+.key-nokey {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--border-2);
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin-bottom: 0.55rem;
+  line-height: 1.5;
+}
+.key-nokey-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+.nokey-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.nokey-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  background: var(--accent-soft);
+}
+.nokey-card-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  min-width: 0;
+  width: 7.5rem;
+  max-width: 7.5rem;
+}
+.nokey-card-left b {
+  font-size: 0.85rem;
+  color: var(--text-1);
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: manual;
+  white-space: normal;
+  margin: 0;
+  padding: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nokey-card p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.74rem;
+  color: var(--text-3);
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: left;
+}
+.nokey-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: var(--panel-bg, rgba(128,128,128,0.15));
+  color: var(--text-3);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+/* 窄屏（<420px）标题和描述上下堆叠 */
+@media (max-width: 420px) {
+  .nokey-card { flex-direction: column; align-items: flex-start; gap: 0.45rem; }
+  .nokey-card-left {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+.nokey-tag.free {
+  background: rgba(16,185,129,0.12);
+  color: #065f46;
+  font-weight: 600;
+}
+[data-theme="dark"] .nokey-tag.free {
+  background: rgba(16,185,129,0.2);
+  color: #34d399;
 }
 .donate-settings-btn {
   background: var(--card-1);
@@ -1635,6 +1961,63 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 }
 
 </style>
+<!-- ===== Icon Sprite (stroke-based, 24x24, currentColor) ===== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" width="0" height="0" viewBox="0 0 24 24">
+  <defs>
+    <!-- key -->
+    <symbol id="i-key" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4"/><path d="M18 5l2 2"/><path d="M15 8l2 2"/></g></symbol>
+    <!-- search -->
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g></symbol>
+    <!-- globe -->
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></g></symbol>
+    <!-- brain -->
+    <symbol id="i-brain" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2a3 3 0 00-3 3v.5a3.5 3.5 0 00-2 6.5 3.5 3.5 0 002 6.5V19a3 3 0 006 0v-1a3.5 3.5 0 002-6.5 3.5 3.5 0 00-2-6.5V5a3 3 0 00-3-3h-2z"/><path d="M9.5 2v20"/><path d="M9.5 8h1a2 2 0 010 4h-1"/><path d="M9.5 14h1a2 2 0 000 4h-1"/></g></symbol>
+    <!-- folder -->
+    <symbol id="i-folder" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></g></symbol>
+    <!-- gear -->
+    <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></g></symbol>
+    <!-- lock -->
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></g></symbol>
+    <!-- link -->
+    <symbol id="i-link" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></g></symbol>
+    <!-- warning -->
+    <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></g></symbol>
+    <!-- check -->
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></g></symbol>
+    <!-- x -->
+    <symbol id="i-x" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g></symbol>
+    <!-- bulb -->
+    <symbol id="i-bulb" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></g></symbol>
+    <!-- download -->
+    <symbol id="i-download" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></g></symbol>
+    <!-- sync -->
+    <symbol id="i-sync" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></g></symbol>
+    <!-- zap -->
+    <symbol id="i-zap" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></g></symbol>
+    <!-- target -->
+    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></g></symbol>
+    <!-- book -->
+    <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></g></symbol>
+  </defs>
+</svg>
+<style>
+/* ===== Icon system ===== */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.icon-lg { width: 1.5em; height: 1.5em; }
+.icon-xl { width: 2em; height: 2em; }
+.icon-2x { width: 3rem; height: 3rem; }
+</style>
 </head>
 <body>
 <div class="blob-wrap" aria-hidden="true">
@@ -1663,7 +2046,10 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
       <h1>BUILD</h1>
       <p class="hero-sub" data-i18n="hero_sub">输入一个词，搭起一座认知大厦</p>
       <div class="search-box">
-        <input type="text" id="conceptInput" data-i18n="input_placeholder" placeholder="输入概念，如博弈论、贝叶斯定理..." onkeydown="if(event.key==='Enter')startGenerate()">
+        <div class="search-input-wrap">
+          <input type="text" id="conceptInput" data-i18n="input_placeholder" placeholder="输入概念，如博弈论、贝叶斯定理..." onkeydown="if(event.key==='Enter')startGenerate()">
+          <button class="cancel-gen-btn" id="cancelGenBtn" onclick="cancelGenerate()" data-i18n="confirm_cancel" hidden>取消</button>
+        </div>
       </div>
       <button class="btn-primary btn-generate" id="genBtn" onclick="startGenerate()" data-i18n="gen_btn">生成框架</button>
       <div class="tag-row" id="tagRow">
@@ -1701,72 +2087,139 @@ mark.reader-highlight.active { background: rgba(245, 158, 11, 0.5); }
 <div class="settings-panel" id="settingsPanel">
   <h3 data-i18n="settings_title">SETTINGS</h3>
 
-  <!-- API Key 卡片（独立区域） -->
-  <div class="settings-key-card">
-    <div class="settings-key-header">
-      <span class="key-icon">🔑</span>
-      <span data-i18n="settings_key_title">API Key</span>
-    </div>
-    <p class="key-desc" data-i18n="settings_key_desc">一个 Key 搞定一切：内容生成 + 联网搜索 + 交叉验证。推荐使用 DeepSeek（注册即送额度，约 1 分钱/次搜索）。</p>
-    <input type="password" id="apiKey" placeholder="sk-...">
-    <div class="hint" data-i18n="settings_llm_key_hint">🔒 仅存本地浏览器，不发往任何第三方服务器</div>
-    <div class="key-howto" data-i18n-html="settings_key_howto" style="margin-top:0.4rem;font-size:0.75rem;color:var(--text-3);line-height:1.5"></div>
-    <div class="form-group compact">
-      <label data-i18n="settings_api_base">API Base URL</label>
-      <input type="text" id="apiBase" value="https://api.deepseek.com">
-    </div>
-    <button class="btn-primary" onclick="saveSettings();closeSettings();" style="margin-top:0.5rem;width:100%" data-i18n="settings_key_save">保存并关闭</button>
+  <!-- ===== Tab 切换 ===== -->
+  <div class="settings-tabs" role="tablist">
+    <button class="settings-tab active" role="tab" data-tab="api" onclick="switchSettingsTab('api')" data-i18n="tab_api"><svg class="icon"><use href="#i-key"/></svg> API 配置</button>
+    <button class="settings-tab" role="tab" data-tab="general" onclick="switchSettingsTab('general')" data-i18n="tab_general"><svg class="icon"><use href="#i-gear"/></svg> 常规设置</button>
   </div>
 
-  <!-- 分隔线 -->
-  <div class="settings-divider"><span data-i18n="settings_more">更多设置</span></div>
-  <div class="form-group">
-    <label data-i18n="settings_language">界面语言</label>
-    <div class="theme-mode-group">
-      <label class="theme-mode-opt"><input type="radio" name="langMode" value="zh" checked onchange="setLang('zh')"> <span data-i18n="settings_lang_zh">中文</span></label>
-      <label class="theme-mode-opt"><input type="radio" name="langMode" value="en" onchange="setLang('en')"> <span data-i18n="settings_lang_en">English</span></label>
+  <!-- ===== Tab 1: API 配置 ===== -->
+  <div class="settings-tab-pane active" id="tab-pane-api">
+    <div class="settings-key-card">
+      <div class="settings-key-header">
+        <span class="key-icon"><svg class="icon icon-lg"><use href="#i-key"/></svg></span>
+        <span data-i18n="settings_key_title">API 配置</span>
+      </div>
+      <p class="key-desc" data-i18n="settings_key_desc">选一个平台填入 Key 即可：生成框架 + 联网搜索 + 交叉验证一站式搞定。国内推荐 智谱GLM 或 硅基流动，免费额度充足。</p>
+
+      <!-- 1) 模型平台选择 -->
+      <div class="form-group compact key-block">
+        <label data-i18n="settings_model_platform">模型平台</label>
+        <select id="modelPlatform" onchange="onPlatformChanged(this.value, {force:true})">
+          <option value="deepseek">DeepSeek（深度求索）</option>
+          <option value="glm">智谱 GLM（国内/永久免费模型可选）</option>
+          <option value="siliconflow">硅基流动（多模型聚合）</option>
+          <option value="custom">自定义（兼容 OpenAI 格式的任意平台）</option>
+        </select>
+        <div id="platformHint" class="key-subhint"></div>
+      </div>
+
+      <!-- 2) API Key 输入 -->
+      <div class="form-group compact key-block">
+        <label data-i18n="settings_key_input">API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+        <div class="hint" data-i18n="settings_llm_key_hint"><svg class="icon"><use href="#i-lock"/></svg> 仅存本地浏览器，不发往任何第三方服务器</div>
+      </div>
+
+      <!-- 3) API Base URL -->
+      <div class="form-group compact key-block">
+        <label data-i18n="settings_api_base">API Base URL</label>
+        <input type="text" id="apiBase" value="https://api.deepseek.com">
+      </div>
+
+      <!-- 4) 模型名称 -->
+      <div class="form-group compact key-block">
+        <label data-i18n="settings_model">模型名称</label>
+        <input type="text" id="modelName" value="deepseek-chat" placeholder="如 deepseek-chat / glm-4.7-flash / deepseek-ai/DeepSeek-R1">
+        <div id="modelHint" class="key-subhint"></div>
+      </div>
+
+      <!-- 一键获取 + 验证 -->
+      <div class="key-actions">
+        <a id="getKeyLink" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" class="btn-getkey" data-i18n="btn_getkey_default">去 DeepSeek 申请 Key →</a>
+        <button type="button" class="btn-verify" onclick="verifyCurrentKey()" data-i18n="btn_verify">验证 Key</button>
+      </div>
+      <div id="settingsVerifyResult" class="verify-result"></div>
+
+      <!-- 还没 Key？各平台免费注册引导 -->
+      <div class="key-nokey" data-i18n-html="settings_nokey_intro"></div>
+      <div class="key-nokey-list">
+        <a class="nokey-card" href="https://open.bigmodel.cn/" target="_blank" rel="noopener">
+          <div class="nokey-card-left">
+            <span class="nokey-tag free" data-i18n="nokey_tag_free">永久免费</span>
+            <b data-i18n="nokey_glm_title">智谱 GLM</b>
+          </div>
+          <p data-i18n="nokey_glm_desc">GLM-4.7-Flash 等 Flash 模型长期免费；新用户注册再送 2000 万 token 永久额度。</p>
+        </a>
+        <a class="nokey-card" href="https://cloud.siliconflow.cn/" target="_blank" rel="noopener">
+          <div class="nokey-card-left">
+            <span class="nokey-tag free" data-i18n="nokey_tag_agg">模型聚合</span>
+            <b data-i18n="nokey_sf_title">硅基流动</b>
+          </div>
+          <p data-i18n="nokey_sf_desc">9B 及以下模型永久免费；新用户赠 2000 万 token；DeepSeek / GLM / Qwen 一个 Key 全搞定。</p>
+        </a>
+        <a class="nokey-card" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">
+          <div class="nokey-card-left">
+            <span class="nokey-tag" data-i18n="nokey_tag_lowcost">高性价比</span>
+            <b data-i18n="nokey_ds_title">DeepSeek</b>
+          </div>
+          <p data-i18n="nokey_ds_desc">搜索与推理能力强；新用户送 500 万 token 额度，单次生成约 1 分钱。</p>
+        </a>
+      </div>
     </div>
   </div>
-  <div class="form-group">
-    <label data-i18n="settings_theme">外观主题</label>
-    <div class="theme-mode-group">
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="system" checked> <span data-i18n="settings_theme_system">跟随系统</span></label>
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="light"> <span data-i18n="settings_theme_light">浅色</span></label>
-      <label class="theme-mode-opt"><input type="radio" name="themeMode" value="dark"> <span data-i18n="settings_theme_dark">暗色</span></label>
+
+  <!-- ===== Tab 2: 常规设置 ===== -->
+  <div class="settings-tab-pane" id="tab-pane-general">
+    <div class="form-group">
+      <label data-i18n="settings_language">界面语言</label>
+      <div class="theme-mode-group">
+        <label class="theme-mode-opt"><input type="radio" name="langMode" value="zh" checked onchange="setLang('zh')"> <span data-i18n="settings_lang_zh">中文</span></label>
+        <label class="theme-mode-opt"><input type="radio" name="langMode" value="en" onchange="setLang('en')"> <span data-i18n="settings_lang_en">English</span></label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="settings_theme">外观主题</label>
+      <div class="theme-mode-group">
+        <label class="theme-mode-opt"><input type="radio" name="themeMode" value="system" checked> <span data-i18n="settings_theme_system">跟随系统</span></label>
+        <label class="theme-mode-opt"><input type="radio" name="themeMode" value="light"> <span data-i18n="settings_theme_light">浅色</span></label>
+        <label class="theme-mode-opt"><input type="radio" name="themeMode" value="dark"> <span data-i18n="settings_theme_dark">暗色</span></label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="settings_gen_mode">生成策略</label>
+      <div class="radio-group">
+        <label><input type="radio" name="genMode" value="cache" checked> <span data-i18n="settings_gen_cache">默认模式 — 已有框架直接返回，不消耗 API</span></label>
+        <label><input type="radio" name="genMode" value="regenerate"> <span data-i18n="settings_gen_regen">每次重新生成 — 跳过缓存，重新调 AI</span></label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="settings_sync_dir">同步目录（本地文件输出）</label>
+      <div class="obs-path-row">
+        <span id="obsidianDirName" class="obs-dir-name" data-i18n="settings_sync_none">未选择</span>
+        <button class="btn-secondary obs-browse-btn" onclick="selectSyncDir()" type="button" data-i18n="settings_sync_browse">选择目录…</button>
+        <button class="btn-secondary obs-browse-btn" onclick="clearSyncDir()" type="button" style="color:var(--accent2)" data-i18n="settings_sync_clear">清除</button>
+        <input type="file" id="obsidianDirInput" webkitdirectory directory multiple style="display:none">
+      </div>
+      <div id="fsAccessStatus" class="hint" style="margin-top:0.3rem"></div>
+      <div class="hint" data-i18n="settings_sync_hint">Safari / Firefox 用户：文件只能下载到「下载」文件夹，无法直接写入所选目录。请生成后从「下载」中手动移入 Obsidian vault。Chrome / Edge 支持直接写入。</div>
+    </div>
+    <div class="form-group">
+      <button class="btn-secondary" onclick="saveSettings()" data-i18n="settings_save">保存设置</button>
+      <button class="btn-secondary" onclick="clearCache()" style="margin-left:0.5rem;color:var(--accent2)" data-i18n="settings_clear_cache">清空缓存</button>
+    </div>
+    <div class="form-group">
+      <button class="btn-secondary" onclick="exportAll()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span data-i18n="settings_export">导出全部框架实例</span></button>
+    </div>
+    <div class="donate-settings-group">
+      <div data-i18n="settings_donate_desc" style="font-size:0.8rem;color:var(--text-3);margin-bottom:0.6rem">如果你觉得元引擎有用，欢迎请我喝杯咖啡 ☕</div>
+      <button class="donate-settings-btn" onclick="openDonate()" data-i18n="settings_donate">赞助支持</button>
     </div>
   </div>
-  <div class="form-group" style="display:none">
-    <label data-i18n="settings_model">模型名称</label>
-    <input type="hidden" id="modelName" value="deepseek-v4-flash">
-  </div>
-  <div class="form-group">
-    <label data-i18n="settings_gen_mode">生成策略</label>
-    <div class="radio-group">
-      <label><input type="radio" name="genMode" value="cache" checked> <span data-i18n="settings_gen_cache">默认模式 — 已有框架直接返回，不消耗 API</span></label>
-      <label><input type="radio" name="genMode" value="regenerate"> <span data-i18n="settings_gen_regen">每次重新生成 — 跳过缓存，重新调 AI</span></label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label data-i18n="settings_sync_dir">同步目录（本地文件输出）</label>
-    <div class="obs-path-row">
-      <span id="obsidianDirName" class="obs-dir-name" data-i18n="settings_sync_none">未选择</span>
-      <button class="btn-secondary obs-browse-btn" onclick="selectSyncDir()" type="button" data-i18n="settings_sync_browse">选择目录…</button>
-      <button class="btn-secondary obs-browse-btn" onclick="clearSyncDir()" type="button" style="color:var(--accent2)" data-i18n="settings_sync_clear">清除</button>
-      <input type="file" id="obsidianDirInput" webkitdirectory directory multiple style="display:none">
-    </div>
-    <div id="fsAccessStatus" class="hint" style="margin-top:0.3rem"></div>
-    <div class="hint" data-i18n="settings_sync_hint">Safari / Firefox 用户：文件只能下载到「下载」文件夹，无法直接写入所选目录。请生成后从「下载」中手动移入 Obsidian vault。Chrome / Edge 支持直接写入。</div>
-  </div>
-  <div class="form-group">
-    <button class="btn-secondary" onclick="saveSettings()" data-i18n="settings_save">保存设置</button>
-    <button class="btn-secondary" onclick="clearCache()" style="margin-left:0.5rem;color:var(--accent2)" data-i18n="settings_clear_cache">清空缓存</button>
-  </div>
-  <div class="form-group">
-    <button class="btn-secondary" onclick="exportAll()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span data-i18n="settings_export">导出全部框架实例</span></button>
-  </div>
-  <div class="donate-settings-group">
-    <div data-i18n="settings_donate_desc" style="font-size:0.8rem;color:var(--text-3);margin-bottom:0.6rem">如果你觉得元引擎有用，欢迎请我喝杯咖啡 ☕</div>
-    <button class="donate-settings-btn" onclick="openDonate()" data-i18n="settings_donate">赞助支持</button>
+
+  <!-- 底部统一保存 + 关闭 -->
+  <div class="settings-footer">
+    <button class="btn-primary" onclick="saveSettings();closeSettings();" style="width:100%" data-i18n="settings_key_save">保存并关闭</button>
   </div>
   <div class="version-line">元引擎 v1.0.3</div>
 </div>
