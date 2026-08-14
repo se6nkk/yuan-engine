@@ -22,3 +22,6 @@ advisory/
 workers/
 image-cards/
 .baoyu-skills/
+# 生成产物：元引擎生成的词条/认知框架（2026-08-14 起由 Obsidian 同步到第二大脑 vault，不入库）
+*-词条.md
+*-认知框架.md
