@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "元引擎",
+  "productName": "YuanEngine",
   "version": "1.0.5",
   "identifier": "com.yuanengine.yuanqidong",
   "build": {
